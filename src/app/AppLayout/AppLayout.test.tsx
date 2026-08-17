@@ -7,13 +7,16 @@ import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
 import { AppLayout } from './AppLayout'
 
 // AppLayout itself isn't auth-gated (App.tsx wraps it in ClerkProvider +
-// AuthGate) — but SettingsTab reads the signed-in user via these hooks, so
-// they need a stand-in here rather than a real (network-calling) ClerkProvider.
+// AuthGate) — but SettingsTab and useLanguagePreference read Clerk state via
+// these hooks, so they need a stand-in here rather than a real
+// (network-calling) ClerkProvider. isSignedIn: false keeps
+// useLanguagePreference from trying to fetch /api/preferences.
 vi.mock('@clerk/clerk-react', () => ({
   useUser: () => ({
     user: { primaryEmailAddress: { emailAddress: 'test@example.com' }, username: null },
   }),
   useClerk: () => ({ signOut: vi.fn() }),
+  useAuth: () => ({ isSignedIn: false, getToken: async () => null }),
 }))
 
 function renderAppLayout(initialEntries: string[] = ['/']) {

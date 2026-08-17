@@ -31,6 +31,17 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
+- **Neon/Drizzle setup (iteration 4):** `/db` lives at the repo root, not under
+  `src/`, specifically so it can never be imported from client code — only `/api`
+  and `drizzle-kit` touch it. Language preference is now genuinely account-synced
+  (`GET`/`PUT /api/preferences`, authenticated via a Clerk session token), not just
+  seeded once by the webhook, per the promise in CLAUDE.md. Skipped `@vercel/node`
+  as a dependency (hand-rolled minimal request/response types instead) — it pulled
+  in ~10 transitive CVEs for what we only needed as type declarations. One accepted
+  risk remains (`esbuild` via `drizzle-kit`, dev-only, not network-exposed in how we
+  use it) — documented in [docs/SECURITY.md](../docs/SECURITY.md#accepted-risks).
+  `/api` routes don't run under plain `npm run dev` (Vite doesn't serve them) — use
+  `vercel dev` to exercise the webhook/preferences endpoints locally.
 - **Relaxation music source (iteration 16):** researched in Aug 2026. Spotify
   deprecated the `Recommendations`, `Related Artists`, `Audio Features/Analysis`,
   and `Featured Playlists` endpoints for new apps in Nov 2024 — an algorithmic

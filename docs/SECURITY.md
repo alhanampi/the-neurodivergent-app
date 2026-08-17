@@ -18,9 +18,26 @@ Applied at every iteration, not just the dedicated hardening iteration
   but before adding one, check it's actively maintained and has no known unpatched
   CVEs.
 - Run `npm audit` before merging any iteration; a flagged high/critical CVE blocks
-  the merge until resolved or the package is replaced.
+  the merge until resolved, the package is replaced, or it's explicitly accepted
+  and documented here (see below) — silent ignoring isn't acceptable either way.
 - Dependabot (or equivalent) is configured starting in the security-hardening
   iteration to keep this ongoing rather than one-off.
+- Before adding a package just for its TypeScript types, check whether it's worth
+  the transitive dependencies it drags in — e.g. `@vercel/node` pulls in a full
+  build-analysis toolchain for what we only needed as type declarations; hand-rolled
+  types (`api/vercel-http.interfaces.ts`) avoided ~10 CVEs that added zero real
+  functionality for us.
+
+### Accepted risks
+
+- **`esbuild` via `drizzle-kit`'s deprecated `@esbuild-kit/esm-loader` (moderate,
+  [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99),
+  since v0.5.0):** the advisory is about esbuild's _dev server_ accepting requests
+  from any website — we never run esbuild as a server; `drizzle-kit` only uses it
+  to transpile `drizzle.config.ts` when we run migration commands locally. No
+  non-breaking fix exists yet (the suggested fix downgrades `drizzle-kit` to
+  0.18.1, an ~2-year-old release incompatible with our schema/config format).
+  Revisit when `drizzle-kit` ships a version off `@esbuild-kit`.
 
 ## `/api` routes
 

@@ -57,5 +57,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    env: {
+      // db/client.ts throws at import time if this is missing — tests for
+      // api/ utils that don't actually run a query need a syntactically
+      // valid placeholder so importing them doesn't crash.
+      DATABASE_URL: 'postgres://test:test@localhost:5432/test',
+    },
   },
 })
