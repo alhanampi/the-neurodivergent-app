@@ -17,18 +17,18 @@ what's explicitly out of scope for it.
 
 ## Tech stack
 
-| Layer | Choice | Why |
-|---|---|---|
-| Build tool / framework | Vite + React + TypeScript | No SSR needed behind a login wall; simpler build; cleaner path to a Capacitor wrap later |
-| Hosting | Vercel | PWA static hosting + Serverless Functions in `/api` for anything needing secrets |
-| Auth | Clerk | Hosted auth, handles sign-in/up, sessions, user management |
-| Database | Neon (Postgres) + Drizzle ORM | Serverless Postgres that pairs natively with Vercel; Drizzle is lightweight and edge-friendly |
-| UI components | MUI | Accessible component library, themable |
-| Icons | react-icons | Single icon import surface across the app |
-| Styling | styled-components | Component styles always live in their own file — see Coding Standards |
-| AI chat | Groq (`openai/gpt-oss-120b`, see ROADMAP notes) | Fast inference, generous free tier, good multilingual support for en/es |
-| i18n | react-i18next | Runtime English/Spanish switching, persisted user preference |
-| Testing | Vitest + React Testing Library, Playwright for e2e | Unit/hook tests colocated, e2e for critical flows |
+| Layer                  | Choice                                             | Why                                                                                           |
+| ---------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Build tool / framework | Vite + React + TypeScript                          | No SSR needed behind a login wall; simpler build; cleaner path to a Capacitor wrap later      |
+| Hosting                | Vercel                                             | PWA static hosting + Serverless Functions in `/api` for anything needing secrets              |
+| Auth                   | Clerk                                              | Hosted auth, handles sign-in/up, sessions, user management                                    |
+| Database               | Neon (Postgres) + Drizzle ORM                      | Serverless Postgres that pairs natively with Vercel; Drizzle is lightweight and edge-friendly |
+| UI components          | MUI                                                | Accessible component library, themable                                                        |
+| Icons                  | react-icons                                        | Single icon import surface across the app                                                     |
+| Styling                | styled-components                                  | Component styles always live in their own file — see Coding Standards                         |
+| AI chat                | Groq (`openai/gpt-oss-120b`, see ROADMAP notes)    | Fast inference, generous free tier, good multilingual support for en/es                       |
+| i18n                   | react-i18next                                      | Runtime English/Spanish switching, persisted user preference                                  |
+| Testing                | Vitest + React Testing Library, Playwright for e2e | Unit/hook tests colocated, e2e for critical flows                                             |
 
 Planned integrations (later iterations, see ROADMAP.md): Google Calendar, Spotify/SoundCloud,
 gamification (badges/streaks) with social sharing.
@@ -108,10 +108,12 @@ Commit messages follow Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`,
 ## Skills & agents
 
 Available now, use every iteration:
+
 - `security-review` — run before merging anything touching auth/data/external APIs.
 - `code-review` — run for correctness and simplification passes.
 
 Planned, to be built once there's a real component to scaffold from (iteration 1):
+
 - `new-feature-tab` — scaffolds a new tab's folder with the full file split
   (`.tsx` / `useX.ts` / `.styles.ts` / `.interfaces.ts` / `.utils.ts`) and i18n key
   stubs, matching the convention above.
