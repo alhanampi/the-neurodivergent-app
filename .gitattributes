@@ -1,0 +1,12 @@
+# Normalize line endings to LF in the repository regardless of each
+# contributor's OS/autocrlf setting, so tools (Prettier, git diff/status)
+# stay consistent and commits don't fill up with line-ending-only noise.
+* text=auto eol=lf
+
+# Binary assets — never touch line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
