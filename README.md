@@ -8,6 +8,8 @@ just a small set of focused tools that adapt to how you actually work.
 Bilingual from day one (English/Spanish), installable on your phone like a native
 app, and built one small, usable iteration at a time.
 
+🔗 **Live:** [the-neurodivergent-app.vercel.app](https://the-neurodivergent-app.vercel.app)
+
 ## What it does
 
 The app is organized around four tabs at the bottom of the screen:
