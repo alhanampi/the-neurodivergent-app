@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import Button from '@mui/material/Button'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
@@ -8,7 +9,8 @@ import { IconWrapper, SettingsContainer, SettingsSection } from './SettingsTab.s
 
 export function SettingsTab() {
   const { t } = useTranslation()
-  const { language, mode, handleLanguageChange, handleThemeChange } = useSettingsTab()
+  const { language, mode, accountLabel, handleLanguageChange, handleThemeChange, handleSignOut } =
+    useSettingsTab()
 
   return (
     <SettingsContainer>
@@ -19,6 +21,14 @@ export function SettingsTab() {
         {t('settings.title')}
       </Typography>
       <Typography variant="body1">{t('settings.description')}</Typography>
+
+      <SettingsSection>
+        <Typography variant="subtitle2">{t('settings.account.label')}</Typography>
+        {accountLabel && <Typography variant="body2">{accountLabel}</Typography>}
+        <Button size="small" variant="outlined" onClick={handleSignOut}>
+          {t('settings.account.signOut')}
+        </Button>
+      </SettingsSection>
 
       <SettingsSection>
         <Typography variant="subtitle2">{t('settings.language.label')}</Typography>

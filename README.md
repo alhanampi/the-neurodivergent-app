@@ -66,8 +66,8 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.1.0  | Project docs and repo setup                                         | ✅ done        |
 | v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done        |
 | v0.3.0  | Language switching + visual theme                                   | ✅ done        |
-| v0.4.0  | Login with Clerk                                                    | 🚧 in progress |
-| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending     |
+| v0.4.0  | Login with Clerk                                                    | ✅ done        |
+| v0.5.0  | Database (Neon) wired up                                            | 🚧 in progress |
 | v0.6.0  | Settings tab                                                        | ⏳ pending     |
 | v0.7.0  | Timers tab                                                          | ⏳ pending     |
 | v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
@@ -84,6 +84,7 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 ## Getting started
 
 ```sh
+cp .env.example .env.local   # fill in your Clerk Publishable Key
 npm install
 npm run dev       # starts the local dev server
 npm run build     # production build (type-checks first)
@@ -92,5 +93,6 @@ npm run test      # unit tests
 npm run lint      # oxlint
 ```
 
-There's no backend or `.env` yet — those land with Clerk (`v0.4.0`) and Neon
-(`v0.5.0`). Right now the app is the navigation shell with four placeholder tabs.
+You'll need a free [Clerk](https://dashboard.clerk.com) application for sign-in to
+work locally — see `.env.example` for which key goes where. Neon (the database)
+lands in `v0.5.0`.
