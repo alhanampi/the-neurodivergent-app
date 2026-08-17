@@ -11,7 +11,8 @@
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
     "react/react-in-jsx-scope": "off",
     "import/no-unassigned-import": "off",
-    "import/no-cycle": "error"
+    "import/no-cycle": "error",
+    "import/no-named-as-default-member": "off"
   },
   "ignorePatterns": ["dist", "coverage", "node_modules"]
 }

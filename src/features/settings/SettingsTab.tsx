@@ -1,14 +1,41 @@
+import { useTranslation } from 'react-i18next'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Typography from '@mui/material/Typography'
 import { FiSettings } from 'react-icons/fi'
-import { ComingSoonPlaceholder } from '@/components/ComingSoonPlaceholder/ComingSoonPlaceholder'
+import { useSettingsTab } from './useSettingsTab'
+import { IconWrapper, SettingsContainer, SettingsSection } from './SettingsTab.styles'
 
-// TODO(iteration/05-settings-tab, v0.6.0): replace with the real Settings tab
-// — language, theme, account (Clerk), sign out, delete account.
 export function SettingsTab() {
+  const { t } = useTranslation()
+  const { language, mode, handleLanguageChange, handleThemeChange } = useSettingsTab()
+
   return (
-    <ComingSoonPlaceholder
-      title="Settings"
-      description="Language, theme, and account preferences will live here. Coming in a future iteration."
-      icon={FiSettings}
-    />
+    <SettingsContainer>
+      <IconWrapper>
+        <FiSettings />
+      </IconWrapper>
+      <Typography variant="h5" component="h1">
+        {t('settings.title')}
+      </Typography>
+      <Typography variant="body1">{t('settings.description')}</Typography>
+
+      <SettingsSection>
+        <Typography variant="subtitle2">{t('settings.language.label')}</Typography>
+        <ToggleButtonGroup value={language} exclusive size="small" onChange={handleLanguageChange}>
+          <ToggleButton value="en">{t('settings.language.en')}</ToggleButton>
+          <ToggleButton value="es">{t('settings.language.es')}</ToggleButton>
+        </ToggleButtonGroup>
+      </SettingsSection>
+
+      <SettingsSection>
+        <Typography variant="subtitle2">{t('settings.theme.label')}</Typography>
+        <ToggleButtonGroup value={mode} exclusive size="small" onChange={handleThemeChange}>
+          <ToggleButton value="light">{t('settings.theme.light')}</ToggleButton>
+          <ToggleButton value="dark">{t('settings.theme.dark')}</ToggleButton>
+          <ToggleButton value="system">{t('settings.theme.system')}</ToggleButton>
+        </ToggleButtonGroup>
+      </SettingsSection>
+    </SettingsContainer>
   )
 }

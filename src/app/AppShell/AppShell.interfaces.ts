@@ -5,9 +5,9 @@ export type TabId = 'timers' | 'ai-chat' | 'dashboard' | 'settings'
 export interface TabConfig {
   id: TabId
   path: string
-  // TODO(iteration 2 — i18n-theme): replace this plain-English label with an
-  // i18n key once react-i18next is wired up. Hardcoded here only because no
-  // i18n system exists yet at this iteration.
-  label: string
+  /** i18n key (namespace "common") for the tab's nav label. */
+  labelKey: string
   icon: IconType
 }
+
+export type TranslatedTabConfig = TabConfig & { label: string }

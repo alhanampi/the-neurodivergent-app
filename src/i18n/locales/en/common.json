@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "timers": "Timers",
+    "chat": "AI Chat",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "comingSoon": {
+    "timers": {
+      "title": "Timers",
+      "description": "Set a timer, run a pomodoro, or track a task as you go. Coming in a future iteration."
+    },
+    "chat": {
+      "title": "AI Chat",
+      "description": "Talk through a task and break it into small, doable steps. Coming in a future iteration."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "See your completed tasks, time spent, and progress over time. Coming in a future iteration."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "More account and app preferences are coming soon.",
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "es": "Español"
+    },
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  }
+}

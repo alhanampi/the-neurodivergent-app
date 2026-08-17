@@ -9,11 +9,11 @@ export const PlaceholderContainer = styled.div`
   min-height: 60vh;
   padding: 24px;
   text-align: center;
-  color: #5b6b73;
+  color: ${({ theme }) => theme.palette.text.secondary};
 `
 
 export const IconWrapper = styled.div`
   font-size: 48px;
   line-height: 1;
-  color: #3e7c8c;
+  color: ${({ theme }) => theme.palette.primary.main};
 `

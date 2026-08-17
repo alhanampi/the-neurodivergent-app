@@ -59,23 +59,23 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                        | Status     |
-| ------- | ------------------------------------------------------------------- | ---------- |
-| v0.1.0  | Project docs and repo setup                                         | ✅ done    |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done    |
-| v0.3.0  | Language switching + visual theme                                   | ⏳ pending |
-| v0.4.0  | Login with Clerk                                                    | ⏳ pending |
-| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending |
-| v0.6.0  | Settings tab                                                        | ⏳ pending |
-| v0.7.0  | Timers tab                                                          | ⏳ pending |
-| v0.8.0  | Dashboard tab                                                       | ⏳ pending |
-| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending |
-| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending |
-| v0.11.0 | Badges and social sharing                                           | ⏳ pending |
-| v0.12.0 | Google Calendar integration                                         | ⏳ pending |
-| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending |
-| v1.0.0  | App store packaging                                                 | ⏳ pending |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending |
+| Version | What it adds                                                        | Status         |
+| ------- | ------------------------------------------------------------------- | -------------- |
+| v0.1.0  | Project docs and repo setup                                         | ✅ done        |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done        |
+| v0.3.0  | Language switching + visual theme                                   | 🚧 in progress |
+| v0.4.0  | Login with Clerk                                                    | ⏳ pending     |
+| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending     |
+| v0.6.0  | Settings tab                                                        | ⏳ pending     |
+| v0.7.0  | Timers tab                                                          | ⏳ pending     |
+| v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
+| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending     |
+| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending     |
+| v0.11.0 | Badges and social sharing                                           | ⏳ pending     |
+| v0.12.0 | Google Calendar integration                                         | ⏳ pending     |
+| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending     |
+| v1.0.0  | App store packaging                                                 | ⏳ pending     |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending     |
 
 ## Getting started
 

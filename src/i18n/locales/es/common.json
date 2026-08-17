@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "timers": "Temporizadores",
+    "chat": "Chat IA",
+    "dashboard": "Panel",
+    "settings": "Ajustes"
+  },
+  "comingSoon": {
+    "timers": {
+      "title": "Temporizadores",
+      "description": "Configurá un temporizador, corré un pomodoro o registrá una tarea mientras la hacés. Próximamente."
+    },
+    "chat": {
+      "title": "Chat IA",
+      "description": "Conversá sobre una tarea y dividila en pasos chicos y manejables. Próximamente."
+    },
+    "dashboard": {
+      "title": "Panel",
+      "description": "Mirá tus tareas completadas, el tiempo dedicado y tu progreso. Próximamente."
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "description": "Más preferencias de cuenta y de la app llegarán pronto.",
+    "language": {
+      "label": "Idioma",
+      "en": "English",
+      "es": "Español"
+    },
+    "theme": {
+      "label": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    }
+  }
+}

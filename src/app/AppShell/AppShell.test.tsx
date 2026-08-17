@@ -1,15 +1,31 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import i18n from '@/i18n/i18n'
+import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
 import { AppShell } from './AppShell'
+
+function renderAppShell(initialEntries: string[] = ['/']) {
+  return render(
+    <ThemeModeProvider>
+      <MemoryRouter initialEntries={initialEntries}>
+        <AppShell />
+      </MemoryRouter>
+    </ThemeModeProvider>,
+  )
+}
+
+afterEach(() => {
+  // Language/theme changes persist to the shared i18next instance and
+  // localStorage — reset both so one test's choices can't leak into the next.
+  void i18n.changeLanguage('en')
+  localStorage.clear()
+})
 
 describe('AppShell', () => {
   it('renders all four bottom navigation tabs', () => {
-    render(
-      <MemoryRouter>
-        <AppShell />
-      </MemoryRouter>,
-    )
+    renderAppShell()
 
     expect(screen.getByRole('button', { name: 'Timers' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'AI Chat' })).toBeInTheDocument()
@@ -18,12 +34,20 @@ describe('AppShell', () => {
   })
 
   it('shows the Timers tab content by default at the root path', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <AppShell />
-      </MemoryRouter>,
-    )
+    renderAppShell()
 
     expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
+  })
+
+  it('switches the UI language when the user changes it in Settings', async () => {
+    const user = userEvent.setup()
+    renderAppShell(['/settings'])
+
+    expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Español' }))
+
+    expect(await screen.findByRole('heading', { name: 'Ajustes' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Temporizadores' })).toBeInTheDocument()
   })
 })
