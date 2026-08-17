@@ -5,11 +5,11 @@ import { TimersTab } from '@/features/timers/TimersTab'
 import { AiChatTab } from '@/features/ai-chat/AiChatTab'
 import { DashboardTab } from '@/features/dashboard/DashboardTab'
 import { SettingsTab } from '@/features/settings/SettingsTab'
-import { useAppShell } from './useAppShell'
-import { ShellContainer, ContentArea, NavContainer } from './AppShell.styles'
+import { useAppLayout } from './useAppLayout'
+import { ShellContainer, ContentArea, NavContainer } from './AppLayout.styles'
 
-export function AppShell() {
-  const { tabs, activeTabId, handleTabChange } = useAppShell()
+export function AppLayout() {
+  const { tabs, activeTabId, handleTabChange } = useAppLayout()
 
   return (
     <ShellContainer>

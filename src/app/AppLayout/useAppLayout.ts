@@ -1,10 +1,10 @@
 import type { SyntheticEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { TABS } from './AppShell.constants'
-import { getActiveTabId } from './AppShell.utils'
+import { TABS } from './AppLayout.constants'
+import { getActiveTabId } from './AppLayout.utils'
 
-export function useAppShell() {
+export function useAppLayout() {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()

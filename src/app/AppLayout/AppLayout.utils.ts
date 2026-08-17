@@ -1,4 +1,4 @@
-import type { TabConfig, TabId } from './AppShell.interfaces'
+import type { TabConfig, TabId } from './AppLayout.interfaces'
 
 /** Maps the current URL path to the tab that should show as active. Falls
  * back to the first tab if nothing matches, rather than showing no selection. */

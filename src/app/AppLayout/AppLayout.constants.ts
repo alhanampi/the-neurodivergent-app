@@ -1,5 +1,5 @@
 import { FiClock, FiMessageCircle, FiBarChart2, FiSettings } from 'react-icons/fi'
-import type { TabConfig } from './AppShell.interfaces'
+import type { TabConfig } from './AppLayout.interfaces'
 
 export const TABS: TabConfig[] = [
   { id: 'timers', path: '/', labelKey: 'nav.timers', icon: FiClock },

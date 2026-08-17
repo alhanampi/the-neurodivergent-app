@@ -4,13 +4,13 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import i18n from '@/i18n/i18n'
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
-import { AppShell } from './AppShell'
+import { AppLayout } from './AppLayout'
 
-function renderAppShell(initialEntries: string[] = ['/']) {
+function renderAppLayout(initialEntries: string[] = ['/']) {
   return render(
     <ThemeModeProvider>
       <MemoryRouter initialEntries={initialEntries}>
-        <AppShell />
+        <AppLayout />
       </MemoryRouter>
     </ThemeModeProvider>,
   )
@@ -23,9 +23,9 @@ afterEach(() => {
   localStorage.clear()
 })
 
-describe('AppShell', () => {
+describe('AppLayout', () => {
   it('renders all four bottom navigation tabs', () => {
-    renderAppShell()
+    renderAppLayout()
 
     expect(screen.getByRole('button', { name: 'Timers' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'AI Chat' })).toBeInTheDocument()
@@ -34,14 +34,14 @@ describe('AppShell', () => {
   })
 
   it('shows the Timers tab content by default at the root path', () => {
-    renderAppShell()
+    renderAppLayout()
 
     expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
   })
 
   it('switches the UI language when the user changes it in Settings', async () => {
     const user = userEvent.setup()
-    renderAppShell(['/settings'])
+    renderAppLayout(['/settings'])
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
 
