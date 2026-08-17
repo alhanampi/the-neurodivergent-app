@@ -73,6 +73,7 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.12.0 | Google Calendar integration | ⏳ pending |
 | v0.13.0 | Spotify/SoundCloud integration | ⏳ pending |
 | v1.0.0 | App store packaging | ⏳ pending |
+| v1.1.0 | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending |
 
 ## Getting started
 

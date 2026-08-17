@@ -25,16 +25,36 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 | v0.12.0 | `iteration/11-google-calendar` | Google Calendar OAuth; two-way sync between tasks and events | pending |
 | v0.13.0 | `iteration/12-music-integration` | Spotify/SoundCloud OAuth; attach playlists to tasks/timers; auto-play for the timer's duration | pending |
 | v1.0.0 | `iteration/13-app-store-packaging` | Capacitor/PWABuilder wrap evaluation; store assets; submission prep | pending |
+| v1.1.0 | `iteration/14-model-selection` | Let the user pick between multiple LLM models for the AI Chat tab for specific uses (e.g. a faster/cheaper model for quick check-ins vs. a stronger reasoning model for harder task breakdowns); model choice becomes a per-conversation or per-preference setting instead of one hardcoded model | pending |
 
 ## Notes and open decisions
 
 - **ORM (iteration 4):** Drizzle is the current pick — lighter than Prisma, pairs
   well with Neon's serverless/edge driver. Revisitable if it becomes a poor fit.
-- **AI model (iteration 8):** default is `openai/gpt-oss-120b` on Groq (the model
-  the user linked), chosen for its multilingual quality, matching the en/es
-  requirement. `llama-3.3-70b-versatile` is the fallback if quality or rate limits
-  are an issue. There is no sustained free tier for the Claude API, so Groq is the
-  practical "free" choice for this feature.
+- **AI model (iteration 8):** `openai/gpt-oss-120b` on Groq, staying with the
+  model the user originally linked. Reasoning: for this feature, quality of task
+  breakdown (following instructions, structuring steps sensibly) matters more than
+  multilingual certification, and gpt-oss-120b benchmarks meaningfully stronger on
+  reasoning/instruction-following than the alternative considered
+  (`llama-3.3-70b-versatile`, which is Meta-certified for 8 languages incl. Spanish
+  but weaker on reasoning). Its Spanish conversational quality isn't formally
+  benchmarked but is expected to be adequate for everyday conversational use; this
+  should be validated with real Spanish conversations once the chat tab is built,
+  and swapped for the fallback model if tone/quality disappoints — it's a one-line
+  config change. There is no sustained free tier for the Claude API, so Groq stays
+  the practical "free" choice for this feature.
+  - **System prompt requirement:** the assistant's persona must be spelled out
+    explicitly in the system prompt, not left to model defaults — warm, encouraging,
+    non-judgmental tone; explicitly a task-breakdown helper (turns a task, including
+    everyday/domestic ones, into small, concrete, non-overwhelming steps); asks
+    clarifying questions before proposing a plan; never scolds or implies the user
+    should already know how to do this. This applies regardless of which model
+    backs the chat, so tone stays consistent even if the model is swapped.
+  - **Future: model selection (v1.1.0, see `iteration/14-model-selection` below).**
+    Once the app is stable post-v1.0, let the user pick from a small set of models
+    for different needs (e.g. quick/cheap vs. stronger reasoning for a hard task).
+    Keep this list short and curated rather than exposing Groq's whole catalog —
+    each option should have a clear, plain-language reason to pick it.
 - **Security gate:** iteration 9 (security hardening) is a deliberate gate before
   gamification/social features and before the OAuth-based integrations (10–12),
   since those add external tokens and public sharing surfaces.
