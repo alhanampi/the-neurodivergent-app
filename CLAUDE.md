@@ -54,7 +54,20 @@ types, styles, or helpers inside the `.tsx` file:
   domain data.
 - `Name.utils.ts` — pure helper functions (formatting, calculations) with no React
   dependency, easy to unit test in isolation.
+- `Name.constants.ts` — static data (config arrays, storage keys, enums-as-const)
+  that isn't a function. Use when a value belongs next to `.utils.ts` in spirit but
+  isn't itself a helper function.
+- `Name.context.ts` — `createContext(...)` calls and nothing else. Keep the
+  context's value _type_ in `.interfaces.ts` and import it here; this file holds
+  only the runtime context object.
 - `Name.test.tsx` / `useName.test.ts` — tests colocated with what they test.
+
+**Exception — pure-read hooks are fine directly in a `.tsx`:** calling a hook that
+only _reads_ existing state/context with no side effects to manage (`useTranslation()`,
+`useThemeMode()`, `useContext(...)`) is still "pure rendering," not business logic —
+no need to wrap it in a component-specific hook just to satisfy this rule. The
+line is state/effects/derived-values/event-handler-logic: once a `.tsx` file has
+any of those, that logic moves to `useName.ts`.
 
 ### Language
 

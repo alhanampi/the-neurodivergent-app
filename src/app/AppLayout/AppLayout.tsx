@@ -1,15 +1,14 @@
 import { Routes, Route } from 'react-router-dom'
 import BottomNavigation from '@mui/material/BottomNavigation'
-import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import { TimersTab } from '@/features/timers/TimersTab'
 import { AiChatTab } from '@/features/ai-chat/AiChatTab'
 import { DashboardTab } from '@/features/dashboard/DashboardTab'
 import { SettingsTab } from '@/features/settings/SettingsTab'
-import { useAppShell } from './useAppShell'
-import { ShellContainer, ContentArea, NavContainer } from './AppShell.styles'
+import { useAppLayout } from './useAppLayout'
+import { ShellContainer, ContentArea, NavContainer, NavAction } from './AppLayout.styles'
 
-export function AppShell() {
-  const { tabs, activeTabId, handleTabChange } = useAppShell()
+export function AppLayout() {
+  const { tabs, activeTabId, handleTabChange } = useAppLayout()
 
   return (
     <ShellContainer>
@@ -25,11 +24,11 @@ export function AppShell() {
       <NavContainer>
         <BottomNavigation value={activeTabId} onChange={handleTabChange} showLabels>
           {tabs.map((tab) => (
-            <BottomNavigationAction
+            <NavAction
               key={tab.id}
               value={tab.id}
               label={tab.label}
-              icon={<tab.icon size={22} />}
+              icon={<tab.icon size={20} />}
             />
           ))}
         </BottomNavigation>

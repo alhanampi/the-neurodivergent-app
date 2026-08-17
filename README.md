@@ -28,9 +28,11 @@ The app is organized around four tabs at the bottom of the screen:
   integrations.
 
 Coming later: **badges** for showing up and finishing things, **social sharing** of
-your wins, and two-way integrations with **Google Calendar** and
+your wins, two-way integrations with **Google Calendar** and
 **Spotify/SoundCloud** (so a "study for 20 minutes" task can queue up a focus
-playlist automatically).
+playlist automatically), more **themes/languages/fonts** (including a
+dyslexia-friendly option), and a **relaxation tab** with guided breathing
+exercises and calming music.
 
 ## Tech stack
 
@@ -59,23 +61,25 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                        | Status     |
-| ------- | ------------------------------------------------------------------- | ---------- |
-| v0.1.0  | Project docs and repo setup                                         | ✅ done    |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done    |
-| v0.3.0  | Language switching + visual theme                                   | ⏳ pending |
-| v0.4.0  | Login with Clerk                                                    | ⏳ pending |
-| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending |
-| v0.6.0  | Settings tab                                                        | ⏳ pending |
-| v0.7.0  | Timers tab                                                          | ⏳ pending |
-| v0.8.0  | Dashboard tab                                                       | ⏳ pending |
-| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending |
-| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending |
-| v0.11.0 | Badges and social sharing                                           | ⏳ pending |
-| v0.12.0 | Google Calendar integration                                         | ⏳ pending |
-| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending |
-| v1.0.0  | App store packaging                                                 | ⏳ pending |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending |
+| Version | What it adds                                                        | Status         |
+| ------- | ------------------------------------------------------------------- | -------------- |
+| v0.1.0  | Project docs and repo setup                                         | ✅ done        |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done        |
+| v0.3.0  | Language switching + visual theme                                   | ✅ done        |
+| v0.4.0  | Login with Clerk                                                    | 🚧 in progress |
+| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending     |
+| v0.6.0  | Settings tab                                                        | ⏳ pending     |
+| v0.7.0  | Timers tab                                                          | ⏳ pending     |
+| v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
+| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending     |
+| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending     |
+| v0.11.0 | Badges and social sharing                                           | ⏳ pending     |
+| v0.12.0 | Google Calendar integration                                         | ⏳ pending     |
+| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending     |
+| v1.0.0  | App store packaging                                                 | ⏳ pending     |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending     |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option          | ⏳ pending     |
+| v1.3.0  | Relaxation tab: guided breathing exercises + curated calming music  | ⏳ pending     |
 
 ## Getting started
 

@@ -2,6 +2,8 @@
    *.styles.ts file — this file stays intentionally small. */
 
 :root {
+  /* Static fallback for the instant before ThemeModeProvider's effect runs
+     and sets this based on the resolved light/dark mode. */
   color-scheme: light;
 }
 
@@ -24,4 +26,18 @@ body {
     'Segoe UI',
     sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Respect the OS-level "reduce motion" preference everywhere, not just in
+   components that remember to check it — matters for an app built for
+   neurodivergent users, some of whom find motion genuinely disruptive. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
