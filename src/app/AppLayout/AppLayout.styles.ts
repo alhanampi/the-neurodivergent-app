@@ -25,8 +25,10 @@ export const NavContainer = styled(Paper).attrs({ elevation: 3 })`
 `
 
 // MUI's default min-width (80px) per action doesn't leave room for longer
-// translated labels (e.g. "Temporizadores") on narrow phones — 4 of them
-// overflow the screen width. Let the label shrink and truncate instead.
+// translated labels on narrow phones — 4 of them overflow the screen width
+// (this is what pushed "Temporizadores" out in Spanish, since fixed by using
+// the shorter "Timers" loanword — see i18n.locales/es/common.json). Keep this
+// as a safety net for whichever label ends up longest in future languages.
 export const NavAction = styled(BottomNavigationAction)`
   min-width: 0;
   padding-left: 4px;

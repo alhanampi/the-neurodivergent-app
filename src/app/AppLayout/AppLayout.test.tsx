@@ -48,6 +48,10 @@ describe('AppLayout', () => {
     await user.click(screen.getByRole('button', { name: 'Español' }))
 
     expect(await screen.findByRole('heading', { name: 'Ajustes' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Temporizadores' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chat IA' })).toBeInTheDocument()
+    // "Timers" is kept as-is in Spanish (a short, widely understood loanword)
+    // rather than translated to the much longer "Temporizadores" — see
+    // src/i18n/locales/es/common.json.
+    expect(screen.getByRole('button', { name: 'Timers' })).toBeInTheDocument()
   })
 })
