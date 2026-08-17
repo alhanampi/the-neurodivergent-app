@@ -1,10 +1,20 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import i18n from '@/i18n/i18n'
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
 import { AppLayout } from './AppLayout'
+
+// AppLayout itself isn't auth-gated (App.tsx wraps it in ClerkProvider +
+// AuthGate) — but SettingsTab reads the signed-in user via these hooks, so
+// they need a stand-in here rather than a real (network-calling) ClerkProvider.
+vi.mock('@clerk/clerk-react', () => ({
+  useUser: () => ({
+    user: { primaryEmailAddress: { emailAddress: 'test@example.com' }, username: null },
+  }),
+  useClerk: () => ({ signOut: vi.fn() }),
+}))
 
 function renderAppLayout(initialEntries: string[] = ['/']) {
   return render(

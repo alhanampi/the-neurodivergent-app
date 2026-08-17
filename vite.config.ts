@@ -45,6 +45,13 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    // MUI + Clerk + i18next push the single bundle past Vite's 500kB default
+    // warning threshold. Real fix is code-splitting (lazy-load heavier
+    // per-route chunks) — tracked for v0.10.0 (security/perf hardening) —
+    // this just stops the warning from being noise until then.
+    chunkSizeWarningLimit: 600,
+  },
   test: {
     globals: true,
     environment: 'jsdom',
