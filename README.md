@@ -32,15 +32,15 @@ playlist automatically).
 
 ## Tech stack
 
-| Piece | Choice | Why |
-|---|---|---|
-| Framework | [Vite](https://vitejs.dev/) + React + TypeScript | The app lives behind a login, so there's no need for server-rendering — Vite keeps the build simple and fast |
-| Hosting | [Vercel](https://vercel.com/) | Ships the PWA and hosts small serverless functions for anything that needs a secret key |
-| Auth | [Clerk](https://clerk.com/) | Handles sign-in/sign-up and sessions so we don't have to roll our own |
-| Database | [Neon](https://neon.tech/) (Postgres) + Drizzle ORM | Serverless Postgres that plugs neatly into Vercel |
-| UI | [MUI](https://mui.com/) + [react-icons](https://react-icons.github.io/react-icons/) + styled-components | Accessible components, one icon set, styles kept clean and separate from logic |
-| AI | [Groq](https://groq.com/) | Fast, free-tier LLM inference powering the AI Chat tab |
-| Language | [react-i18next](https://react.i18next.com/) | Real-time English/Spanish switching, remembers what you prefer |
+| Piece     | Choice                                                                                                  | Why                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Framework | [Vite](https://vitejs.dev/) + React + TypeScript                                                        | The app lives behind a login, so there's no need for server-rendering — Vite keeps the build simple and fast |
+| Hosting   | [Vercel](https://vercel.com/)                                                                           | Ships the PWA and hosts small serverless functions for anything that needs a secret key                      |
+| Auth      | [Clerk](https://clerk.com/)                                                                             | Handles sign-in/sign-up and sessions so we don't have to roll our own                                        |
+| Database  | [Neon](https://neon.tech/) (Postgres) + Drizzle ORM                                                     | Serverless Postgres that plugs neatly into Vercel                                                            |
+| UI        | [MUI](https://mui.com/) + [react-icons](https://react-icons.github.io/react-icons/) + styled-components | Accessible components, one icon set, styles kept clean and separate from logic                               |
+| AI        | [Groq](https://groq.com/)                                                                               | Fast, free-tier LLM inference powering the AI Chat tab                                                       |
+| Language  | [react-i18next](https://react.i18next.com/)                                                             | Real-time English/Spanish switching, remembers what you prefer                                               |
 
 ## How this project is built
 
@@ -57,25 +57,34 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds | Status |
-|---|---|---|
-| v0.1.0 | Project docs and repo setup (this one) | 🚧 in progress |
-| v0.2.0 | App scaffold: navigation shell, PWA basics, CI, first deploy | ⏳ pending |
-| v0.3.0 | Language switching + visual theme | ⏳ pending |
-| v0.4.0 | Login with Clerk | ⏳ pending |
-| v0.5.0 | Database (Neon) wired up | ⏳ pending |
-| v0.6.0 | Settings tab | ⏳ pending |
-| v0.7.0 | Timers tab | ⏳ pending |
-| v0.8.0 | Dashboard tab | ⏳ pending |
-| v0.9.0 | AI Chat tab (Groq) | ⏳ pending |
-| v0.10.0 | Security & accessibility hardening | ⏳ pending |
-| v0.11.0 | Badges and social sharing | ⏳ pending |
-| v0.12.0 | Google Calendar integration | ⏳ pending |
-| v0.13.0 | Spotify/SoundCloud integration | ⏳ pending |
-| v1.0.0 | App store packaging | ⏳ pending |
-| v1.1.0 | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending |
+| Version | What it adds                                                        | Status         |
+| ------- | ------------------------------------------------------------------- | -------------- |
+| v0.1.0  | Project docs and repo setup                                         | ✅ done        |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | 🚧 in progress |
+| v0.3.0  | Language switching + visual theme                                   | ⏳ pending     |
+| v0.4.0  | Login with Clerk                                                    | ⏳ pending     |
+| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending     |
+| v0.6.0  | Settings tab                                                        | ⏳ pending     |
+| v0.7.0  | Timers tab                                                          | ⏳ pending     |
+| v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
+| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending     |
+| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending     |
+| v0.11.0 | Badges and social sharing                                           | ⏳ pending     |
+| v0.12.0 | Google Calendar integration                                         | ⏳ pending     |
+| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending     |
+| v1.0.0  | App store packaging                                                 | ⏳ pending     |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending     |
 
 ## Getting started
 
-Not runnable yet — the app scaffold lands in `v0.2.0`. Once it does, this section
-will cover `npm install`, `npm run dev`, and environment variables.
+```sh
+npm install
+npm run dev       # starts the local dev server
+npm run build     # production build (type-checks first)
+npm run preview   # serves the production build locally
+npm run test      # unit tests
+npm run lint      # oxlint
+```
+
+There's no backend or `.env` yet — those land with Clerk (`v0.4.0`) and Neon
+(`v0.5.0`). Right now the app is the navigation shell with four placeholder tabs.
