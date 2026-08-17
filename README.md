@@ -28,9 +28,11 @@ The app is organized around four tabs at the bottom of the screen:
   integrations.
 
 Coming later: **badges** for showing up and finishing things, **social sharing** of
-your wins, and two-way integrations with **Google Calendar** and
+your wins, two-way integrations with **Google Calendar** and
 **Spotify/SoundCloud** (so a "study for 20 minutes" task can queue up a focus
-playlist automatically).
+playlist automatically), more **themes/languages/fonts** (including a
+dyslexia-friendly option), and a **relaxation tab** with guided breathing
+exercises and calming music.
 
 ## Tech stack
 
@@ -76,6 +78,8 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending     |
 | v1.0.0  | App store packaging                                                 | ⏳ pending     |
 | v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending     |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option          | ⏳ pending     |
+| v1.3.0  | Relaxation tab: guided breathing exercises + curated calming music  | ⏳ pending     |
 
 ## Getting started
 
