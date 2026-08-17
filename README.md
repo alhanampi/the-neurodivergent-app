@@ -66,8 +66,8 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.1.0  | Project docs and repo setup                                         | ✅ done        |
 | v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done        |
 | v0.3.0  | Language switching + visual theme                                   | ✅ done        |
-| v0.4.0  | Login with Clerk                                                    | 🚧 in progress |
-| v0.5.0  | Database (Neon) wired up                                            | ⏳ pending     |
+| v0.4.0  | Login with Clerk                                                    | ✅ done        |
+| v0.5.0  | Database (Neon) wired up                                            | 🚧 in progress |
 | v0.6.0  | Settings tab                                                        | ⏳ pending     |
 | v0.7.0  | Timers tab                                                          | ⏳ pending     |
 | v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
