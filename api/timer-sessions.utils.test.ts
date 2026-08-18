@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseCreateTimerSessionBody } from './timer-sessions.utils'
+import { parseCreateTimerSessionBody, parseDateRangeQuery } from './timer-sessions.utils'
 
 const validBody = {
   presetId: 'pomodoro-focus',
@@ -62,5 +62,50 @@ describe('parseCreateTimerSessionBody', () => {
     expect(parseCreateTimerSessionBody(null)).toBeNull()
     expect(parseCreateTimerSessionBody('nope')).toBeNull()
     expect(parseCreateTimerSessionBody(undefined)).toBeNull()
+  })
+})
+
+describe('parseDateRangeQuery', () => {
+  it('returns undefined when neither startDate nor endDate is given (the Timers tab call)', () => {
+    expect(parseDateRangeQuery({})).toBeUndefined()
+  })
+
+  it('parses a well-formed range', () => {
+    const result = parseDateRangeQuery({
+      startDate: '2026-08-01T00:00:00.000Z',
+      endDate: '2026-08-18T23:59:59.999Z',
+    })
+    expect(result).toEqual({
+      startDate: new Date('2026-08-01T00:00:00.000Z'),
+      endDate: new Date('2026-08-18T23:59:59.999Z'),
+    })
+  })
+
+  it('takes the first value when a query param repeats', () => {
+    const result = parseDateRangeQuery({
+      startDate: ['2026-08-01T00:00:00.000Z', '2026-08-02T00:00:00.000Z'],
+      endDate: '2026-08-18T23:59:59.999Z',
+    })
+    expect(result?.startDate).toEqual(new Date('2026-08-01T00:00:00.000Z'))
+  })
+
+  it('rejects only one of the two bounds being given', () => {
+    expect(parseDateRangeQuery({ startDate: '2026-08-01T00:00:00.000Z' })).toBeNull()
+    expect(parseDateRangeQuery({ endDate: '2026-08-01T00:00:00.000Z' })).toBeNull()
+  })
+
+  it('rejects an unparsable date', () => {
+    expect(
+      parseDateRangeQuery({ startDate: 'not-a-date', endDate: '2026-08-18T00:00:00.000Z' }),
+    ).toBeNull()
+  })
+
+  it('rejects startDate after endDate', () => {
+    expect(
+      parseDateRangeQuery({
+        startDate: '2026-08-18T00:00:00.000Z',
+        endDate: '2026-08-01T00:00:00.000Z',
+      }),
+    ).toBeNull()
   })
 })

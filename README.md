@@ -76,7 +76,7 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.5.0  | Database (Neon) wired up                                                               | ✅ done    |
 | v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done    |
 | v0.7.0  | Timers tab                                                                             | ✅ done    |
-| v0.8.0  | Dashboard tab                                                                          | ⏳ pending |
+| v0.8.0  | Dashboard tab                                                                          | ✅ done    |
 | v0.9.0  | AI Chat tab (Groq)                                                                     | ⏳ pending |
 | v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending |
 | v0.11.0 | Badges and social sharing                                                              | ⏳ pending |

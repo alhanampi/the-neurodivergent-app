@@ -17,6 +17,14 @@ export interface TimerSessionRecord {
   endedAt: string
 }
 
+/** Parsed `startDate`/`endDate` bounds for a date-ranged GET
+ * /api/timer-sessions call (the Dashboard tab) — see
+ * timer-sessions.utils.ts's parseDateRangeQuery. */
+export interface DateRangeFilter {
+  startDate: Date
+  endDate: Date
+}
+
 /** Body for POST /api/timer-sessions — one finished (completed or manually
  * stopped) timer run. */
 export interface CreateTimerSessionBody {

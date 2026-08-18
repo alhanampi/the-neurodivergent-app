@@ -12,10 +12,6 @@
     "chat": {
       "title": "AI Chat",
       "description": "Talk through a task and break it into small, doable steps. Coming in a future iteration."
-    },
-    "dashboard": {
-      "title": "Dashboard",
-      "description": "See your completed tasks, time spent, and progress over time. Coming in a future iteration."
     }
   },
   "auth": {
@@ -84,6 +80,33 @@
       "empty": "No sessions yet — start a timer to see your history here.",
       "completed": "Completed",
       "stopped": "Stopped early"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "loading": "Loading your stats…",
+    "empty": "No sessions in this range yet — start a timer to see your stats here.",
+    "rangePresets": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days",
+      "all": "All time"
+    },
+    "stats": {
+      "totalTime": "Total time",
+      "sessions": "Sessions",
+      "completionRate": "Completed"
+    },
+    "duration": {
+      "hoursMinutes": "{{hours}}h {{minutes}} min",
+      "hoursOnly": "{{hours}}h",
+      "minutesOnly": "{{minutes}} min"
+    },
+    "charts": {
+      "timeSpentTitle": "Time spent",
+      "byPresetTitle": "By type",
+      "minutesSeriesLabel": "Minutes",
+      "minutesValue": "{{minutes}} min"
     }
   },
   "settings": {

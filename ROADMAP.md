@@ -18,7 +18,7 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 | v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                                                                                                                                                                           | done    |
 | v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account; plus a fixed header (app identity, avatar, Settings shortcut) and the bottom nav trimmed to 3 tabs                                                                                                                                                                                                                                                                         | done    |
 | v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                                                                                                                                                                             | done    |
-| v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                             | pending |
+| v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                             | done    |
 | v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Timers" handoff creates timer entries with estimated durations                                                                                                                                                                                                                                               | pending |
 | v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                               | pending |
 | v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                       | pending |
@@ -32,6 +32,57 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
+- **Dashboard tab (iteration 7):** chart library is `@mui/x-charts` (user's
+  choice between it and Recharts — picked for inheriting the app's MUI theme
+  automatically, so the charts use the same muted teal as the rest of the app
+  with no separate color config). Ran the `dataviz` skill before writing any
+  chart code, which changed the plan from the originally-sketched pie chart to
+  two bar charts: per its "choosing a form" guidance, a pie/donut isn't the
+  recommended form for part-to-whole (a stacked/plain bar is) and is flagged
+  as an anti-pattern for comparing close values; and per its color-formula
+  guidance, a single bar chart whose bars are different nominal categories
+  (the four timer presets) is _one series_, so it takes one flat color
+  (slot-1, here the app's own primary teal) rather than a distinct hue per
+  bar — a categorical palette is for genuinely separate overlaid series, which
+  this isn't. Two charts: a "time spent" bar chart bucketed over the selected
+  range, and a "by type" horizontal bar chart ranking presets by total logged
+  time (only presets with ≥1 session in range are shown). Date-range filter is
+  four relative presets (7/30/90 days, all time) via the same
+  `ToggleButtonGroup` pattern as the Timers tab's preset selector, not a
+  free-form calendar picker — avoids pulling in `@mui/x-date-pickers` for a
+  personal-tracking dashboard that doesn't need an arbitrary custom range.
+  - **Time-series bucketing adapts to the range's span:** day buckets up to
+    31 days, week buckets up to 180 days, month buckets beyond that — so "All
+    time" doesn't render one bar per day and turn into unreadable clutter on
+    a mobile-width chart. Every bucket in range is seeded with 0 before
+    sessions are summed in, so a quiet day/week/month shows as a real gap
+    rather than being silently omitted (which would compress the axis and
+    misrepresent the gap as "doesn't exist").
+  - **API change:** `GET /api/timer-sessions` now accepts optional
+    `startDate`/`endDate` query params. Omitted (the Timers tab's own "recent
+    history" call) keeps the exact original behavior — last 50 sessions,
+    unfiltered. Given (the Dashboard's call) filters by `startedAt` and lifts
+    the cap to 2000, since a wide "all time" range needs every session to
+    aggregate correctly, not just the most recent ones — still a sanity
+    ceiling against an unbounded query, not a product limit anyone doing
+    personal timer tracking would realistically hit. Both bounds are required
+    together; one without the other, or an unparsable date, is a 400.
+  - **Refetch doesn't skeleton-flash:** switching the date-range preset keeps
+    the previous range's numbers visible (dimmed via opacity, not unmounted)
+    until the new ones land, rather than swapping to a spinner and causing a
+    layout jump.
+  - **Deferred, not forgotten:** a full per-chart accessible table-view twin
+    (screen-reader/keyboard access to the exact same data the bars show) is
+    left for iteration 9's dedicated WCAG pass rather than built per-chart
+    here — consistent with how that iteration is already scoped as the
+    project's accessibility gate. The Timers tab's existing session history
+    list already gives non-visual access to the same underlying data in the
+    meantime.
+  - Pushed the main bundle from ~850kB to ~1.1MB raw (~340kB gzipped) —
+    `@mui/x-charts` is the single heaviest addition since Clerk. Bumped
+    `chunkSizeWarningLimit` again (same recurring note as v0.6.0/v0.7.0);
+    real fix is still the code-splitting tracked for v0.10.0, called out
+    there as the next tab specifically worth lazy-loading.
 - **Timers tab (iteration 6):** presets (`short-break` 5m, `long-break` 15m) are
   quick-select defaults, not fixed values — every timer's duration is always
   further editable (composer or an idle card), see below. `pomodoro-focus`
@@ -273,7 +324,7 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   should be validated with real Spanish conversations once the chat tab is built,
   and swapped for the fallback model if tone/quality disappoints — it's a one-line
   config change. There is no sustained free tier for the Claude API, so Groq stays
-  the practical "free" choice for this feature.
+  the practical "free" choice for this feature. The base for how the chat could work could be taken from this github project, with a currently functional AI chat: https://github.com/alhanampi/AI-chat-app
   - **System prompt requirement:** the assistant's persona must be spelled out
     explicitly in the system prompt, not left to model defaults — warm, encouraging,
     non-judgmental tone; explicitly a task-breakdown helper (turns a task, including
