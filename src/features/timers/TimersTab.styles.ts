@@ -108,6 +108,14 @@ export const TimerCardTime = styled.span`
   white-space: nowrap;
 `
 
+// Groups a running/paused card's countdown with its "add minutes" button so
+// the two read as one unit, distinct from the stop button next to them.
+export const TimerCardTimeGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`
+
 export const HistorySection = styled.div`
   display: flex;
   flex-direction: column;

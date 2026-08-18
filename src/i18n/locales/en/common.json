@@ -34,6 +34,7 @@
     "minutesUnit": "min",
     "decreaseMinutes": "Decrease minutes",
     "increaseMinutes": "Increase minutes",
+    "addMinutes": "Add {{minutes}} minutes",
     "namePlaceholder": "Name this timer (optional)",
     "addTimer": "Add timer",
     "noActiveTimers": "No active timers — add one above to get started.",
@@ -46,7 +47,7 @@
       "disable": "Disable tick sound"
     },
     "addTimerDialog": {
-      "title": "Set timer duration",
+      "title": "New timer",
       "cancel": "Cancel",
       "confirm": "Add timer"
     },

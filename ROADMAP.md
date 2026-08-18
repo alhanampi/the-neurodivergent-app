@@ -159,6 +159,24 @@ Status legend: `pending` (not started) · `in progress` · `done`.
       computed from the ref itself rather than React's own (possibly
       not-yet-flushed) `current` updater argument, before also calling
       `setTimers`.
+  - **Name moved into the popup, plus "add minutes" mid-run (post-merge
+    revision, branch `fix/timer-name-and-add-minutes`):** the free-text name
+    field used to live in the always-visible composer, ahead of preset
+    selection — now it's inside `AddTimerDialog`/`PomodoroDialog` themselves,
+    right alongside the duration field(s) it's paired with conceptually.
+    `nameDraft` (already existed, just relocated) resets to empty on
+    `openAddDialog` now too, matching the existing duration-reset behavior,
+    so a leftover name from a cancelled popup can't silently attach to the
+    next timer. Separately, a running or paused card now has a small "add
+    minutes" button next to its countdown (`ADD_MINUTES_STEP`, 5 min per tap
+    — same default step as `MinutesInput`'s own +/- nudge) for when a task
+    runs long and the timer shouldn't just end on it; pure logic lives in
+    `addMinutesToTimerInstance` (`TimersTab.utils.ts`) — extends both
+    `plannedSeconds` and `remainingSeconds` by the same delta (keeps the
+    progress bar meaningful instead of jumping), nudges a running timer's
+    wall-clock `endTimestampMs` out by the same amount, and, for a Pomodoro,
+    extends its _current_ phase's seconds too. Idle timers are untouched —
+    they already have `MinutesInput` for setting an exact duration.
 - **Task roulette (iteration 17):** depends on the gamification system from
   iteration 10 (points/badges) and the Timers tab from iteration 6 (the task list
   it spins over) already being in place — it's an extension/consumer of both, not

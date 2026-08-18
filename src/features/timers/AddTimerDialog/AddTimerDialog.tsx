@@ -4,16 +4,20 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import TextField from '@mui/material/TextField'
 import { MinutesInput } from '../MinutesInput/MinutesInput'
-import { DialogBody } from './AddTimerDialog.styles'
+import { DialogBody, NameFieldWrapper } from './AddTimerDialog.styles'
 import type { AddTimerDialogProps } from './AddTimerDialog.interfaces'
 
 // Opened by the composer's "Add timer" button (see useTimersTab's
-// openAddDialog, which resets `minutes` to DEFAULT_CUSTOM_MINUTES every time
-// this opens) — makes the user actively set a duration instead of silently
-// creating a timer with whatever the composer last happened to show.
+// openAddDialog, which resets both `name` and `minutes` every time this
+// opens) — makes the user actively set a duration (and, optionally, a name)
+// instead of silently creating a timer with whatever was left over from last
+// time.
 export function AddTimerDialog({
   open,
+  name,
+  onNameChange,
   minutes,
   onMinutesChange,
   min,
@@ -27,6 +31,15 @@ export function AddTimerDialog({
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{t('timers.addTimerDialog.title')}</DialogTitle>
       <DialogContent>
+        <NameFieldWrapper>
+          <TextField
+            size="small"
+            fullWidth
+            value={name}
+            onChange={(event) => onNameChange(event.target.value)}
+            label={t('timers.namePlaceholder')}
+          />
+        </NameFieldWrapper>
         <DialogBody>
           <MinutesInput
             value={minutes}

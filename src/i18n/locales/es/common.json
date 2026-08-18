@@ -34,6 +34,7 @@
     "minutesUnit": "min",
     "decreaseMinutes": "Reducir minutos",
     "increaseMinutes": "Aumentar minutos",
+    "addMinutes": "Agregar {{minutes}} minutos",
     "namePlaceholder": "Nombrá este temporizador (opcional)",
     "addTimer": "Agregar temporizador",
     "noActiveTimers": "No hay temporizadores activos — agregá uno arriba para empezar.",
@@ -46,7 +47,7 @@
       "disable": "Desactivar sonido de segundos"
     },
     "addTimerDialog": {
-      "title": "Definí la duración del temporizador",
+      "title": "Nuevo temporizador",
       "cancel": "Cancelar",
       "confirm": "Agregar temporizador"
     },

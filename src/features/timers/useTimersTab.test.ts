@@ -82,6 +82,18 @@ describe('useTimersTab', () => {
     expect(result.current.draftMinutes).toBe(10)
   })
 
+  it('opening the Add dialog resets the name draft, same as the duration', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.selectPreset('custom'))
+    act(() => result.current.openAddDialog())
+    act(() => result.current.setNameDraft('Fold laundry'))
+    act(() => result.current.closeAddDialog())
+    act(() => result.current.openAddDialog())
+
+    expect(result.current.nameDraft).toBe('')
+  })
+
   it('opening the Add dialog while Focus is selected opens the Pomodoro dialog instead, defaulting to 20/10', () => {
     const { result } = renderHook(() => useTimersTab())
 
@@ -123,9 +135,9 @@ describe('useTimersTab', () => {
   it('adds an idle timer, clears the name draft, and closes the dialog', () => {
     const { result } = renderHook(() => useTimersTab())
 
-    act(() => result.current.setNameDraft('Fold laundry'))
     act(() => result.current.selectPreset('custom'))
     act(() => result.current.openAddDialog())
+    act(() => result.current.setNameDraft('Fold laundry'))
     act(() => result.current.setDraftMinutes(12))
     act(() => result.current.addTimer())
 
@@ -260,6 +272,43 @@ describe('useTimersTab', () => {
     expect(runningTimer?.plannedSeconds).toBe(10 * 60)
   })
 
+  it('adds minutes to a running timer, extending both its planned and remaining time', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.addTimer())
+    const id = result.current.timers[0].id
+    act(() => result.current.toggleTimer(id))
+    act(() => vi.advanceTimersByTime(5000))
+
+    const beforeRemaining = result.current.timers[0].remainingSeconds
+    act(() => result.current.addMinutesToTimer(id, 5))
+
+    const timer = result.current.timers[0]
+    expect(timer.plannedSeconds).toBe(15 * 60)
+    expect(timer.remainingSeconds).toBe(beforeRemaining + 5 * 60)
+    // Still running, still counting down from the extended total — not reset.
+    act(() => vi.advanceTimersByTime(1000))
+    expect(result.current.timers[0].remainingSeconds).toBeLessThan(timer.remainingSeconds)
+  })
+
+  it('adds minutes to a paused timer too, but leaves an idle one alone', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.addTimer())
+    const id = result.current.timers[0].id
+
+    act(() => result.current.addMinutesToTimer(id, 5))
+    expect(result.current.timers[0].plannedSeconds).toBe(10 * 60)
+
+    act(() => result.current.toggleTimer(id))
+    act(() => result.current.toggleTimer(id))
+    expect(result.current.timers[0].status).toBe('paused')
+
+    act(() => result.current.addMinutesToTimer(id, 5))
+    expect(result.current.timers[0].plannedSeconds).toBe(15 * 60)
+    expect(result.current.timers[0].remainingSeconds).toBe(15 * 60)
+  })
+
   it('auto-completes, logs completed:true, and notifies once a timer runs out', () => {
     const { result } = renderHook(() => useTimersTab())
 
@@ -326,9 +375,9 @@ describe('useTimersTab', () => {
     it('confirmPomodoro creates a two-phase timer, clears the name draft, and closes the dialog', () => {
       const { result } = renderHook(() => useTimersTab())
 
-      act(() => result.current.setNameDraft('Deep work'))
       // 'pomodoro-focus' (Focus) is the default selected preset.
       act(() => result.current.openAddDialog())
+      act(() => result.current.setNameDraft('Deep work'))
       act(() => result.current.setPomodoroFocusMinutes(1))
       act(() => result.current.setPomodoroBreakMinutes(1))
       act(() => result.current.confirmPomodoro())
