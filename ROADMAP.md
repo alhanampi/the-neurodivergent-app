@@ -106,14 +106,26 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   [Freesound.org](https://freesound.org/docs/api/overview.html) is a good fit for
   short ambient/nature sound loops behind the breathing exercises specifically —
   free API access is non-commercial only, so revisit if the app ever monetizes.
-- **Relaxation animations (iteration 16):** custom-built, not a library — box/square
-  breathing (4-4-4-4 hold pattern) and an expanding-wave style are simple enough as
-  CSS/`styled-components` keyframe animations driven by a hook that tracks the
-  current phase and duration, no need for an animation dependency. Must respect the
-  `prefers-reduced-motion` handling already added in iteration 2
-  (`src/index.css`) — for users with that preference, replace the moving shape with
-  a static one plus a text/number countdown instead of skipping the exercise
-  content entirely.
+- **Relaxation animations (iteration 16):** open to a library here, not committed to
+  hand-rolling it — candidates to evaluate when this iteration starts:
+  - **`motion`** (formerly `framer-motion`) — the most mature option, great for
+    orchestrated phase sequences (inhale → hold → exhale → hold), huge
+    community/maintenance track record. Heaviest of the options (~50-60kB gzip).
+  - **`@react-spring/web`** — physics-based, also well-established, similar weight
+    to `motion`.
+  - **`lottie-react`** — if we'd rather use a pre-made, designer-quality animation
+    (there are free breathing-exercise Lottie files available) than build the
+    shape ourselves; different tradeoff (asset weight/quality vs. code control).
+  - Plain CSS/`styled-components` keyframes (zero dependency) is still fine for
+    something as simple as a circle expanding/contracting — genuinely don't need a
+    library for that specific shape, just noting it's an option, not the mandate.
+  - Whichever it is, lazy-load it (`import()`) so it doesn't add to everyone's
+    initial bundle for a tab most sessions won't open — same spirit as the
+    code-splitting already tracked for v0.10.0.
+  - Must respect the `prefers-reduced-motion` handling already added in iteration 2
+    (`src/index.css`) — for users with that preference, replace the moving shape
+    with a static one plus a text/number countdown instead of skipping the
+    exercise content entirely.
 - **Linter (iteration 1):** used [oxlint](https://oxc.rs/) instead of ESLint —
   `npm create vite@latest` now defaults to it, it's a Rust-based linter that's
   meaningfully faster, and its `react`/`typescript`/`jsx-a11y`/`import` plugins
