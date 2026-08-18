@@ -1,7 +1,7 @@
 import type { VercelApiRequest, VercelApiResponse } from './vercel-http.interfaces'
+import { getUserIdFromRequest } from './auth.utils'
 import {
   getLanguagePreference,
-  getUserIdFromRequest,
   isSupportedLanguage,
   setLanguagePreference,
 } from './preferences.utils'

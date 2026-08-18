@@ -9,10 +9,6 @@
     "settings": "Ajustes"
   },
   "comingSoon": {
-    "timers": {
-      "title": "Temporizadores",
-      "description": "Configurá un temporizador, corré un pomodoro o registrá una tarea mientras la hacés. Próximamente."
-    },
     "chat": {
       "title": "Chat IA",
       "description": "Conversá sobre una tarea y dividila en pasos chicos y manejables. Próximamente."
@@ -25,6 +21,35 @@
   "auth": {
     "brandTitle": "The Neurodivergent App",
     "tagline": "Iniciá sesión para organizarte."
+  },
+  "timers": {
+    "title": "Temporizadores",
+    "presets": {
+      "pomodoro-focus": "Foco",
+      "short-break": "Descanso corto",
+      "long-break": "Descanso largo",
+      "custom": "Personalizado"
+    },
+    "minutesValue": "{{count}} min",
+    "decreaseMinutes": "Reducir minutos",
+    "increaseMinutes": "Aumentar minutos",
+    "customLabelPlaceholder": "¿En qué estás trabajando? (opcional)",
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "stop": "Detener",
+    "notification": {
+      "title": "¡Se acabó el tiempo!",
+      "banner": "Activá las notificaciones para saber cuándo termina un temporizador, incluso si cambiás de app.",
+      "enable": "Activar notificaciones"
+    },
+    "history": {
+      "title": "Sesiones recientes",
+      "loading": "Cargando tu historial…",
+      "empty": "Todavía no hay sesiones — iniciá un temporizador para ver tu historial acá.",
+      "completed": "Completado",
+      "stopped": "Detenido antes"
+    }
   },
   "settings": {
     "title": "Ajustes",

@@ -9,10 +9,6 @@
     "settings": "Settings"
   },
   "comingSoon": {
-    "timers": {
-      "title": "Timers",
-      "description": "Set a timer, run a pomodoro, or track a task as you go. Coming in a future iteration."
-    },
     "chat": {
       "title": "AI Chat",
       "description": "Talk through a task and break it into small, doable steps. Coming in a future iteration."
@@ -25,6 +21,35 @@
   "auth": {
     "brandTitle": "The Neurodivergent App",
     "tagline": "Sign in to get organized."
+  },
+  "timers": {
+    "title": "Timers",
+    "presets": {
+      "pomodoro-focus": "Focus",
+      "short-break": "Short break",
+      "long-break": "Long break",
+      "custom": "Custom"
+    },
+    "minutesValue": "{{count}} min",
+    "decreaseMinutes": "Decrease minutes",
+    "increaseMinutes": "Increase minutes",
+    "customLabelPlaceholder": "What are you working on? (optional)",
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Resume",
+    "stop": "Stop",
+    "notification": {
+      "title": "Time's up!",
+      "banner": "Turn on notifications to know when a timer finishes, even if you switch apps.",
+      "enable": "Enable notifications"
+    },
+    "history": {
+      "title": "Recent sessions",
+      "loading": "Loading your history…",
+      "empty": "No sessions yet — start a timer to see your history here.",
+      "completed": "Completed",
+      "stopped": "Stopped early"
+    }
   },
   "settings": {
     "title": "Settings",

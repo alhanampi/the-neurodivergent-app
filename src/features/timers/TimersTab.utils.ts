@@ -1,0 +1,59 @@
+import {
+  CUSTOM_PRESET_ID,
+  MAX_CUSTOM_MINUTES,
+  MIN_CUSTOM_MINUTES,
+  TIMER_PRESETS,
+} from './TimersTab.constants'
+import type { TimerPresetId } from './TimersTab.interfaces'
+
+/** Formats a duration as `M:SS`, or `H:MM:SS` past an hour. */
+export function formatSeconds(totalSeconds: number): string {
+  const safeSeconds = Math.max(0, Math.round(totalSeconds))
+  const hours = Math.floor(safeSeconds / 3600)
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+  const seconds = safeSeconds % 60
+
+  const pad = (value: number) => value.toString().padStart(2, '0')
+
+  return hours > 0 ? `${hours}:${pad(minutes)}:${pad(seconds)}` : `${minutes}:${pad(seconds)}`
+}
+
+/** Remaining seconds derived from a fixed end timestamp rather than a
+ * decrementing counter, so it self-corrects after the interval gets
+ * throttled (backgrounded tab) instead of drifting behind. */
+export function computeRemainingSeconds(
+  endTimestampMs: number,
+  nowMs: number = Date.now(),
+): number {
+  return Math.max(0, Math.ceil((endTimestampMs - nowMs) / 1000))
+}
+
+export function clampCustomMinutes(minutes: number): number {
+  if (Number.isNaN(minutes)) return MIN_CUSTOM_MINUTES
+  return Math.min(MAX_CUSTOM_MINUTES, Math.max(MIN_CUSTOM_MINUTES, Math.round(minutes)))
+}
+
+export function getPlannedSeconds(presetId: TimerPresetId, customMinutes: number): number {
+  if (presetId === CUSTOM_PRESET_ID) {
+    return clampCustomMinutes(customMinutes) * 60
+  }
+  const preset = TIMER_PRESETS.find((candidate) => candidate.id === presetId)
+  return (preset?.minutes ?? MIN_CUSTOM_MINUTES) * 60
+}
+
+/** i18n key for a preset's display name. Custom timers still resolve to a
+ * generic "Custom timer" string here — callers that have the user's own
+ * free-text label prefer that instead, falling back to this key when none
+ * was given. */
+export function getPresetTranslationKey(presetId: TimerPresetId): string {
+  return `timers.presets.${presetId}`
+}
+
+/** Formats a session's timestamp using the app's current language, so
+ * history entries read in the same locale as the rest of the UI rather than
+ * whatever the browser's default happens to be. */
+export function formatSessionTimestamp(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+    new Date(iso),
+  )
+}

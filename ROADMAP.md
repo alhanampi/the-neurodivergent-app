@@ -32,6 +32,25 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
+- **Timers tab (iteration 6):** presets (`pomodoro-focus` 25m, `short-break` 5m,
+  `long-break` 15m) are fixed app config for this iteration, not user-editable or
+  DB-stored — revisit if personalization (v1.2.0) wants custom preset lengths.
+  "Custom" is a fourth option with its own minutes stepper (1–180min, clamped) and
+  an optional free-text label. Countdown correctness: the running timer tracks a
+  wall-clock end timestamp (not a decrementing counter) and re-derives the
+  remaining time from it every tick, so a throttled/backgrounded tab can't drift —
+  it self-corrects instead of losing time. A manual "Stop" always logs the elapsed
+  time as `completed: false`; letting the countdown reach zero auto-logs
+  `completed: true` and fires the completion notification — stops under 5 elapsed
+  seconds aren't logged at all (near-certain mis-taps, not real sessions).
+  Notifications prefer `ServiceWorkerRegistration.showNotification()` (works on
+  mobile browsers that block the bare `Notification` constructor, and can still
+  fire if the tab isn't focused) and fall back to `new Notification()` when no
+  service worker registration is active yet (e.g. plain `npm run dev`); permission
+  is requested on demand via a dismissible banner, not on page load. Added
+  `api/auth.utils.ts` to share the Clerk-token-verification helper that was
+  previously private to `api/preferences.utils.ts`, now that a second
+  authenticated route (`api/timer-sessions.ts`) needs the same check.
 - **Task roulette (iteration 17):** depends on the gamification system from
   iteration 10 (points/badges) and the Timers tab from iteration 6 (the task list
   it spins over) already being in place — it's an extension/consumer of both, not
