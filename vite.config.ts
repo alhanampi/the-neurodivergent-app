@@ -45,6 +45,17 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  optimizeDeps: {
+    // These are server-only (db/, api/) — src/ never imports them (verified:
+    // no match for their names anywhere under src/). Vite's dev-time
+    // dependency scanner nonetheless discovers them the first time a route
+    // touching Clerk auth renders, forcing a one-time full-page reload
+    // (blank flash, ~1-3s) mid-session. Excluding them here stops Vite from
+    // pre-bundling them at all — if src/ ever does start importing one by
+    // mistake, this now surfaces as a clear resolution error instead of a
+    // silent reload, which is the outcome we actually want either way.
+    exclude: ['@clerk/backend', '@neondatabase/serverless', 'drizzle-orm'],
+  },
   build: {
     // MUI + Clerk + i18next push the single bundle past Vite's 500kB default
     // warning threshold. Real fix is code-splitting (lazy-load heavier
@@ -57,5 +68,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    env: {
+      // db/client.ts throws at import time if this is missing — tests for
+      // api/ utils that don't actually run a query need a syntactically
+      // valid placeholder so importing them doesn't crash.
+      DATABASE_URL: 'postgres://test:test@localhost:5432/test',
+    },
   },
 })

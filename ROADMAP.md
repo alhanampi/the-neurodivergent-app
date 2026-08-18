@@ -15,8 +15,8 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 | v0.2.0  | `iteration/01-app-scaffold`        | Vite + React + TS app; oxlint/Prettier/Husky; folder conventions; `vite-plugin-pwa` baseline (manifest + icons); bottom-tab navigation shell (React Router) with 4 placeholder tabs; Vitest + RTL; GitHub Actions CI; Vercel project connected and deployed                                                     | done        |
 | v0.3.0  | `iteration/02-i18n-theme`          | react-i18next with `en`/`es` resources; language auto-detect + persisted preference; MUI + styled-components theme bridge; design tokens; light/dark base                                                                                                                                                       | done        |
 | v0.4.0  | `iteration/03-auth-clerk`          | Clerk sign-in/up; protected routes; session handling; user menu                                                                                                                                                                                                                                                 | done        |
-| v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                     | in progress |
-| v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account                                                                                                                                                                                                                       | pending     |
+| v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                     | done        |
+| v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account                                                                                                                                                                                                                       | in progress |
 | v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                       | pending     |
 | v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                       | pending     |
 | v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Timers" handoff creates timer entries with estimated durations                                                                                         | pending     |
@@ -31,6 +31,34 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
+- **Neon/Drizzle setup (iteration 4):** `/db` lives at the repo root, not under
+  `src/`, specifically so it can never be imported from client code — only `/api`
+  and `drizzle-kit` touch it. Language preference is now genuinely account-synced
+  (`GET`/`PUT /api/preferences`, authenticated via a Clerk session token), not just
+  seeded once by the webhook, per the promise in CLAUDE.md. Skipped `@vercel/node`
+  as a dependency (hand-rolled minimal request/response types instead) — it pulled
+  in ~10 transitive CVEs for what we only needed as type declarations. One accepted
+  risk remains (`esbuild` via `drizzle-kit`, dev-only, not network-exposed in how we
+  use it) — documented in [docs/SECURITY.md](../docs/SECURITY.md#accepted-risks).
+  `/api` routes don't run under plain `npm run dev` (Vite doesn't serve them) — use
+  `vercel dev` to exercise the webhook/preferences endpoints locally.
+- **Vite dev-server blank flash (iteration 4, fixed):** the first time a
+  Clerk-authenticated route rendered under `npm run dev`, Vite's dependency
+  scanner discovered `@clerk/backend`/`drizzle-orm`/`@neondatabase/serverless`
+  as "new dependencies" and force-reloaded the page (a ~1-3s blank flash) —
+  confirmed via `src/` having zero references to any of them, and the
+  production bundle containing none of them either, so this was dev-server-only.
+  Fixed by adding them to `optimizeDeps.exclude` in `vite.config.ts`. Found by
+  actually driving the app end-to-end (sign-in → all 4 tabs → language/theme
+  toggles → sign out) with Playwright rather than only running `lint`/`test`/
+  `build` — worth doing that full pass again for future iterations that touch
+  auth or routing.
+- **Sign-up gap (found during iteration 4 verification, not fixed — iteration 3
+  scope):** the sign-in screen's "Sign up" link bounces out of the app to
+  Clerk's generic hosted Account Portal instead of an in-app flow, since only
+  `<SignIn>` was ever built, not `<SignUp>`. Doesn't block anything now (new
+  users can still sign up, just via an unstyled page) — worth an in-app
+  `<SignUp>` component whenever Settings/onboarding gets more attention.
 - **Relaxation music source (iteration 16):** researched in Aug 2026. Spotify
   deprecated the `Recommendations`, `Related Artists`, `Audio Features/Analysis`,
   and `Featured Playlists` endpoints for new apps in Nov 2024 — an algorithmic

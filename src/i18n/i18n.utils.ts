@@ -1,8 +1,8 @@
 import { DEFAULT_LANGUAGE, LANGUAGE_STORAGE_KEY, SUPPORTED_LANGUAGES } from './i18n.constants'
 import type { SupportedLanguage } from './i18n.interfaces'
 
-export function isSupportedLanguage(value: string): value is SupportedLanguage {
-  return (SUPPORTED_LANGUAGES as readonly string[]).includes(value)
+export function isSupportedLanguage(value: unknown): value is SupportedLanguage {
+  return typeof value === 'string' && (SUPPORTED_LANGUAGES as readonly string[]).includes(value)
 }
 
 /**
