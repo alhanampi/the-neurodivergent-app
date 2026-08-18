@@ -7,6 +7,37 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    // `/api` routes are Vercel Serverless Functions, not part of the client
+    // build — plain `npm run dev` has no idea about them (see the "vercel
+    // dev" note in ROADMAP.md). Without this, a fetch to e.g.
+    // `/api/timer-sessions` falls through to Vite's own module-serving
+    // pipeline, which tries to transform the raw `api/*.ts` source file as
+    // if it were a browser module. Usually that just silently returns
+    // unparseable "JSON" (swallowed by the existing try/catch + `!res.ok`
+    // checks in every fetch helper) — but a request with a query string
+    // (e.g. the Dashboard tab's `?startDate=...&endDate=...`) trips up
+    // Vite/oxc's module-type detection and hard-crashes the transform
+    // instead, taking down the whole page. Intercepting `/api/*` here,
+    // before Vite's internal middlewares run, turns both cases into one
+    // clean 404 — exactly what the fetch helpers already expect and handle.
+    {
+      name: 'api-routes-404-in-dev',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url?.startsWith('/api/')) {
+            res.statusCode = 404
+            res.setHeader('Content-Type', 'application/json')
+            res.end(
+              JSON.stringify({
+                error: '/api routes are not served by `npm run dev` — use `vercel dev` instead.',
+              }),
+            )
+            return
+          }
+          next()
+        })
+      },
+    },
     react(),
     VitePWA({
       registerType: 'autoUpdate',
