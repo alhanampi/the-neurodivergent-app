@@ -9,10 +9,6 @@
     "settings": "Settings"
   },
   "comingSoon": {
-    "timers": {
-      "title": "Timers",
-      "description": "Set a timer, run a pomodoro, or track a task as you go. Coming in a future iteration."
-    },
     "chat": {
       "title": "AI Chat",
       "description": "Talk through a task and break it into small, doable steps. Coming in a future iteration."
@@ -25,6 +21,70 @@
   "auth": {
     "brandTitle": "The Neurodivergent App",
     "tagline": "Sign in to get organized."
+  },
+  "timers": {
+    "title": "Timers",
+    "presets": {
+      "pomodoro-focus": "Focus",
+      "short-break": "Short break",
+      "long-break": "Long break",
+      "custom": "Custom time"
+    },
+    "durationLabel": "Timer duration in minutes",
+    "minutesUnit": "min",
+    "decreaseMinutes": "Decrease minutes",
+    "increaseMinutes": "Increase minutes",
+    "namePlaceholder": "Name this timer (optional)",
+    "addTimer": "Add timer",
+    "noActiveTimers": "No active timers — add one above to get started.",
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Resume",
+    "stop": "Stop",
+    "sound": {
+      "enable": "Enable tick sound",
+      "disable": "Disable tick sound"
+    },
+    "addTimerDialog": {
+      "title": "Set timer duration",
+      "cancel": "Cancel",
+      "confirm": "Add timer"
+    },
+    "pomodoroDialog": {
+      "title": "Set up your Pomodoro",
+      "explanation": "This will be {{focusMinutes}} min of focus followed by {{breakMinutes}} min of break — feel free to adjust either below.",
+      "focusLabel": "Focus duration in minutes",
+      "breakLabel": "Break duration in minutes",
+      "cancel": "Cancel",
+      "confirm": "Add timer"
+    },
+    "pomodoro": {
+      "phase": {
+        "focus": "Focus",
+        "break": "Break"
+      },
+      "phaseCompleteTitle": "Phase complete!",
+      "phaseCompleteBody": "{{phase}} — {{minutes}} min"
+    },
+    "stopDialog": {
+      "title": "Stop this timer?",
+      "body": "This ends the timer now and logs the time you've put in so far. This can't be undone.",
+      "bodyNamed": "This ends \"{{name}}\" now and logs the time you've put in so far. This can't be undone.",
+      "cancel": "Keep going",
+      "confirm": "Stop timer"
+    },
+    "notification": {
+      "title": "Time's up!",
+      "banner": "Turn on notifications to know when a timer finishes, even if you switch apps.",
+      "enable": "Enable notifications"
+    },
+    "history": {
+      "title": "Recent sessions",
+      "loading": "Loading your history…",
+      "empty": "No sessions yet — start a timer to see your history here.",
+      "completed": "Completed",
+      "stopped": "Stopped early"
+    }
   },
   "settings": {
     "title": "Settings",

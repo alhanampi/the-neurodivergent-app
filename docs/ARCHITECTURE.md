@@ -15,6 +15,7 @@ src/
       TimersTab.styles.ts
       TimersTab.interfaces.ts
       TimersTab.utils.ts
+      StopTimerDialog/       # Confirmation before stopping a timer with progress
     ai-chat/
     dashboard/
     settings/
@@ -25,7 +26,9 @@ src/
   theme/                # MUI theme + styled-components ThemeProvider bridge, design tokens
   utils/                # Cross-feature pure helpers
 api/                    # Vercel Serverless Functions (secrets live here, never in src/)
+  auth.utils.ts          # Shared Clerk token verification, used by every authenticated route
   preferences.ts         # GET/PUT the signed-in user's preferences
+  timer-sessions.ts      # GET/POST the signed-in user's timer session history
   webhooks/
     clerk.ts             # Clerk → Neon user/preferences sync
 db/                     # Server-only: Drizzle schema + Neon client. Imported only
@@ -65,10 +68,12 @@ Browser (React)
    │                a session JWT to authenticated /api calls
    │
    ├─ /api/* (Vercel Serverless Functions)
-   │     ├─ /api/chat          → Groq (API key stays server-side)
-   │     ├─ /api/preferences   → verifies the Clerk token, reads/writes Neon
-   │     └─ /api/webhooks/*    → Clerk webhook (svix-verified) → Neon,
-   │                              upserts/deletes the user + preferences rows
+   │     ├─ /api/chat            → Groq (API key stays server-side)
+   │     ├─ /api/preferences     → verifies the Clerk token, reads/writes Neon
+   │     ├─ /api/timer-sessions  → verifies the Clerk token, reads/writes Neon
+   │     │                          (GET recent history, POST a finished run)
+   │     └─ /api/webhooks/*      → Clerk webhook (svix-verified) → Neon,
+   │                                upserts/deletes the user + preferences rows
    │
    └─ Neon Postgres ── reached only from /api (via db/client.ts), never
                         directly from the browser

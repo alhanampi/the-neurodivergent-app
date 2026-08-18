@@ -9,10 +9,6 @@
     "settings": "Ajustes"
   },
   "comingSoon": {
-    "timers": {
-      "title": "Temporizadores",
-      "description": "Configurá un temporizador, corré un pomodoro o registrá una tarea mientras la hacés. Próximamente."
-    },
     "chat": {
       "title": "Chat IA",
       "description": "Conversá sobre una tarea y dividila en pasos chicos y manejables. Próximamente."
@@ -25,6 +21,70 @@
   "auth": {
     "brandTitle": "The Neurodivergent App",
     "tagline": "Iniciá sesión para organizarte."
+  },
+  "timers": {
+    "title": "Temporizadores",
+    "presets": {
+      "pomodoro-focus": "Foco",
+      "short-break": "Descanso corto",
+      "long-break": "Descanso largo",
+      "custom": "Tiempo personalizado"
+    },
+    "durationLabel": "Duración del temporizador en minutos",
+    "minutesUnit": "min",
+    "decreaseMinutes": "Reducir minutos",
+    "increaseMinutes": "Aumentar minutos",
+    "namePlaceholder": "Nombrá este temporizador (opcional)",
+    "addTimer": "Agregar temporizador",
+    "noActiveTimers": "No hay temporizadores activos — agregá uno arriba para empezar.",
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "stop": "Detener",
+    "sound": {
+      "enable": "Activar sonido de segundos",
+      "disable": "Desactivar sonido de segundos"
+    },
+    "addTimerDialog": {
+      "title": "Definí la duración del temporizador",
+      "cancel": "Cancelar",
+      "confirm": "Agregar temporizador"
+    },
+    "pomodoroDialog": {
+      "title": "Configurá tu Pomodoro",
+      "explanation": "Van a ser {{focusMinutes}} min de foco seguidos de {{breakMinutes}} min de descanso — podés ajustar ambos abajo.",
+      "focusLabel": "Duración del foco en minutos",
+      "breakLabel": "Duración del descanso en minutos",
+      "cancel": "Cancelar",
+      "confirm": "Agregar temporizador"
+    },
+    "pomodoro": {
+      "phase": {
+        "focus": "Foco",
+        "break": "Descanso"
+      },
+      "phaseCompleteTitle": "¡Fase completada!",
+      "phaseCompleteBody": "{{phase}} — {{minutes}} min"
+    },
+    "stopDialog": {
+      "title": "¿Detener este temporizador?",
+      "body": "Esto termina el temporizador ahora y registra el tiempo que llevás hasta el momento. No se puede deshacer.",
+      "bodyNamed": "Esto termina \"{{name}}\" ahora y registra el tiempo que llevás hasta el momento. No se puede deshacer.",
+      "cancel": "Seguir",
+      "confirm": "Detener temporizador"
+    },
+    "notification": {
+      "title": "¡Se acabó el tiempo!",
+      "banner": "Activá las notificaciones para saber cuándo termina un temporizador, incluso si cambiás de app.",
+      "enable": "Activar notificaciones"
+    },
+    "history": {
+      "title": "Sesiones recientes",
+      "loading": "Cargando tu historial…",
+      "empty": "Todavía no hay sesiones — iniciá un temporizador para ver tu historial acá.",
+      "completed": "Completado",
+      "stopped": "Detenido antes"
+    }
   },
   "settings": {
     "title": "Ajustes",
