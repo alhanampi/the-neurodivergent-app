@@ -31,8 +31,9 @@ Coming later: **badges** for showing up and finishing things, **social sharing**
 your wins, two-way integrations with **Google Calendar** and
 **Spotify/SoundCloud** (so a "study for 20 minutes" task can queue up a focus
 playlist automatically), more **themes/languages/fonts** (including a
-dyslexia-friendly option), and a **relaxation tab** with guided breathing
-exercises and calming music.
+dyslexia-friendly option), a **relaxation tab** with guided breathing exercises
+and calming music, and a **task roulette** that randomly picks a pending task
+for you (weighted by difficulty and time of day) so you don't have to decide.
 
 ## Tech stack
 
@@ -61,25 +62,26 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                        | Status         |
-| ------- | ------------------------------------------------------------------- | -------------- |
-| v0.1.0  | Project docs and repo setup                                         | ✅ done        |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done        |
-| v0.3.0  | Language switching + visual theme                                   | ✅ done        |
-| v0.4.0  | Login with Clerk                                                    | ✅ done        |
-| v0.5.0  | Database (Neon) wired up                                            | ✅ done        |
-| v0.6.0  | Settings tab                                                        | 🚧 in progress |
-| v0.7.0  | Timers tab                                                          | ⏳ pending     |
-| v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
-| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending     |
-| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending     |
-| v0.11.0 | Badges and social sharing                                           | ⏳ pending     |
-| v0.12.0 | Google Calendar integration                                         | ⏳ pending     |
-| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending     |
-| v1.0.0  | App store packaging                                                 | ⏳ pending     |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending     |
-| v1.2.0  | More themes, more languages, dyslexia-friendly font option          | ⏳ pending     |
-| v1.3.0  | Relaxation tab: guided breathing exercises + curated calming music  | ⏳ pending     |
+| Version | What it adds                                                                           | Status         |
+| ------- | -------------------------------------------------------------------------------------- | -------------- |
+| v0.1.0  | Project docs and repo setup                                                            | ✅ done        |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                           | ✅ done        |
+| v0.3.0  | Language switching + visual theme                                                      | ✅ done        |
+| v0.4.0  | Login with Clerk                                                                       | ✅ done        |
+| v0.5.0  | Database (Neon) wired up                                                               | ✅ done        |
+| v0.6.0  | Settings tab                                                                           | 🚧 in progress |
+| v0.7.0  | Timers tab                                                                             | ⏳ pending     |
+| v0.8.0  | Dashboard tab                                                                          | ⏳ pending     |
+| v0.9.0  | AI Chat tab (Groq)                                                                     | ⏳ pending     |
+| v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending     |
+| v0.11.0 | Badges and social sharing                                                              | ⏳ pending     |
+| v0.12.0 | Google Calendar integration                                                            | ⏳ pending     |
+| v0.13.0 | Spotify/SoundCloud integration                                                         | ⏳ pending     |
+| v1.0.0  | App store packaging                                                                    | ⏳ pending     |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending     |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending     |
+| v1.3.0  | Relaxation tab: guided breathing exercises + curated calming music                     | ⏳ pending     |
+| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending     |
 
 ## Getting started
 
