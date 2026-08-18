@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthGate } from '@/auth/AuthGate/AuthGate'
 import { AppLayout } from './AppLayout/AppLayout'
+import { Header } from './Header/Header'
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 if (!clerkPublishableKey) {
@@ -30,6 +31,10 @@ export function App() {
   return (
     <ClerkProvider publishableKey={clerkPublishableKey} localization={clerkLocalization}>
       <BrowserRouter>
+        {/* Header is rendered above both branches of AuthGate, so the app's
+            identity (and, once signed in, account/Settings access) stays in
+            the same place whether you're signed in or looking at SignIn. */}
+        <Header />
         <AuthGate>
           <AppLayout />
         </AuthGate>

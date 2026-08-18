@@ -1,4 +1,7 @@
 {
+  "app": {
+    "shortName": "ND App"
+  },
   "nav": {
     "timers": "Timers",
     "chat": "Chat IA",

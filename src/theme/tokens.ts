@@ -47,3 +47,11 @@ export const fontFamily = [
   '"Segoe UI"',
   'sans-serif',
 ].join(', ')
+
+/** Fixed-position chrome heights (px) — shared so the header, the bottom
+ * nav, and anything that needs to pad around them (page content, the
+ * sign-in screen) never drift out of sync with each other. */
+export const layout = {
+  headerHeight: 56,
+  bottomNavHeight: 56,
+}

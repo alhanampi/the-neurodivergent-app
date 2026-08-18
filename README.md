@@ -12,7 +12,8 @@ app, and built one small, usable iteration at a time.
 
 ## What it does
 
-The app is organized around four tabs at the bottom of the screen:
+A header sits at the top always — the app's name, and once you're signed in, your
+avatar and a Settings shortcut. Below it, three tabs:
 
 - **⏱️ Timers** — Set a timer and get notified when it's done (pomodoros, 20-minute
   focus blocks, whatever works for you), or just start a stopwatch and mark it
@@ -24,8 +25,9 @@ The app is organized around four tabs at the bottom of the screen:
   step arrives with its own estimated time.
 - **📊 Dashboard** — A look back at what you got done: completed tasks, time spent,
   streaks, patterns over time.
-- **⚙️ Settings** — Language, theme, account, and (as the app grows) connected
-  integrations.
+
+**⚙️ Settings** — reached from the header, not a tab — has language, theme, account,
+and (as the app grows) connected integrations.
 
 Coming later: **badges** for showing up and finishing things, **social sharing** of
 your wins, two-way integrations with **Google Calendar** and

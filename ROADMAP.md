@@ -41,6 +41,14 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   decorative UI piece — but its last publish was over a year ago as of this
   writing (Aug 2026), so re-check it's still the best option (not abandoned, no
   newer alternative) when this iteration actually starts.
+- **Header + 3-tab nav (iteration 5, mid-course UI change):** added a fixed header
+  (`src/app/Header`) with the app logo/name, always rendered — above the sign-in
+  screen too, not just the signed-in app. Settings moved out of the bottom nav into
+  the header (avatar + gear icon) since it's an account-level concern, not a core
+  feature tab; the bottom nav is 3 tabs now (Timers, AI Chat, Dashboard), not 4.
+  `/settings` is still a real route, just reached differently. Extracted
+  `useClerkAppearanceVariables` (`src/theme/`) so the Clerk-theming object (used by
+  SignIn, and now both UserButton instances) isn't hand-copied per component.
 - **Settings tab (iteration 5):** profile/account management delegated to Clerk's
   `<UserButton>` (themed with our design tokens) instead of hand-building
   name/avatar/email editing — same reasoning as using `<SignIn>` in iteration 3:

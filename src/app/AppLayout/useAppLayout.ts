@@ -8,7 +8,7 @@ export function useAppLayout() {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
-  const activeTabId = getActiveTabId(location.pathname, TABS)
+  const activeTabId = getActiveTabId(location.pathname, TABS) // null while on a non-tab route (e.g. Settings)
 
   const tabs = TABS.map((tab) => ({ ...tab, label: t(tab.labelKey) }))
 
