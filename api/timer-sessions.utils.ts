@@ -1,9 +1,10 @@
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { db } from '../db/client'
 import { timerSessions } from '../db/schema'
 import { TIMER_PRESET_IDS } from './timer-sessions.interfaces'
 import type {
   CreateTimerSessionBody,
+  DateRangeFilter,
   TimerPresetId,
   TimerSessionRecord,
 } from './timer-sessions.interfaces'
@@ -13,8 +14,16 @@ import type {
  * limit (no preset comes close to it). */
 const MAX_SESSION_SECONDS = 24 * 60 * 60
 
-/** How many recent sessions GET /api/timer-sessions returns. */
+/** How many recent sessions a plain GET /api/timer-sessions (no date range —
+ * the Timers tab's "recent history" list) returns. */
 const HISTORY_LIMIT = 50
+
+/** How many sessions a date-ranged GET (the Dashboard tab) returns. Higher
+ * than HISTORY_LIMIT since a wide "all time" range needs every session to
+ * aggregate correctly, not just the most recent ones — still a sanity
+ * ceiling against an unbounded query, not a product limit anyone doing
+ * personal timer tracking would realistically hit. */
+const DASHBOARD_QUERY_LIMIT = 2000
 
 function isValidPresetId(value: unknown): value is TimerPresetId {
   return typeof value === 'string' && (TIMER_PRESET_IDS as readonly string[]).includes(value)
@@ -65,13 +74,54 @@ export function parseCreateTimerSessionBody(body: unknown): CreateTimerSessionBo
   }
 }
 
-export async function listTimerSessions(userId: string): Promise<TimerSessionRecord[]> {
-  const rows = await db
-    .select()
-    .from(timerSessions)
-    .where(eq(timerSessions.userId, userId))
-    .orderBy(desc(timerSessions.startedAt))
-    .limit(HISTORY_LIMIT)
+function firstQueryValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value
+}
+
+/** Parses the optional `startDate`/`endDate` query params GET
+ * /api/timer-sessions accepts for the Dashboard tab's date-range filter.
+ * `undefined` means neither was given (the Timers tab's plain "recent
+ * history" call — falls back to the existing unfiltered/HISTORY_LIMIT
+ * behavior); `null` means one or both were given but malformed, which the
+ * handler turns into a 400 rather than silently ignoring bad input. */
+export function parseDateRangeQuery(
+  query: Record<string, string | string[] | undefined>,
+): DateRangeFilter | null | undefined {
+  const rawStart = firstQueryValue(query.startDate)
+  const rawEnd = firstQueryValue(query.endDate)
+  if (rawStart === undefined && rawEnd === undefined) return undefined
+  if (rawStart === undefined || rawEnd === undefined) return null
+
+  const startMs = Date.parse(rawStart)
+  const endMs = Date.parse(rawEnd)
+  if (Number.isNaN(startMs) || Number.isNaN(endMs) || startMs > endMs) return null
+
+  return { startDate: new Date(startMs), endDate: new Date(endMs) }
+}
+
+export async function listTimerSessions(
+  userId: string,
+  range?: DateRangeFilter,
+): Promise<TimerSessionRecord[]> {
+  const rows = range
+    ? await db
+        .select()
+        .from(timerSessions)
+        .where(
+          and(
+            eq(timerSessions.userId, userId),
+            gte(timerSessions.startedAt, range.startDate),
+            lte(timerSessions.startedAt, range.endDate),
+          ),
+        )
+        .orderBy(desc(timerSessions.startedAt))
+        .limit(DASHBOARD_QUERY_LIMIT)
+    : await db
+        .select()
+        .from(timerSessions)
+        .where(eq(timerSessions.userId, userId))
+        .orderBy(desc(timerSessions.startedAt))
+        .limit(HISTORY_LIMIT)
 
   return rows.map((row) => ({
     id: row.id,

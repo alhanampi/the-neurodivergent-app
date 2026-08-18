@@ -4,6 +4,7 @@ import {
   createTimerSession,
   listTimerSessions,
   parseCreateTimerSessionBody,
+  parseDateRangeQuery,
 } from './timer-sessions.utils'
 
 export default async function handler(req: VercelApiRequest, res: VercelApiResponse) {
@@ -14,7 +15,13 @@ export default async function handler(req: VercelApiRequest, res: VercelApiRespo
   }
 
   if (req.method === 'GET') {
-    const sessions = await listTimerSessions(userId)
+    const range = parseDateRangeQuery(req.query)
+    if (range === null) {
+      res.status(400).json({ error: 'Invalid date range' })
+      return
+    }
+
+    const sessions = await listTimerSessions(userId, range)
     res.status(200).json({ sessions })
     return
   }
