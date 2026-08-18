@@ -16,6 +16,7 @@ import {
   getProgressFraction,
 } from './TimersTab.utils'
 import { MinutesInput } from './MinutesInput/MinutesInput'
+import { AddTimerDialog } from './AddTimerDialog/AddTimerDialog'
 import { StopTimerDialog } from './StopTimerDialog/StopTimerDialog'
 import {
   ComposerSection,
@@ -46,7 +47,7 @@ export function TimersTab() {
     selectedPresetId,
     draftMinutes,
     nameDraft,
-    plannedSecondsPreview,
+    isAddDialogOpen,
     history,
     isHistoryLoading,
     notificationPermission,
@@ -55,6 +56,8 @@ export function TimersTab() {
     selectPreset,
     setDraftMinutes,
     setNameDraft,
+    openAddDialog,
+    closeAddDialog,
     addTimer,
     updateTimerMinutes,
     toggleTimer,
@@ -123,14 +126,6 @@ export function TimersTab() {
           </ToggleButtonGroup>
         </PresetRow>
 
-        <MinutesInput
-          value={draftMinutes}
-          onChange={setDraftMinutes}
-          min={MIN_CUSTOM_MINUTES}
-          max={MAX_CUSTOM_MINUTES}
-          ariaLabel={t('timers.durationLabel')}
-        />
-
         <TextField
           size="small"
           fullWidth
@@ -139,8 +134,8 @@ export function TimersTab() {
           placeholder={t('timers.namePlaceholder')}
         />
 
-        <Button variant="contained" startIcon={<FiPlus />} onClick={addTimer}>
-          {t('timers.addTimer', { duration: formatSeconds(plannedSecondsPreview) })}
+        <Button variant="contained" startIcon={<FiPlus />} onClick={openAddDialog}>
+          {t('timers.addTimer')}
         </Button>
       </ComposerSection>
 
@@ -219,6 +214,16 @@ export function TimersTab() {
           </HistoryList>
         )}
       </HistorySection>
+
+      <AddTimerDialog
+        open={isAddDialogOpen}
+        minutes={draftMinutes}
+        onMinutesChange={setDraftMinutes}
+        min={MIN_CUSTOM_MINUTES}
+        max={MAX_CUSTOM_MINUTES}
+        onCancel={closeAddDialog}
+        onConfirm={addTimer}
+      />
 
       <StopTimerDialog
         open={pendingStopId !== null}

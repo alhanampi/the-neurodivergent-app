@@ -91,6 +91,19 @@ Status legend: `pending` (not started) · `in progress` · `done`.
       re-triggers the sync — the same "don't let an effect's own side effects
       feed back into its own dependencies" lesson as the interval/finishTimer
       pitfall above, in a different shape.
+  - **"Add timer" popup (second revision):** the composer no longer shows a
+    duration field inline — clicking "Add timer" was silently creating a timer
+    with whatever the composer happened to be showing (25min, from the
+    Focus preset selected by default), rather than making the user actively
+    choose a duration. Now the button opens `AddTimerDialog`
+    (`src/features/timers/AddTimerDialog/`), a small popup around the same
+    `MinutesInput` used on idle cards, always reset to
+    `DEFAULT_CUSTOM_MINUTES` (10) on open regardless of which preset button
+    was last clicked — confirming there creates the timer, cancelling creates
+    nothing. Preset buttons now only tag the resulting timer's translated
+    display name (`selectPreset` no longer touches the duration at all); the
+    duration is decided once, in the popup, and stays freely editable
+    afterward on the idle card exactly as before.
   - **Pitfall worth remembering:** the running-timers interval effect must read
     `finishTimer` through a ref rather than depending on it directly — its
     identity depends on `getToken`/`t`, which aren't contractually stable

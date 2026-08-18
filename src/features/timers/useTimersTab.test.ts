@@ -51,29 +51,41 @@ describe('useTimersTab', () => {
     vi.useRealTimers()
   })
 
-  it('starts with no timers and the first preset selected in the composer', () => {
+  it('starts with no timers, the first preset selected, and the Add dialog closed', () => {
     const { result } = renderHook(() => useTimersTab())
 
     expect(result.current.timers).toEqual([])
     expect(result.current.selectedPresetId).toBe('pomodoro-focus')
-    expect(result.current.plannedSecondsPreview).toBe(25 * 60)
+    expect(result.current.isAddDialogOpen).toBe(false)
   })
 
-  it('selecting a preset reseeds the draft duration with its default', () => {
+  it('opening the Add dialog resets the draft duration to the default, regardless of preset', () => {
     const { result } = renderHook(() => useTimersTab())
 
-    act(() => result.current.selectPreset('short-break'))
-    expect(result.current.draftMinutes).toBe(5)
+    act(() => result.current.selectPreset('long-break'))
+    act(() => result.current.setDraftMinutes(90))
+    act(() => result.current.openAddDialog())
 
-    act(() => result.current.selectPreset('custom'))
+    expect(result.current.isAddDialogOpen).toBe(true)
     expect(result.current.draftMinutes).toBe(10)
   })
 
-  it('adds an idle timer and clears the name draft', () => {
+  it('closing the Add dialog without confirming adds nothing', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.openAddDialog())
+    act(() => result.current.closeAddDialog())
+
+    expect(result.current.isAddDialogOpen).toBe(false)
+    expect(result.current.timers).toEqual([])
+  })
+
+  it('adds an idle timer, clears the name draft, and closes the dialog', () => {
     const { result } = renderHook(() => useTimersTab())
 
     act(() => result.current.setNameDraft('Fold laundry'))
     act(() => result.current.selectPreset('custom'))
+    act(() => result.current.openAddDialog())
     act(() => result.current.setDraftMinutes(12))
     act(() => result.current.addTimer())
 
@@ -86,14 +98,17 @@ describe('useTimersTab', () => {
       remainingSeconds: 12 * 60,
     })
     expect(result.current.nameDraft).toBe('')
+    expect(result.current.isAddDialogOpen).toBe(false)
   })
 
   it('supports multiple concurrent timers ticking independently', () => {
     const { result } = renderHook(() => useTimersTab())
 
     act(() => result.current.selectPreset('short-break'))
+    act(() => result.current.setDraftMinutes(5))
     act(() => result.current.addTimer())
     act(() => result.current.selectPreset('long-break'))
+    act(() => result.current.setDraftMinutes(15))
     act(() => result.current.addTimer())
 
     expect(result.current.timers).toHaveLength(2)
@@ -202,7 +217,7 @@ describe('useTimersTab', () => {
     const runningTimer = result.current.timers.find((timer) => timer.id === runningId)
     expect(idleTimer?.plannedSeconds).toBe(45 * 60)
     expect(idleTimer?.remainingSeconds).toBe(45 * 60)
-    expect(runningTimer?.plannedSeconds).toBe(25 * 60)
+    expect(runningTimer?.plannedSeconds).toBe(10 * 60)
   })
 
   it('auto-completes, logs completed:true, and notifies once a timer runs out', () => {

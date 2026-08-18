@@ -19,6 +19,24 @@ function renderTimersTab() {
   )
 }
 
+// Opens the "Add timer" popup, optionally overrides its default (10 min)
+// duration by typing into it, then confirms — mirrors the real two-step
+// flow (trigger button → popup → confirm) end to end.
+async function addTimerViaDialog(user: ReturnType<typeof userEvent.setup>, minutes?: number) {
+  await user.click(screen.getByRole('button', { name: 'Add timer' }))
+  const dialog = screen.getByRole('dialog')
+
+  if (minutes !== undefined) {
+    const field = within(dialog).getByDisplayValue('10')
+    await user.clear(field)
+    await user.type(field, String(minutes))
+    await user.tab()
+  }
+
+  await user.click(within(dialog).getByRole('button', { name: 'Add timer' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+}
+
 afterEach(() => {
   void i18n.changeLanguage('en')
   localStorage.clear()
@@ -34,15 +52,47 @@ describe('TimersTab', () => {
     expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
 
-  it('adds a timer card in the idle state, with an editable duration', async () => {
+  it('clicking Add timer opens a popup instead of creating a timer immediately', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await user.click(screen.getByRole('button', { name: 'Add timer' }))
+
+    expect(screen.getByRole('heading', { name: 'Set timer duration' })).toBeInTheDocument()
+    expect(screen.getByText(/No active timers/)).toBeInTheDocument()
+  })
+
+  it('the popup defaults to 10 minutes', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: 'Add timer' }))
+
+    expect(within(screen.getByRole('dialog')).getByDisplayValue('10')).toBeInTheDocument()
+  })
+
+  it('cancelling the popup creates nothing', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: 'Add timer' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: 'Set timer duration' })).not.toBeInTheDocument()
+    })
+    expect(screen.getByText(/No active timers/)).toBeInTheDocument()
+  })
+
+  it('confirming the popup adds a timer card in the idle state, with the chosen duration', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await addTimerViaDialog(user)
 
     expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
     const card = screen.getByRole('listitem')
-    expect(within(card).getByDisplayValue('25')).toBeInTheDocument()
+    expect(within(card).getByDisplayValue('10')).toBeInTheDocument()
     expect(screen.queryByText(/No active timers/)).not.toBeInTheDocument()
   })
 
@@ -50,9 +100,8 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
-    await user.click(screen.getByRole('button', { name: 'Short break' }))
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user, 25)
+    await addTimerViaDialog(user, 5)
 
     const [firstCard, secondCard] = screen.getAllByRole('listitem')
     expect(within(firstCard).getByDisplayValue('25')).toBeInTheDocument()
@@ -65,7 +114,7 @@ describe('TimersTab', () => {
 
     await user.click(screen.getByRole('button', { name: 'Custom' }))
     await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Fold laundry')
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
 
     expect(screen.getByText('Fold laundry')).toBeInTheDocument()
   })
@@ -74,9 +123,9 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     const card = screen.getByRole('listitem')
-    const durationField = within(card).getByDisplayValue('25')
+    const durationField = within(card).getByDisplayValue('10')
 
     await user.clear(durationField)
     await user.type(durationField, '40')
@@ -89,32 +138,32 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     const card = screen.getByRole('listitem')
 
     await user.click(within(card).getByRole('button', { name: 'Increase minutes' }))
 
-    expect(within(card).getByDisplayValue('30')).toBeInTheDocument()
+    expect(within(card).getByDisplayValue('15')).toBeInTheDocument()
   })
 
   it('edits an idle timer duration by scrolling over it', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     const card = screen.getByRole('listitem')
-    const durationField = within(card).getByDisplayValue('25')
+    const durationField = within(card).getByDisplayValue('10')
 
     fireEvent.wheel(durationField, { deltaY: -100 })
 
-    expect(within(card).getByDisplayValue('30')).toBeInTheDocument()
+    expect(within(card).getByDisplayValue('15')).toBeInTheDocument()
   })
 
   it('starts a timer via its play button, toggling Start into Pause', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     await user.click(screen.getByRole('button', { name: 'Start' }))
 
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
@@ -124,19 +173,19 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     await user.click(screen.getByRole('button', { name: 'Start' }))
 
     const card = screen.getByRole('listitem')
-    expect(within(card).queryByDisplayValue('25')).not.toBeInTheDocument()
-    expect(within(card).getByText('25:00')).toBeInTheDocument()
+    expect(within(card).queryByDisplayValue('10')).not.toBeInTheDocument()
+    expect(within(card).getByText('10:00')).toBeInTheDocument()
   })
 
   it('asks for confirmation before stopping a started timer', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     await user.click(screen.getByRole('button', { name: 'Start' }))
     await user.click(screen.getByRole('button', { name: 'Stop' }))
 
@@ -156,7 +205,7 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await addTimerViaDialog(user)
     await user.click(screen.getByRole('button', { name: 'Stop' }))
 
     expect(screen.queryByRole('heading', { name: 'Stop this timer?' })).not.toBeInTheDocument()

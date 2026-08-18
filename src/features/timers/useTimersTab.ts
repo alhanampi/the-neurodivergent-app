@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useTranslation } from 'react-i18next'
 import {
+  DEFAULT_CUSTOM_MINUTES,
   MAX_CUSTOM_MINUTES,
   MIN_CUSTOM_MINUTES,
   MIN_LOGGABLE_SECONDS,
@@ -12,7 +13,6 @@ import {
   clampMinutes,
   computeRemainingSeconds,
   createTimerId,
-  getPresetDefaultMinutes,
   getPresetTranslationKey,
   sanitizeTimerName,
 } from './TimersTab.utils'
@@ -37,10 +37,9 @@ export function useTimersTab() {
 
   const [timers, setTimers] = useState<TimerInstance[]>([])
   const [selectedPresetId, setSelectedPresetId] = useState<TimerPresetId>(TIMER_PRESETS[0].id)
-  const [draftMinutes, setDraftMinutesState] = useState(() =>
-    getPresetDefaultMinutes(TIMER_PRESETS[0].id),
-  )
+  const [draftMinutes, setDraftMinutesState] = useState(DEFAULT_CUSTOM_MINUTES)
   const [nameDraft, setNameDraftState] = useState('')
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [history, setHistory] = useState<TimerSession[]>([])
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [notificationPermission, setNotificationPermission] = useState(getNotificationPermission)
@@ -54,7 +53,6 @@ export function useTimersTab() {
     timersRef.current = timers
   }, [timers])
 
-  const plannedSecondsPreview = draftMinutes * 60
   const hasRunningTimer = timers.some((timer) => timer.status === 'running')
 
   useEffect(() => {
@@ -162,19 +160,27 @@ export function useTimersTab() {
     return () => window.clearInterval(intervalId)
   }, [hasRunningTimer, isSoundEnabled])
 
-  // Picking a preset just reseeds the editable duration with that preset's
-  // default — it's a starting point, not a lock; the user can still type or
-  // scroll it to something else afterward (composer or an idle card).
-  const selectPreset = useCallback((presetId: TimerPresetId) => {
-    setSelectedPresetId(presetId)
-    setDraftMinutesState(getPresetDefaultMinutes(presetId))
-  }, [])
+  // Just tags which preset the resulting timer is labeled/translated as —
+  // duration is decided separately, in the "Add timer" popup (see
+  // openAddDialog), so this no longer touches draftMinutes.
+  const selectPreset = useCallback((presetId: TimerPresetId) => setSelectedPresetId(presetId), [])
 
   const setDraftMinutes = useCallback((minutes: number) => {
     setDraftMinutesState(clampMinutes(minutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES))
   }, [])
 
   const setNameDraft = useCallback((name: string) => setNameDraftState(name), [])
+
+  // Always resets to DEFAULT_CUSTOM_MINUTES on open, regardless of preset or
+  // whatever was left over from the last time the popup was used — the
+  // point is to make the user actively choose a duration rather than
+  // silently inheriting one.
+  const openAddDialog = useCallback(() => {
+    setDraftMinutesState(DEFAULT_CUSTOM_MINUTES)
+    setIsAddDialogOpen(true)
+  }, [])
+
+  const closeAddDialog = useCallback(() => setIsAddDialogOpen(false), [])
 
   const addTimer = useCallback(() => {
     const plannedSeconds = clampMinutes(draftMinutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES) * 60
@@ -190,6 +196,7 @@ export function useTimersTab() {
     }
     setTimers((current) => [...current, timer])
     setNameDraftState('')
+    setIsAddDialogOpen(false)
   }, [draftMinutes, nameDraft, selectedPresetId])
 
   // Only meaningful for an idle timer — its remainingSeconds always equals
@@ -272,7 +279,7 @@ export function useTimersTab() {
     selectedPresetId,
     draftMinutes,
     nameDraft,
-    plannedSecondsPreview,
+    isAddDialogOpen,
     history,
     isHistoryLoading,
     notificationPermission,
@@ -281,6 +288,8 @@ export function useTimersTab() {
     selectPreset,
     setDraftMinutes,
     setNameDraft,
+    openAddDialog,
+    closeAddDialog,
     addTimer,
     updateTimerMinutes,
     toggleTimer,
