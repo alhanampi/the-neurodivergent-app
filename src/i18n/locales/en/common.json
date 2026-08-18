@@ -33,11 +33,24 @@
     "minutesValue": "{{count}} min",
     "decreaseMinutes": "Decrease minutes",
     "increaseMinutes": "Increase minutes",
-    "customLabelPlaceholder": "What are you working on? (optional)",
+    "namePlaceholder": "Name this timer (optional)",
+    "addTimer": "Add timer ({{duration}})",
+    "noActiveTimers": "No active timers — add one above to get started.",
     "start": "Start",
     "pause": "Pause",
     "resume": "Resume",
     "stop": "Stop",
+    "sound": {
+      "enable": "Enable tick sound",
+      "disable": "Disable tick sound"
+    },
+    "stopDialog": {
+      "title": "Stop this timer?",
+      "body": "This ends the timer now and logs the time you've put in so far. This can't be undone.",
+      "bodyNamed": "This ends \"{{name}}\" now and logs the time you've put in so far. This can't be undone.",
+      "cancel": "Keep going",
+      "confirm": "Stop timer"
+    },
     "notification": {
       "title": "Time's up!",
       "banner": "Turn on notifications to know when a timer finishes, even if you switch apps.",

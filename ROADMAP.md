@@ -35,22 +35,47 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 - **Timers tab (iteration 6):** presets (`pomodoro-focus` 25m, `short-break` 5m,
   `long-break` 15m) are fixed app config for this iteration, not user-editable or
   DB-stored — revisit if personalization (v1.2.0) wants custom preset lengths.
-  "Custom" is a fourth option with its own minutes stepper (1–180min, clamped) and
-  an optional free-text label. Countdown correctness: the running timer tracks a
-  wall-clock end timestamp (not a decrementing counter) and re-derives the
-  remaining time from it every tick, so a throttled/backgrounded tab can't drift —
-  it self-corrects instead of losing time. A manual "Stop" always logs the elapsed
-  time as `completed: false`; letting the countdown reach zero auto-logs
+  "Custom" is a fourth option with its own minutes stepper (1–180min, clamped).
+  Supports **multiple concurrent timers**: each one is a card (compact row, not a
+  full-screen countdown) with an optional user-given name, added via a composer
+  form at the top; tapping a card toggles it between running and paused, one
+  shared interval drives every running card's countdown so they can't drift
+  relative to each other. Countdown correctness: each running timer tracks its
+  own wall-clock end timestamp (not a decrementing counter) and re-derives the
+  remaining time from it every tick, so a throttled/backgrounded tab can't drift
+  either — it self-corrects instead of losing time. Stopping a timer that's
+  running or paused (i.e. has real progress) asks for confirmation first
+  (`StopTimerDialog`, mirrors `DeleteAccountDialog`'s pattern) since it can't be
+  undone; an untouched idle card is removed immediately with no prompt, since
+  there's nothing to lose. A confirmed manual stop logs the elapsed time as
+  `completed: false`; letting the countdown reach zero auto-logs
   `completed: true` and fires the completion notification — stops under 5 elapsed
-  seconds aren't logged at all (near-certain mis-taps, not real sessions).
+  seconds aren't logged at all and skip the confirmation entirely (near-certain
+  mis-taps, not real sessions). An optional per-second tick sound (off by
+  default, toggled via a header icon, preference kept in `localStorage` — a UI
+  preference, not account data) is synthesized with the Web Audio API rather
+  than shipping an audio asset; the shared `AudioContext` is created/resumed
+  from user-gesture handlers specifically (toggling sound on, tapping a timer)
+  since browsers refuse to unlock audio from a bare interval callback.
   Notifications prefer `ServiceWorkerRegistration.showNotification()` (works on
   mobile browsers that block the bare `Notification` constructor, and can still
   fire if the tab isn't focused) and fall back to `new Notification()` when no
   service worker registration is active yet (e.g. plain `npm run dev`); permission
-  is requested on demand via a dismissible banner, not on page load. Added
-  `api/auth.utils.ts` to share the Clerk-token-verification helper that was
-  previously private to `api/preferences.utils.ts`, now that a second
-  authenticated route (`api/timer-sessions.ts`) needs the same check.
+  is requested on demand via a dismissible banner, not on page load. Layout is
+  deliberately compact (small per-card play/pause + progress bar rows, no
+  large fixed-height countdown circle) so the composer plus a handful of active
+  timers fit one mobile screen without scrolling. Added `api/auth.utils.ts` to
+  share the Clerk-token-verification helper that was previously private to
+  `api/preferences.utils.ts`, now that a second authenticated route
+  (`api/timer-sessions.ts`) needs the same check.
+  - **Pitfall worth remembering:** the running-timers interval effect must read
+    `finishTimer` through a ref rather than depending on it directly — its
+    identity depends on `getToken`/`t`, which aren't contractually stable
+    references, and depending on it directly caused a real infinite render
+    loop in testing (an unstable mock reproduced it immediately). The fix
+    (ref-read inside the interval, skip `setState` entirely on ticks where
+    nothing actually changed) is the safer default for any interval-driven
+    effect that calls back into hook state.
 - **Task roulette (iteration 17):** depends on the gamification system from
   iteration 10 (points/badges) and the Timers tab from iteration 6 (the task list
   it spins over) already being in place — it's an extension/consumer of both, not

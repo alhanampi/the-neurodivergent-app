@@ -1,17 +1,30 @@
 import styled from 'styled-components'
+import { layout } from '@/theme/tokens'
 
+// Fits the composer + a handful of timer cards within one screen (the ask
+// that drove this layout: no giant fixed-height countdown circle, compact
+// rows instead) while still scrolling gracefully — via the inherited
+// ContentArea overflow — once there are enough timers/history entries to
+// need it.
 export const TimersContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  padding: 24px 16px 32px;
+  gap: 16px;
+  padding: 16px;
   max-width: 480px;
   margin: 0 auto;
+  min-height: calc(100dvh - ${layout.headerHeight + layout.bottomNavHeight}px);
+`
+
+export const HeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 `
 
 export const IconWrapper = styled.div`
-  font-size: 40px;
+  font-size: 32px;
   line-height: 1;
   color: ${({ theme }) => theme.palette.primary.main};
 `
@@ -29,6 +42,17 @@ export const NotificationBanner = styled.div`
   text-align: center;
 `
 
+export const ComposerSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+`
+
 export const PresetRow = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -39,15 +63,8 @@ export const PresetRow = styled.div`
 
 export const CustomRow = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-`
-
-export const MinutesStepper = styled.div`
-  display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 12px;
 `
 
@@ -57,25 +74,61 @@ export const MinutesValue = styled.span`
   font-variant-numeric: tabular-nums;
 `
 
-export const CountdownWrapper = styled.div`
-  position: relative;
+export const TimersList = styled.ul`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 220px;
-  height: 220px;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 `
 
-export const CountdownText = styled.div`
-  position: absolute;
-  font-size: 40px;
-  font-variant-numeric: tabular-nums;
+export const TimerCard = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+  background: ${({ theme }) => theme.palette.background.paper};
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+`
+
+export const TimerCardBody = styled.button`
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+`
+
+export const TimerCardInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+`
+
+export const TimerCardName = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: ${({ theme }) => theme.palette.text.primary};
 `
 
-export const ControlsRow = styled.div`
-  display: flex;
-  gap: 12px;
+export const TimerCardTime = styled.span`
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+  color: ${({ theme }) => theme.palette.text.primary};
+  white-space: nowrap;
 `
 
 export const HistorySection = styled.div`

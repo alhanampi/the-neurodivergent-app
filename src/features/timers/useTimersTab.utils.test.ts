@@ -2,9 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   fetchTimerHistory,
   getNotificationPermission,
+  getStoredSoundPreference,
   notifyTimerComplete,
+  playTickSound,
   postTimerSession,
   requestNotificationPermission,
+  setStoredSoundPreference,
+  unlockAudio,
 } from './useTimersTab.utils'
 import type { CreateTimerSession } from './TimersTab.interfaces'
 
@@ -183,5 +187,73 @@ describe('notifyTimerComplete', () => {
       'title',
       expect.objectContaining({ body: 'body' }),
     )
+  })
+})
+
+describe('sound preference storage', () => {
+  afterEach(() => {
+    localStorage.clear()
+  })
+
+  it('defaults to false when nothing is stored', () => {
+    expect(getStoredSoundPreference()).toBe(false)
+  })
+
+  it('round-trips a stored preference', () => {
+    setStoredSoundPreference(true)
+    expect(getStoredSoundPreference()).toBe(true)
+
+    setStoredSoundPreference(false)
+    expect(getStoredSoundPreference()).toBe(false)
+  })
+})
+
+describe('unlockAudio / playTickSound', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('does nothing when the AudioContext API is unavailable', () => {
+    vi.stubGlobal('AudioContext', undefined)
+    expect(() => unlockAudio()).not.toThrow()
+    expect(() => playTickSound()).not.toThrow()
+  })
+
+  it('plays a synthesized tick through the unlocked context', () => {
+    const oscillator = {
+      type: '',
+      frequency: { value: 0 },
+      connect: vi.fn(),
+      start: vi.fn(),
+      stop: vi.fn(),
+    }
+    const gain = {
+      gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+      connect: vi.fn(),
+    }
+    const context = {
+      state: 'running',
+      currentTime: 0,
+      destination: {},
+      createOscillator: vi.fn(() => oscillator),
+      createGain: vi.fn(() => gain),
+      resume: vi.fn(async () => {}),
+    }
+    // A plain arrow-function mock can't be invoked with `new` — AudioContext
+    // is constructed via `new AudioContextClass()`, so this needs a real
+    // function whose explicit object return `new` honors in place of `this`.
+    vi.stubGlobal(
+      'AudioContext',
+      vi.fn(function AudioContextMock() {
+        return context
+      }),
+    )
+
+    unlockAudio()
+    playTickSound()
+
+    expect(context.createOscillator).toHaveBeenCalledTimes(1)
+    expect(oscillator.connect).toHaveBeenCalledWith(gain)
+    expect(oscillator.start).toHaveBeenCalledTimes(1)
   })
 })

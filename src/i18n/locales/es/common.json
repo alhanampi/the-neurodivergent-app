@@ -33,11 +33,24 @@
     "minutesValue": "{{count}} min",
     "decreaseMinutes": "Reducir minutos",
     "increaseMinutes": "Aumentar minutos",
-    "customLabelPlaceholder": "¿En qué estás trabajando? (opcional)",
+    "namePlaceholder": "Nombrá este temporizador (opcional)",
+    "addTimer": "Agregar temporizador ({{duration}})",
+    "noActiveTimers": "No hay temporizadores activos — agregá uno arriba para empezar.",
     "start": "Iniciar",
     "pause": "Pausar",
     "resume": "Reanudar",
     "stop": "Detener",
+    "sound": {
+      "enable": "Activar sonido de segundos",
+      "disable": "Desactivar sonido de segundos"
+    },
+    "stopDialog": {
+      "title": "¿Detener este temporizador?",
+      "body": "Esto termina el temporizador ahora y registra el tiempo que llevás hasta el momento. No se puede deshacer.",
+      "bodyNamed": "Esto termina \"{{name}}\" ahora y registra el tiempo que llevás hasta el momento. No se puede deshacer.",
+      "cancel": "Seguir",
+      "confirm": "Detener temporizador"
+    },
     "notification": {
       "title": "¡Se acabó el tiempo!",
       "banner": "Activá las notificaciones para saber cuándo termina un temporizador, incluso si cambiás de app.",

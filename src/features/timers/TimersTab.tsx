@@ -1,20 +1,35 @@
 import { useTranslation } from 'react-i18next'
 import Button from '@mui/material/Button'
-import CircularProgress from '@mui/material/CircularProgress'
 import IconButton from '@mui/material/IconButton'
+import LinearProgress from '@mui/material/LinearProgress'
 import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
-import { FiBell, FiClock, FiMinus, FiPlus } from 'react-icons/fi'
+import {
+  FiBell,
+  FiClock,
+  FiMinus,
+  FiPause,
+  FiPlay,
+  FiPlus,
+  FiVolume2,
+  FiVolumeX,
+  FiX,
+} from 'react-icons/fi'
 import { useTimersTab } from './useTimersTab'
 import { CUSTOM_PRESET_ID } from './TimersTab.constants'
-import { formatSeconds, formatSessionTimestamp, getPresetTranslationKey } from './TimersTab.utils'
 import {
-  ControlsRow,
-  CountdownText,
-  CountdownWrapper,
+  formatSeconds,
+  formatSessionTimestamp,
+  getPresetTranslationKey,
+  getProgressFraction,
+} from './TimersTab.utils'
+import { StopTimerDialog } from './StopTimerDialog/StopTimerDialog'
+import {
+  ComposerSection,
   CustomRow,
+  HeaderRow,
   HistoryEmpty,
   HistoryItem,
   HistoryItemLabel,
@@ -22,11 +37,16 @@ import {
   HistoryList,
   HistorySection,
   IconWrapper,
-  MinutesStepper,
   MinutesValue,
   NotificationBanner,
   PresetRow,
+  TimerCard,
+  TimerCardBody,
+  TimerCardInfo,
+  TimerCardName,
+  TimerCardTime,
   TimersContainer,
+  TimersList,
 } from './TimersTab.styles'
 import type { TimerPresetId } from './TimersTab.interfaces'
 
@@ -35,35 +55,51 @@ const CUSTOM_MINUTES_STEP = 5
 export function TimersTab() {
   const { t, i18n } = useTranslation()
   const {
-    status,
+    timers,
     presets,
     selectedPresetId,
     customMinutes,
-    customLabel,
-    displaySeconds,
-    progressFraction,
+    nameDraft,
+    plannedSecondsPreview,
     history,
     isHistoryLoading,
     notificationPermission,
+    isSoundEnabled,
+    pendingStopId,
     selectPreset,
     setCustomMinutes,
-    setCustomLabel,
-    start,
-    pauseOrResume,
-    stop,
+    setNameDraft,
+    addTimer,
+    toggleTimer,
+    requestStop,
+    cancelStopRequest,
+    confirmStop,
     requestNotifications,
+    toggleSound,
   } = useTimersTab()
 
-  const isIdle = status === 'idle'
+  const pendingTimer = timers.find((timer) => timer.id === pendingStopId) ?? null
+  const pendingTimerName = pendingTimer
+    ? (pendingTimer.name ?? t(getPresetTranslationKey(pendingTimer.presetId)))
+    : null
 
   return (
     <TimersContainer>
-      <IconWrapper>
-        <FiClock />
-      </IconWrapper>
-      <Typography variant="h5" component="h1">
-        {t('timers.title')}
-      </Typography>
+      <HeaderRow>
+        <IconWrapper>
+          <FiClock />
+        </IconWrapper>
+        <Typography variant="h5" component="h1">
+          {t('timers.title')}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={toggleSound}
+          aria-label={isSoundEnabled ? t('timers.sound.disable') : t('timers.sound.enable')}
+        >
+          {isSoundEnabled ? <FiVolume2 /> : <FiVolumeX />}
+        </IconButton>
+      </HeaderRow>
 
       {notificationPermission === 'default' && (
         <NotificationBanner>
@@ -79,34 +115,32 @@ export function TimersTab() {
         </NotificationBanner>
       )}
 
-      <PresetRow>
-        <ToggleButtonGroup
-          value={selectedPresetId}
-          exclusive
-          size="small"
-          disabled={!isIdle}
-          onChange={(_event, next: TimerPresetId | null) => {
-            if (next) selectPreset(next)
-          }}
-        >
-          {presets.map((preset) => (
-            <ToggleButton key={preset.id} value={preset.id}>
-              {t(getPresetTranslationKey(preset.id))}
+      <ComposerSection>
+        <PresetRow>
+          <ToggleButtonGroup
+            value={selectedPresetId}
+            exclusive
+            size="small"
+            onChange={(_event, next: TimerPresetId | null) => {
+              if (next) selectPreset(next)
+            }}
+          >
+            {presets.map((preset) => (
+              <ToggleButton key={preset.id} value={preset.id}>
+                {t(getPresetTranslationKey(preset.id))}
+              </ToggleButton>
+            ))}
+            <ToggleButton value={CUSTOM_PRESET_ID}>
+              {t(getPresetTranslationKey(CUSTOM_PRESET_ID))}
             </ToggleButton>
-          ))}
-          <ToggleButton value={CUSTOM_PRESET_ID}>
-            {t(getPresetTranslationKey(CUSTOM_PRESET_ID))}
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </PresetRow>
+          </ToggleButtonGroup>
+        </PresetRow>
 
-      {selectedPresetId === CUSTOM_PRESET_ID && (
-        <CustomRow>
-          <MinutesStepper>
+        {selectedPresetId === CUSTOM_PRESET_ID && (
+          <CustomRow>
             <IconButton
               size="small"
               aria-label={t('timers.decreaseMinutes')}
-              disabled={!isIdle}
               onClick={() => setCustomMinutes(customMinutes - CUSTOM_MINUTES_STEP)}
             >
               <FiMinus />
@@ -115,49 +149,60 @@ export function TimersTab() {
             <IconButton
               size="small"
               aria-label={t('timers.increaseMinutes')}
-              disabled={!isIdle}
               onClick={() => setCustomMinutes(customMinutes + CUSTOM_MINUTES_STEP)}
             >
               <FiPlus />
             </IconButton>
-          </MinutesStepper>
-          <TextField
-            size="small"
-            fullWidth
-            disabled={!isIdle}
-            value={customLabel}
-            onChange={(event) => setCustomLabel(event.target.value)}
-            placeholder={t('timers.customLabelPlaceholder')}
-          />
-        </CustomRow>
-      )}
-
-      <CountdownWrapper>
-        <CircularProgress
-          variant="determinate"
-          value={progressFraction * 100}
-          size={220}
-          thickness={3}
-        />
-        <CountdownText>{formatSeconds(displaySeconds)}</CountdownText>
-      </CountdownWrapper>
-
-      <ControlsRow>
-        {isIdle ? (
-          <Button variant="contained" onClick={start}>
-            {t('timers.start')}
-          </Button>
-        ) : (
-          <>
-            <Button variant="outlined" onClick={pauseOrResume}>
-              {status === 'running' ? t('timers.pause') : t('timers.resume')}
-            </Button>
-            <Button variant="contained" color="error" onClick={stop}>
-              {t('timers.stop')}
-            </Button>
-          </>
+          </CustomRow>
         )}
-      </ControlsRow>
+
+        <TextField
+          size="small"
+          fullWidth
+          value={nameDraft}
+          onChange={(event) => setNameDraft(event.target.value)}
+          placeholder={t('timers.namePlaceholder')}
+        />
+
+        <Button variant="contained" startIcon={<FiPlus />} onClick={addTimer}>
+          {t('timers.addTimer', { duration: formatSeconds(plannedSecondsPreview) })}
+        </Button>
+      </ComposerSection>
+
+      {timers.length === 0 ? (
+        <HistoryEmpty>{t('timers.noActiveTimers')}</HistoryEmpty>
+      ) : (
+        <TimersList>
+          {timers.map((timer) => (
+            <TimerCard key={timer.id}>
+              <TimerCardBody
+                type="button"
+                onClick={() => toggleTimer(timer.id)}
+                aria-label={timer.status === 'running' ? t('timers.pause') : t('timers.start')}
+              >
+                {timer.status === 'running' ? <FiPause size={20} /> : <FiPlay size={20} />}
+                <TimerCardInfo>
+                  <TimerCardName>
+                    {timer.name || t(getPresetTranslationKey(timer.presetId))}
+                  </TimerCardName>
+                  <LinearProgress
+                    variant="determinate"
+                    value={getProgressFraction(timer.plannedSeconds, timer.remainingSeconds) * 100}
+                  />
+                </TimerCardInfo>
+                <TimerCardTime>{formatSeconds(timer.remainingSeconds)}</TimerCardTime>
+              </TimerCardBody>
+              <IconButton
+                size="small"
+                aria-label={t('timers.stop')}
+                onClick={() => requestStop(timer.id)}
+              >
+                <FiX />
+              </IconButton>
+            </TimerCard>
+          ))}
+        </TimersList>
+      )}
 
       <HistorySection>
         <Typography variant="subtitle2">{t('timers.history.title')}</Typography>
@@ -187,6 +232,13 @@ export function TimersTab() {
           </HistoryList>
         )}
       </HistorySection>
+
+      <StopTimerDialog
+        open={pendingStopId !== null}
+        timerName={pendingTimerName}
+        onCancel={cancelStopRequest}
+        onConfirm={confirmStop}
+      />
     </TimersContainer>
   )
 }

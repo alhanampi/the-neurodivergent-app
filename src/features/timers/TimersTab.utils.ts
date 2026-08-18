@@ -1,6 +1,7 @@
 import {
   CUSTOM_PRESET_ID,
   MAX_CUSTOM_MINUTES,
+  MAX_TIMER_NAME_LENGTH,
   MIN_CUSTOM_MINUTES,
   TIMER_PRESETS,
 } from './TimersTab.constants'
@@ -43,7 +44,7 @@ export function getPlannedSeconds(presetId: TimerPresetId, customMinutes: number
 
 /** i18n key for a preset's display name. Custom timers still resolve to a
  * generic "Custom timer" string here — callers that have the user's own
- * free-text label prefer that instead, falling back to this key when none
+ * free-text name prefer that instead, falling back to this key when none
  * was given. */
 export function getPresetTranslationKey(presetId: TimerPresetId): string {
   return `timers.presets.${presetId}`
@@ -56,4 +57,29 @@ export function formatSessionTimestamp(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
     new Date(iso),
   )
+}
+
+/** Trims a user-entered timer name, caps its length, and collapses an
+ * empty/whitespace-only entry to null so "no name" is a single consistent
+ * value throughout the feature. */
+export function sanitizeTimerName(rawName: string): string | null {
+  const trimmed = rawName.trim().slice(0, MAX_TIMER_NAME_LENGTH)
+  return trimmed.length > 0 ? trimmed : null
+}
+
+/** A short, sufficiently-unique client-side id for a timer card — these
+ * never leave the browser (the persisted session gets its own DB-assigned
+ * id), so collision resistance just needs to cover one tab's lifetime. */
+export function createTimerId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+/** 0–1 fraction of a timer's planned duration that's elapsed so far, for a
+ * progress bar. Idle timers (nothing elapsed yet) read as 0. */
+export function getProgressFraction(plannedSeconds: number, remainingSeconds: number): number {
+  if (plannedSeconds <= 0) return 0
+  return Math.min(1, Math.max(0, 1 - remainingSeconds / plannedSeconds))
 }

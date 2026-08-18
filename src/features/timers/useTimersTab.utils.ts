@@ -1,3 +1,4 @@
+import { TIMER_SOUND_STORAGE_KEY } from './TimersTab.constants'
 import type { CreateTimerSession, TimerSession } from './TimersTab.interfaces'
 
 type GetToken = () => Promise<string | null>
@@ -91,5 +92,70 @@ export async function notifyTimerComplete(title: string, body: string): Promise<
     void notification
   } catch {
     // Best-effort — the in-app completion state already reflects this.
+  }
+}
+
+export function getStoredSoundPreference(): boolean {
+  try {
+    return localStorage.getItem(TIMER_SOUND_STORAGE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+export function setStoredSoundPreference(enabled: boolean): void {
+  try {
+    localStorage.setItem(TIMER_SOUND_STORAGE_KEY, String(enabled))
+  } catch {
+    // Best-effort — worst case the toggle resets next visit.
+  }
+}
+
+// Browsers only let an AudioContext start/produce sound once it's been
+// created or resumed from inside a real user gesture (a click handler, not
+// an interval callback) — shared across calls so it's created at most once
+// per tab and reused by every subsequent tick.
+let sharedAudioContext: AudioContext | null = null
+
+/** Call from a user-gesture handler (toggling sound on, starting/resuming a
+ * timer) to create/unlock the shared AudioContext ahead of the first tick
+ * that needs to play through it. Safe to call repeatedly. */
+export function unlockAudio(): void {
+  try {
+    const AudioContextClass =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!AudioContextClass) return
+
+    sharedAudioContext ??= new AudioContextClass()
+    if (sharedAudioContext.state === 'suspended') {
+      void sharedAudioContext.resume()
+    }
+  } catch {
+    // Best-effort — the tick sound just silently won't play.
+  }
+}
+
+/** A short synthesized "tick" — no audio asset to ship, works offline in
+ * the PWA. Silently does nothing if the AudioContext was never unlocked
+ * (e.g. sound was enabled without any prior user gesture reaching it). */
+export function playTickSound(): void {
+  const context = sharedAudioContext
+  if (!context) return
+
+  try {
+    const oscillator = context.createOscillator()
+    const gain = context.createGain()
+    oscillator.type = 'sine'
+    oscillator.frequency.value = 880
+    gain.gain.setValueAtTime(0.0001, context.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.15, context.currentTime + 0.005)
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.05)
+    oscillator.connect(gain)
+    gain.connect(context.destination)
+    oscillator.start()
+    oscillator.stop(context.currentTime + 0.06)
+  } catch {
+    // Best-effort — a missed tick isn't worth surfacing to the user.
   }
 }

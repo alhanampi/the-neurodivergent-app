@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest'
 import {
   clampCustomMinutes,
   computeRemainingSeconds,
+  createTimerId,
   formatSeconds,
   formatSessionTimestamp,
   getPlannedSeconds,
   getPresetTranslationKey,
+  getProgressFraction,
+  sanitizeTimerName,
 } from './TimersTab.utils'
+import { MAX_TIMER_NAME_LENGTH } from './TimersTab.constants'
 
 describe('formatSeconds', () => {
   it('formats sub-hour durations as M:SS', () => {
@@ -73,5 +77,49 @@ describe('formatSessionTimestamp', () => {
     const result = formatSessionTimestamp('2026-08-18T10:00:00.000Z', 'en')
     expect(typeof result).toBe('string')
     expect(result.length).toBeGreaterThan(0)
+  })
+})
+
+describe('sanitizeTimerName', () => {
+  it('trims whitespace', () => {
+    expect(sanitizeTimerName('  Fold laundry  ')).toBe('Fold laundry')
+  })
+
+  it('collapses an empty or whitespace-only name to null', () => {
+    expect(sanitizeTimerName('')).toBeNull()
+    expect(sanitizeTimerName('   ')).toBeNull()
+  })
+
+  it('caps the length', () => {
+    const tooLong = 'x'.repeat(MAX_TIMER_NAME_LENGTH + 20)
+    expect(sanitizeTimerName(tooLong)).toHaveLength(MAX_TIMER_NAME_LENGTH)
+  })
+})
+
+describe('createTimerId', () => {
+  it('returns a non-empty string, unique across calls', () => {
+    const first = createTimerId()
+    const second = createTimerId()
+    expect(typeof first).toBe('string')
+    expect(first.length).toBeGreaterThan(0)
+    expect(first).not.toBe(second)
+  })
+})
+
+describe('getProgressFraction', () => {
+  it('is 0 for an untouched timer', () => {
+    expect(getProgressFraction(1500, 1500)).toBe(0)
+  })
+
+  it('is 1 once time is up', () => {
+    expect(getProgressFraction(1500, 0)).toBe(1)
+  })
+
+  it('is proportional in between', () => {
+    expect(getProgressFraction(100, 25)).toBeCloseTo(0.75)
+  })
+
+  it('never goes negative for a zero-length plan', () => {
+    expect(getProgressFraction(0, 0)).toBe(0)
   })
 })

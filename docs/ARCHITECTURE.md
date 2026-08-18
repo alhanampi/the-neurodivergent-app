@@ -15,6 +15,7 @@ src/
       TimersTab.styles.ts
       TimersTab.interfaces.ts
       TimersTab.utils.ts
+      StopTimerDialog/       # Confirmation before stopping a timer with progress
     ai-chat/
     dashboard/
     settings/

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n/i18n'
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
@@ -21,41 +21,101 @@ function renderTimersTab() {
 
 afterEach(() => {
   void i18n.changeLanguage('en')
+  localStorage.clear()
 })
 
 describe('TimersTab', () => {
-  it('shows the preset options and the default preset duration', () => {
+  it('shows the preset options and no active timers initially', () => {
     renderTimersTab()
 
     expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Focus' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Short break' })).toBeInTheDocument()
-    expect(screen.getByText('25:00')).toBeInTheDocument()
+    expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
 
-  it('starts a timer and swaps the Start button for Pause/Stop', async () => {
+  it('adds a timer card in the idle state', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+
+    expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
+    expect(screen.getByText('25:00')).toBeInTheDocument()
+    expect(screen.queryByText(/No active timers/)).not.toBeInTheDocument()
+  })
+
+  it('supports multiple timers at once', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await user.click(screen.getByRole('button', { name: 'Short break' }))
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+
+    expect(screen.getByText('25:00')).toBeInTheDocument()
+    expect(screen.getByText('5:00')).toBeInTheDocument()
+  })
+
+  it('names a custom timer and shows the name on its card', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: 'Custom' }))
+    await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Fold laundry')
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+
+    expect(screen.getByText('Fold laundry')).toBeInTheDocument()
+  })
+
+  it('starts a timer by tapping its card, toggling Start into Pause', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
     await user.click(screen.getByRole('button', { name: 'Start' }))
 
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Stop' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Start' })).not.toBeInTheDocument()
   })
 
-  it('shows the custom minutes stepper and label field only for the custom preset', async () => {
+  it('asks for confirmation before stopping a started timer', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    expect(
-      screen.queryByPlaceholderText('What are you working on? (optional)'),
-    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await user.click(screen.getByRole('button', { name: 'Start' }))
+    await user.click(screen.getByRole('button', { name: 'Stop' }))
 
-    await user.click(screen.getByRole('button', { name: 'Custom' }))
+    expect(screen.getByRole('heading', { name: 'Stop this timer?' })).toBeInTheDocument()
 
-    expect(screen.getByPlaceholderText('What are you working on? (optional)')).toBeInTheDocument()
-    expect(screen.getByText('10 min')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Keep going' }))
+    // MUI's Dialog unmounts its content only after its close transition
+    // finishes, so the heading can briefly still be in the DOM.
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: 'Stop this timer?' })).not.toBeInTheDocument()
+    })
+    // Still there — cancelling the dialog didn't remove the timer.
+    expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+  })
+
+  it('removes an untouched idle timer immediately, with no confirmation dialog', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await user.click(screen.getByRole('button', { name: 'Stop' }))
+
+    expect(screen.queryByRole('heading', { name: 'Stop this timer?' })).not.toBeInTheDocument()
+    expect(screen.getByText(/No active timers/)).toBeInTheDocument()
+  })
+
+  it('toggles the tick sound preference', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: 'Enable tick sound' }))
+
+    expect(screen.getByRole('button', { name: 'Disable tick sound' })).toBeInTheDocument()
   })
 
   it('shows the empty history state when there are no sessions', () => {
