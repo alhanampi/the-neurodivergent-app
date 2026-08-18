@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n/i18n'
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
@@ -34,18 +34,19 @@ describe('TimersTab', () => {
     expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
 
-  it('adds a timer card in the idle state', async () => {
+  it('adds a timer card in the idle state, with an editable duration', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
     await user.click(screen.getByRole('button', { name: /Add timer/ }))
 
     expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument()
-    expect(screen.getByText('25:00')).toBeInTheDocument()
+    const card = screen.getByRole('listitem')
+    expect(within(card).getByDisplayValue('25')).toBeInTheDocument()
     expect(screen.queryByText(/No active timers/)).not.toBeInTheDocument()
   })
 
-  it('supports multiple timers at once', async () => {
+  it('supports multiple timers at once, each with its own duration', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
@@ -53,8 +54,9 @@ describe('TimersTab', () => {
     await user.click(screen.getByRole('button', { name: 'Short break' }))
     await user.click(screen.getByRole('button', { name: /Add timer/ }))
 
-    expect(screen.getByText('25:00')).toBeInTheDocument()
-    expect(screen.getByText('5:00')).toBeInTheDocument()
+    const [firstCard, secondCard] = screen.getAllByRole('listitem')
+    expect(within(firstCard).getByDisplayValue('25')).toBeInTheDocument()
+    expect(within(secondCard).getByDisplayValue('5')).toBeInTheDocument()
   })
 
   it('names a custom timer and shows the name on its card', async () => {
@@ -68,7 +70,47 @@ describe('TimersTab', () => {
     expect(screen.getByText('Fold laundry')).toBeInTheDocument()
   })
 
-  it('starts a timer by tapping its card, toggling Start into Pause', async () => {
+  it('edits an idle timer duration by typing directly', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    const card = screen.getByRole('listitem')
+    const durationField = within(card).getByDisplayValue('25')
+
+    await user.clear(durationField)
+    await user.type(durationField, '40')
+    await user.tab()
+
+    expect(within(card).getByDisplayValue('40')).toBeInTheDocument()
+  })
+
+  it('edits an idle timer duration with the +/- buttons', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    const card = screen.getByRole('listitem')
+
+    await user.click(within(card).getByRole('button', { name: 'Increase minutes' }))
+
+    expect(within(card).getByDisplayValue('30')).toBeInTheDocument()
+  })
+
+  it('edits an idle timer duration by scrolling over it', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    const card = screen.getByRole('listitem')
+    const durationField = within(card).getByDisplayValue('25')
+
+    fireEvent.wheel(durationField, { deltaY: -100 })
+
+    expect(within(card).getByDisplayValue('30')).toBeInTheDocument()
+  })
+
+  it('starts a timer via its play button, toggling Start into Pause', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
@@ -76,6 +118,18 @@ describe('TimersTab', () => {
     await user.click(screen.getByRole('button', { name: 'Start' }))
 
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+  })
+
+  it('no longer offers duration editing once a timer has started', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: /Add timer/ }))
+    await user.click(screen.getByRole('button', { name: 'Start' }))
+
+    const card = screen.getByRole('listitem')
+    expect(within(card).queryByDisplayValue('25')).not.toBeInTheDocument()
+    expect(within(card).getByText('25:00')).toBeInTheDocument()
   })
 
   it('asks for confirmation before stopping a started timer', async () => {

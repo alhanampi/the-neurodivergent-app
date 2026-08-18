@@ -6,29 +6,19 @@ import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
-import {
-  FiBell,
-  FiClock,
-  FiMinus,
-  FiPause,
-  FiPlay,
-  FiPlus,
-  FiVolume2,
-  FiVolumeX,
-  FiX,
-} from 'react-icons/fi'
+import { FiBell, FiClock, FiPause, FiPlay, FiPlus, FiVolume2, FiVolumeX, FiX } from 'react-icons/fi'
 import { useTimersTab } from './useTimersTab'
-import { CUSTOM_PRESET_ID } from './TimersTab.constants'
+import { CUSTOM_PRESET_ID, MAX_CUSTOM_MINUTES, MIN_CUSTOM_MINUTES } from './TimersTab.constants'
 import {
   formatSeconds,
   formatSessionTimestamp,
   getPresetTranslationKey,
   getProgressFraction,
 } from './TimersTab.utils'
+import { MinutesInput } from './MinutesInput/MinutesInput'
 import { StopTimerDialog } from './StopTimerDialog/StopTimerDialog'
 import {
   ComposerSection,
-  CustomRow,
   HeaderRow,
   HistoryEmpty,
   HistoryItem,
@@ -37,11 +27,9 @@ import {
   HistoryList,
   HistorySection,
   IconWrapper,
-  MinutesValue,
   NotificationBanner,
   PresetRow,
   TimerCard,
-  TimerCardBody,
   TimerCardInfo,
   TimerCardName,
   TimerCardTime,
@@ -50,15 +38,13 @@ import {
 } from './TimersTab.styles'
 import type { TimerPresetId } from './TimersTab.interfaces'
 
-const CUSTOM_MINUTES_STEP = 5
-
 export function TimersTab() {
   const { t, i18n } = useTranslation()
   const {
     timers,
     presets,
     selectedPresetId,
-    customMinutes,
+    draftMinutes,
     nameDraft,
     plannedSecondsPreview,
     history,
@@ -67,9 +53,10 @@ export function TimersTab() {
     isSoundEnabled,
     pendingStopId,
     selectPreset,
-    setCustomMinutes,
+    setDraftMinutes,
     setNameDraft,
     addTimer,
+    updateTimerMinutes,
     toggleTimer,
     requestStop,
     cancelStopRequest,
@@ -136,25 +123,13 @@ export function TimersTab() {
           </ToggleButtonGroup>
         </PresetRow>
 
-        {selectedPresetId === CUSTOM_PRESET_ID && (
-          <CustomRow>
-            <IconButton
-              size="small"
-              aria-label={t('timers.decreaseMinutes')}
-              onClick={() => setCustomMinutes(customMinutes - CUSTOM_MINUTES_STEP)}
-            >
-              <FiMinus />
-            </IconButton>
-            <MinutesValue>{t('timers.minutesValue', { count: customMinutes })}</MinutesValue>
-            <IconButton
-              size="small"
-              aria-label={t('timers.increaseMinutes')}
-              onClick={() => setCustomMinutes(customMinutes + CUSTOM_MINUTES_STEP)}
-            >
-              <FiPlus />
-            </IconButton>
-          </CustomRow>
-        )}
+        <MinutesInput
+          value={draftMinutes}
+          onChange={setDraftMinutes}
+          min={MIN_CUSTOM_MINUTES}
+          max={MAX_CUSTOM_MINUTES}
+          ariaLabel={t('timers.durationLabel')}
+        />
 
         <TextField
           size="small"
@@ -175,23 +150,35 @@ export function TimersTab() {
         <TimersList>
           {timers.map((timer) => (
             <TimerCard key={timer.id}>
-              <TimerCardBody
-                type="button"
-                onClick={() => toggleTimer(timer.id)}
+              <IconButton
                 aria-label={timer.status === 'running' ? t('timers.pause') : t('timers.start')}
+                onClick={() => toggleTimer(timer.id)}
               >
                 {timer.status === 'running' ? <FiPause size={20} /> : <FiPlay size={20} />}
-                <TimerCardInfo>
-                  <TimerCardName>
-                    {timer.name || t(getPresetTranslationKey(timer.presetId))}
-                  </TimerCardName>
-                  <LinearProgress
-                    variant="determinate"
-                    value={getProgressFraction(timer.plannedSeconds, timer.remainingSeconds) * 100}
-                  />
-                </TimerCardInfo>
+              </IconButton>
+
+              <TimerCardInfo>
+                <TimerCardName>
+                  {timer.name || t(getPresetTranslationKey(timer.presetId))}
+                </TimerCardName>
+                <LinearProgress
+                  variant="determinate"
+                  value={getProgressFraction(timer.plannedSeconds, timer.remainingSeconds) * 100}
+                />
+              </TimerCardInfo>
+
+              {timer.status === 'idle' ? (
+                <MinutesInput
+                  value={Math.round(timer.plannedSeconds / 60)}
+                  onChange={(minutes) => updateTimerMinutes(timer.id, minutes)}
+                  min={MIN_CUSTOM_MINUTES}
+                  max={MAX_CUSTOM_MINUTES}
+                  ariaLabel={t('timers.durationLabel')}
+                />
+              ) : (
                 <TimerCardTime>{formatSeconds(timer.remainingSeconds)}</TimerCardTime>
-              </TimerCardBody>
+              )}
+
               <IconButton
                 size="small"
                 aria-label={t('timers.stop')}

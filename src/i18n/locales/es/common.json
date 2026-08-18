@@ -30,7 +30,8 @@
       "long-break": "Descanso largo",
       "custom": "Personalizado"
     },
-    "minutesValue": "{{count}} min",
+    "durationLabel": "Duración del temporizador en minutos",
+    "minutesUnit": "min",
     "decreaseMinutes": "Reducir minutos",
     "increaseMinutes": "Aumentar minutos",
     "namePlaceholder": "Nombrá este temporizador (opcional)",

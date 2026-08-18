@@ -59,12 +59,22 @@ describe('useTimersTab', () => {
     expect(result.current.plannedSecondsPreview).toBe(25 * 60)
   })
 
+  it('selecting a preset reseeds the draft duration with its default', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.selectPreset('short-break'))
+    expect(result.current.draftMinutes).toBe(5)
+
+    act(() => result.current.selectPreset('custom'))
+    expect(result.current.draftMinutes).toBe(10)
+  })
+
   it('adds an idle timer and clears the name draft', () => {
     const { result } = renderHook(() => useTimersTab())
 
     act(() => result.current.setNameDraft('Fold laundry'))
     act(() => result.current.selectPreset('custom'))
-    act(() => result.current.setCustomMinutes(12))
+    act(() => result.current.setDraftMinutes(12))
     act(() => result.current.addTimer())
 
     expect(result.current.timers).toHaveLength(1)
@@ -177,11 +187,29 @@ describe('useTimersTab', () => {
     expect(mockPostTimerSession).not.toHaveBeenCalled()
   })
 
+  it('edits an idle timer duration, but leaves a running one alone', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.addTimer())
+    act(() => result.current.addTimer())
+    const [idleId, runningId] = result.current.timers.map((timer) => timer.id)
+    act(() => result.current.toggleTimer(runningId))
+
+    act(() => result.current.updateTimerMinutes(idleId, 45))
+    act(() => result.current.updateTimerMinutes(runningId, 45))
+
+    const idleTimer = result.current.timers.find((timer) => timer.id === idleId)
+    const runningTimer = result.current.timers.find((timer) => timer.id === runningId)
+    expect(idleTimer?.plannedSeconds).toBe(45 * 60)
+    expect(idleTimer?.remainingSeconds).toBe(45 * 60)
+    expect(runningTimer?.plannedSeconds).toBe(25 * 60)
+  })
+
   it('auto-completes, logs completed:true, and notifies once a timer runs out', () => {
     const { result } = renderHook(() => useTimersTab())
 
     act(() => result.current.selectPreset('custom'))
-    act(() => result.current.setCustomMinutes(1))
+    act(() => result.current.setDraftMinutes(1))
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
     act(() => result.current.toggleTimer(id))

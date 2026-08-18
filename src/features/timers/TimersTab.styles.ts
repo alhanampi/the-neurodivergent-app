@@ -61,19 +61,6 @@ export const PresetRow = styled.div`
   width: 100%;
 `
 
-export const CustomRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-`
-
-export const MinutesValue = styled.span`
-  min-width: 3ch;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-`
-
 export const TimersList = styled.ul`
   display: flex;
   flex-direction: column;
@@ -92,21 +79,6 @@ export const TimerCard = styled.li`
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
   background: ${({ theme }) => theme.palette.background.paper};
   border: 1px solid ${({ theme }) => theme.palette.divider};
-`
-
-export const TimerCardBody = styled.button`
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  border: none;
-  background: none;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
 `
 
 export const TimerCardInfo = styled.div`

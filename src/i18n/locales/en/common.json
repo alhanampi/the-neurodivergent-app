@@ -30,7 +30,8 @@
       "long-break": "Long break",
       "custom": "Custom"
     },
-    "minutesValue": "{{count}} min",
+    "durationLabel": "Timer duration in minutes",
+    "minutesUnit": "min",
     "decreaseMinutes": "Decrease minutes",
     "increaseMinutes": "Increase minutes",
     "namePlaceholder": "Name this timer (optional)",

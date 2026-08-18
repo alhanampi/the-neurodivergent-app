@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useTranslation } from 'react-i18next'
-import { MIN_LOGGABLE_SECONDS, TICK_INTERVAL_MS, TIMER_PRESETS } from './TimersTab.constants'
 import {
-  clampCustomMinutes,
+  MAX_CUSTOM_MINUTES,
+  MIN_CUSTOM_MINUTES,
+  MIN_LOGGABLE_SECONDS,
+  TICK_INTERVAL_MS,
+  TIMER_PRESETS,
+} from './TimersTab.constants'
+import {
+  clampMinutes,
   computeRemainingSeconds,
   createTimerId,
-  getPlannedSeconds,
+  getPresetDefaultMinutes,
   getPresetTranslationKey,
   sanitizeTimerName,
 } from './TimersTab.utils'
@@ -31,7 +37,9 @@ export function useTimersTab() {
 
   const [timers, setTimers] = useState<TimerInstance[]>([])
   const [selectedPresetId, setSelectedPresetId] = useState<TimerPresetId>(TIMER_PRESETS[0].id)
-  const [customMinutes, setCustomMinutesState] = useState(10)
+  const [draftMinutes, setDraftMinutesState] = useState(() =>
+    getPresetDefaultMinutes(TIMER_PRESETS[0].id),
+  )
   const [nameDraft, setNameDraftState] = useState('')
   const [history, setHistory] = useState<TimerSession[]>([])
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
@@ -46,7 +54,7 @@ export function useTimersTab() {
     timersRef.current = timers
   }, [timers])
 
-  const plannedSecondsPreview = getPlannedSeconds(selectedPresetId, customMinutes)
+  const plannedSecondsPreview = draftMinutes * 60
   const hasRunningTimer = timers.some((timer) => timer.status === 'running')
 
   useEffect(() => {
@@ -154,16 +162,22 @@ export function useTimersTab() {
     return () => window.clearInterval(intervalId)
   }, [hasRunningTimer, isSoundEnabled])
 
-  const selectPreset = useCallback((presetId: TimerPresetId) => setSelectedPresetId(presetId), [])
+  // Picking a preset just reseeds the editable duration with that preset's
+  // default — it's a starting point, not a lock; the user can still type or
+  // scroll it to something else afterward (composer or an idle card).
+  const selectPreset = useCallback((presetId: TimerPresetId) => {
+    setSelectedPresetId(presetId)
+    setDraftMinutesState(getPresetDefaultMinutes(presetId))
+  }, [])
 
-  const setCustomMinutes = useCallback((minutes: number) => {
-    setCustomMinutesState(clampCustomMinutes(minutes))
+  const setDraftMinutes = useCallback((minutes: number) => {
+    setDraftMinutesState(clampMinutes(minutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES))
   }, [])
 
   const setNameDraft = useCallback((name: string) => setNameDraftState(name), [])
 
   const addTimer = useCallback(() => {
-    const plannedSeconds = getPlannedSeconds(selectedPresetId, customMinutes)
+    const plannedSeconds = clampMinutes(draftMinutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES) * 60
     const timer: TimerInstance = {
       id: createTimerId(),
       presetId: selectedPresetId,
@@ -176,9 +190,27 @@ export function useTimersTab() {
     }
     setTimers((current) => [...current, timer])
     setNameDraftState('')
-  }, [customMinutes, nameDraft, selectedPresetId])
+  }, [draftMinutes, nameDraft, selectedPresetId])
 
-  // Tapping a timer card toggles it: idle/paused → running, running → paused.
+  // Only meaningful for an idle timer — its remainingSeconds always equals
+  // plannedSeconds at that point, so both move together. Once a timer has
+  // actually started (running/paused), its duration is locked in; the guard
+  // is defense in depth since the UI never offers this control then either.
+  const updateTimerMinutes = useCallback((id: string, minutes: number) => {
+    const plannedSeconds = clampMinutes(minutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES) * 60
+    setTimers((current) =>
+      current.map((timer) =>
+        timer.id === id && timer.status === 'idle'
+          ? { ...timer, plannedSeconds, remainingSeconds: plannedSeconds }
+          : timer,
+      ),
+    )
+  }, [])
+
+  // Explicit play/pause control on each card: idle/paused → running,
+  // running → paused. (Tapping a card used to do this on its own; now the
+  // duration area of an idle card is an editable field instead — see
+  // MinutesInput — so starting/pausing needs its own dedicated button.)
   const toggleTimer = useCallback((id: string) => {
     unlockAudio()
     setTimers((current) =>
@@ -238,7 +270,7 @@ export function useTimersTab() {
     timers,
     presets: TIMER_PRESETS,
     selectedPresetId,
-    customMinutes,
+    draftMinutes,
     nameDraft,
     plannedSecondsPreview,
     history,
@@ -247,9 +279,10 @@ export function useTimersTab() {
     isSoundEnabled,
     pendingStopId,
     selectPreset,
-    setCustomMinutes,
+    setDraftMinutes,
     setNameDraft,
     addTimer,
+    updateTimerMinutes,
     toggleTimer,
     requestStop,
     cancelStopRequest,

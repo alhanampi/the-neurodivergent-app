@@ -33,14 +33,12 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 ## Notes and open decisions
 
 - **Timers tab (iteration 6):** presets (`pomodoro-focus` 25m, `short-break` 5m,
-  `long-break` 15m) are fixed app config for this iteration, not user-editable or
-  DB-stored — revisit if personalization (v1.2.0) wants custom preset lengths.
-  "Custom" is a fourth option with its own minutes stepper (1–180min, clamped).
+  `long-break` 15m) are quick-select defaults, not fixed values — every timer's
+  duration is always further editable (composer or an idle card), see below.
   Supports **multiple concurrent timers**: each one is a card (compact row, not a
   full-screen countdown) with an optional user-given name, added via a composer
-  form at the top; tapping a card toggles it between running and paused, one
-  shared interval drives every running card's countdown so they can't drift
-  relative to each other. Countdown correctness: each running timer tracks its
+  form at the top; one shared interval drives every running card's countdown so
+  they can't drift relative to each other. Countdown correctness: each running timer tracks its
   own wall-clock end timestamp (not a decrementing counter) and re-derives the
   remaining time from it every tick, so a throttled/backgrounded tab can't drift
   either — it self-corrects instead of losing time. Stopping a timer that's
@@ -68,6 +66,31 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   share the Clerk-token-verification helper that was previously private to
   `api/preferences.utils.ts`, now that a second authenticated route
   (`api/timer-sessions.ts`) needs the same check.
+  - **Editable duration, explicit play control (revision after first pass):**
+    tapping a card no longer starts it — that overloaded a single tap with two
+    different meanings (edit vs. start) depending on state, which is exactly the
+    kind of implicit, context-dependent interaction this app tries to avoid.
+    Instead: an idle card shows its duration as an editable `MinutesInput`
+    (typed directly, scrolled with the mouse wheel, or nudged with +/- buttons —
+    `src/features/timers/MinutesInput/`, shared by the composer and every idle
+    card) in place of the static time text, and a dedicated play/pause icon
+    button starts/pauses it explicitly. Once running or paused, the duration
+    locks in (shown as static text again) — editing a total mid-run is
+    ambiguous enough (what happens to elapsed time if you shrink it below
+    that?) that it's out of scope rather than guessed at; stop-and-restart
+    covers that case for now. Preset buttons became quick-fill defaults for
+    this field rather than fixed values — picking one just reseeds the
+    duration, which stays freely editable afterward either way.
+    - **Bug found writing this:** `useMinutesInput`'s "resync draft from the
+      external value when not focused" effect was keyed on `[value, isFocused]`.
+      Since `isFocused` flips on every commit (blur), that re-triggered the
+      effect immediately after a commit, and because a controlled `value` prop
+      only catches up once the parent re-renders, it could clobber the
+      just-committed draft back to the stale prop for a tick. Fixed by tracking
+      focus in a ref instead of state, so only an actual `value` change
+      re-triggers the sync — the same "don't let an effect's own side effects
+      feed back into its own dependencies" lesson as the interval/finishTimer
+      pitfall above, in a different shape.
   - **Pitfall worth remembering:** the running-timers interval effect must read
     `finishTimer` through a ref rather than depending on it directly — its
     identity depends on `getToken`/`t`, which aren't contractually stable

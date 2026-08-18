@@ -5,9 +5,11 @@ export interface TimerPresetDefinition {
   minutes: number
 }
 
-// Fixed durations, not user-editable in this iteration — see ROADMAP.md
-// (v0.7.0) for scope. "Custom" is a separate, fourth option handled by its
-// own minutes input rather than living in this list.
+// Starting-point durations for the preset quick-select buttons — the actual
+// duration is always further editable (typed or scrolled) afterward, both
+// in the composer and on an idle timer card, so these are defaults, not
+// fixed values. "Custom" is a separate, fourth button with no preset
+// duration of its own (falls back to DEFAULT_CUSTOM_MINUTES).
 export const TIMER_PRESETS: TimerPresetDefinition[] = [
   { id: 'pomodoro-focus', minutes: 25 },
   { id: 'short-break', minutes: 5 },

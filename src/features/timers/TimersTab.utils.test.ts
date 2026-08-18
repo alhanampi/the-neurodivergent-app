@@ -1,16 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
   clampCustomMinutes,
+  clampMinutes,
   computeRemainingSeconds,
   createTimerId,
   formatSeconds,
   formatSessionTimestamp,
-  getPlannedSeconds,
+  getPresetDefaultMinutes,
   getPresetTranslationKey,
   getProgressFraction,
   sanitizeTimerName,
 } from './TimersTab.utils'
-import { MAX_TIMER_NAME_LENGTH } from './TimersTab.constants'
+import { DEFAULT_CUSTOM_MINUTES, MAX_TIMER_NAME_LENGTH } from './TimersTab.constants'
 
 describe('formatSeconds', () => {
   it('formats sub-hour durations as M:SS', () => {
@@ -52,16 +53,28 @@ describe('clampCustomMinutes', () => {
   })
 })
 
-describe('getPlannedSeconds', () => {
-  it('resolves a known preset to its fixed duration', () => {
-    expect(getPlannedSeconds('pomodoro-focus', 999)).toBe(25 * 60)
-    expect(getPlannedSeconds('short-break', 999)).toBe(5 * 60)
-    expect(getPlannedSeconds('long-break', 999)).toBe(15 * 60)
+describe('clampMinutes', () => {
+  it('clamps within the given range', () => {
+    expect(clampMinutes(0, 1, 180)).toBe(1)
+    expect(clampMinutes(500, 1, 180)).toBe(180)
+    expect(clampMinutes(42, 1, 180)).toBe(42)
+    expect(clampMinutes(42, 50, 60)).toBe(50)
   })
 
-  it('resolves custom to the clamped custom minutes', () => {
-    expect(getPlannedSeconds('custom', 12)).toBe(12 * 60)
-    expect(getPlannedSeconds('custom', 0)).toBe(60)
+  it('falls back to the minimum for NaN', () => {
+    expect(clampMinutes(Number.NaN, 1, 180)).toBe(1)
+  })
+})
+
+describe('getPresetDefaultMinutes', () => {
+  it('resolves a known preset to its default duration', () => {
+    expect(getPresetDefaultMinutes('pomodoro-focus')).toBe(25)
+    expect(getPresetDefaultMinutes('short-break')).toBe(5)
+    expect(getPresetDefaultMinutes('long-break')).toBe(15)
+  })
+
+  it('falls back to DEFAULT_CUSTOM_MINUTES for custom', () => {
+    expect(getPresetDefaultMinutes('custom')).toBe(DEFAULT_CUSTOM_MINUTES)
   })
 })
 

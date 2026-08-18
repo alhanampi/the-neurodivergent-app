@@ -1,5 +1,6 @@
 import {
   CUSTOM_PRESET_ID,
+  DEFAULT_CUSTOM_MINUTES,
   MAX_CUSTOM_MINUTES,
   MAX_TIMER_NAME_LENGTH,
   MIN_CUSTOM_MINUTES,
@@ -29,17 +30,25 @@ export function computeRemainingSeconds(
   return Math.max(0, Math.ceil((endTimestampMs - nowMs) / 1000))
 }
 
-export function clampCustomMinutes(minutes: number): number {
-  if (Number.isNaN(minutes)) return MIN_CUSTOM_MINUTES
-  return Math.min(MAX_CUSTOM_MINUTES, Math.max(MIN_CUSTOM_MINUTES, Math.round(minutes)))
+/** Generic minutes clamp — used by any editable duration control, not just
+ * the timers feature's own default bounds. */
+export function clampMinutes(minutes: number, min: number, max: number): number {
+  if (Number.isNaN(minutes)) return min
+  return Math.min(max, Math.max(min, Math.round(minutes)))
 }
 
-export function getPlannedSeconds(presetId: TimerPresetId, customMinutes: number): number {
-  if (presetId === CUSTOM_PRESET_ID) {
-    return clampCustomMinutes(customMinutes) * 60
-  }
+export function clampCustomMinutes(minutes: number): number {
+  return clampMinutes(minutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES)
+}
+
+/** A preset button's starting-point duration — just a convenient default to
+ * seed the (always-editable) duration field with, not a fixed value it's
+ * locked to afterward. 'custom' has no fixed default of its own, so it
+ * falls back to DEFAULT_CUSTOM_MINUTES. */
+export function getPresetDefaultMinutes(presetId: TimerPresetId): number {
+  if (presetId === CUSTOM_PRESET_ID) return DEFAULT_CUSTOM_MINUTES
   const preset = TIMER_PRESETS.find((candidate) => candidate.id === presetId)
-  return (preset?.minutes ?? MIN_CUSTOM_MINUTES) * 60
+  return preset?.minutes ?? DEFAULT_CUSTOM_MINUTES
 }
 
 /** i18n key for a preset's display name. Custom timers still resolve to a
