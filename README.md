@@ -19,7 +19,7 @@ avatar and a Settings shortcut. Below it, three tabs:
   focus blocks, whatever works for you), or just start a stopwatch and mark it
   finished whenever you are. Every session gets saved, so you build up a real
   picture of how you spend your time.
-- **💬 AI Chat** — Not stuck staring at a huge task, unsure where to start? Talk it
+- **💬 AI Chat** — Stuck staring at a huge task, unsure where to start? Talk it
   through with an assistant whose only job is helping you break it into smaller,
   doable steps. Once you're happy with the plan, send it straight to Timers — each
   step arrives with its own estimated time.
@@ -40,15 +40,17 @@ for you (weighted by difficulty and time of day) so you don't have to decide.
 
 ## Tech stack
 
-| Piece     | Choice                                                                                                  | Why                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Framework | [Vite](https://vitejs.dev/) + React + TypeScript                                                        | The app lives behind a login, so there's no need for server-rendering — Vite keeps the build simple and fast |
-| Hosting   | [Vercel](https://vercel.com/)                                                                           | Ships the PWA and hosts small serverless functions for anything that needs a secret key                      |
-| Auth      | [Clerk](https://clerk.com/)                                                                             | Handles sign-in/sign-up and sessions so we don't have to roll our own                                        |
-| Database  | [Neon](https://neon.tech/) (Postgres) + Drizzle ORM                                                     | Serverless Postgres that plugs neatly into Vercel                                                            |
-| UI        | [MUI](https://mui.com/) + [react-icons](https://react-icons.github.io/react-icons/) + styled-components | Accessible components, one icon set, styles kept clean and separate from logic                               |
-| AI        | [Groq](https://groq.com/)                                                                               | Fast, free-tier LLM inference powering the AI Chat tab                                                       |
-| Language  | [react-i18next](https://react.i18next.com/)                                                             | Real-time English/Spanish switching, remembers what you prefer                                               |
+| Piece     | Choice                                                                                                  | Why                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Framework | [Vite](https://vitejs.dev/) + React + TypeScript                                                        | The app lives behind a login, so there's no need for server-rendering — Vite keeps the build simple and fast   |
+| Hosting   | [Vercel](https://vercel.com/)                                                                           | Ships the PWA and hosts small serverless functions for anything that needs a secret key                        |
+| Auth      | [Clerk](https://clerk.com/)                                                                             | Handles sign-in/sign-up and sessions so we don't have to roll our own                                          |
+| Database  | [Neon](https://neon.tech/) (Postgres) + Drizzle ORM                                                     | Serverless Postgres that plugs neatly into Vercel                                                              |
+| UI        | [MUI](https://mui.com/) + [react-icons](https://react-icons.github.io/react-icons/) + styled-components | Accessible components, one icon set, styles kept clean and separate from logic                                 |
+| AI        | [Groq](https://groq.com/)                                                                               | Fast, free-tier LLM inference powering the AI Chat tab                                                         |
+| Language  | [react-i18next](https://react.i18next.com/) + [@clerk/localizations](https://clerk.com/docs)            | Real-time English/Spanish switching (app UI and Clerk's own screens both follow it), remembers what you prefer |
+| Tooling   | [oxlint](https://oxc.rs/) + Prettier + Husky                                                            | Fast Rust-based linting, consistent formatting, pre-commit checks so issues never reach a PR                   |
+| Testing   | [Vitest](https://vitest.dev/) + React Testing Library                                                   | Unit/hook tests colocated with the code they cover                                                             |
 
 ## How this project is built
 
