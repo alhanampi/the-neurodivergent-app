@@ -12,39 +12,45 @@ app, and built one small, usable iteration at a time.
 
 ## What it does
 
-The app is organized around four tabs at the bottom of the screen:
+A header sits at the top always — the app's name, and once you're signed in, your
+avatar and a Settings shortcut. Below it, three tabs:
 
 - **⏱️ Timers** — Set a timer and get notified when it's done (pomodoros, 20-minute
   focus blocks, whatever works for you), or just start a stopwatch and mark it
   finished whenever you are. Every session gets saved, so you build up a real
   picture of how you spend your time.
-- **💬 AI Chat** — Not stuck staring at a huge task, unsure where to start? Talk it
+- **💬 AI Chat** — Stuck staring at a huge task, unsure where to start? Talk it
   through with an assistant whose only job is helping you break it into smaller,
   doable steps. Once you're happy with the plan, send it straight to Timers — each
   step arrives with its own estimated time.
 - **📊 Dashboard** — A look back at what you got done: completed tasks, time spent,
   streaks, patterns over time.
-- **⚙️ Settings** — Language, theme, account, and (as the app grows) connected
-  integrations.
+
+**⚙️ Settings** — reached from the header, not a tab — has language, theme, account,
+and (as the app grows) connected integrations.
 
 Coming later: **badges** for showing up and finishing things, **social sharing** of
 your wins, two-way integrations with **Google Calendar** and
 **Spotify/SoundCloud** (so a "study for 20 minutes" task can queue up a focus
 playlist automatically), more **themes/languages/fonts** (including a
-dyslexia-friendly option), and a **relaxation tab** with guided breathing
-exercises and calming music.
+dyslexia-friendly option), a **relaxation tab** with animated breathing exercises
+(box breathing, expanding waves) and calming music, and a **task roulette** that
+randomly picks a pending task
+for you (weighted by difficulty and time of day) so you don't have to decide.
 
 ## Tech stack
 
-| Piece     | Choice                                                                                                  | Why                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Framework | [Vite](https://vitejs.dev/) + React + TypeScript                                                        | The app lives behind a login, so there's no need for server-rendering — Vite keeps the build simple and fast |
-| Hosting   | [Vercel](https://vercel.com/)                                                                           | Ships the PWA and hosts small serverless functions for anything that needs a secret key                      |
-| Auth      | [Clerk](https://clerk.com/)                                                                             | Handles sign-in/sign-up and sessions so we don't have to roll our own                                        |
-| Database  | [Neon](https://neon.tech/) (Postgres) + Drizzle ORM                                                     | Serverless Postgres that plugs neatly into Vercel                                                            |
-| UI        | [MUI](https://mui.com/) + [react-icons](https://react-icons.github.io/react-icons/) + styled-components | Accessible components, one icon set, styles kept clean and separate from logic                               |
-| AI        | [Groq](https://groq.com/)                                                                               | Fast, free-tier LLM inference powering the AI Chat tab                                                       |
-| Language  | [react-i18next](https://react.i18next.com/)                                                             | Real-time English/Spanish switching, remembers what you prefer                                               |
+| Piece     | Choice                                                                                                  | Why                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Framework | [Vite](https://vitejs.dev/) + React + TypeScript                                                        | The app lives behind a login, so there's no need for server-rendering — Vite keeps the build simple and fast   |
+| Hosting   | [Vercel](https://vercel.com/)                                                                           | Ships the PWA and hosts small serverless functions for anything that needs a secret key                        |
+| Auth      | [Clerk](https://clerk.com/)                                                                             | Handles sign-in/sign-up and sessions so we don't have to roll our own                                          |
+| Database  | [Neon](https://neon.tech/) (Postgres) + Drizzle ORM                                                     | Serverless Postgres that plugs neatly into Vercel                                                              |
+| UI        | [MUI](https://mui.com/) + [react-icons](https://react-icons.github.io/react-icons/) + styled-components | Accessible components, one icon set, styles kept clean and separate from logic                                 |
+| AI        | [Groq](https://groq.com/)                                                                               | Fast, free-tier LLM inference powering the AI Chat tab                                                         |
+| Language  | [react-i18next](https://react.i18next.com/) + [@clerk/localizations](https://clerk.com/docs)            | Real-time English/Spanish switching (app UI and Clerk's own screens both follow it), remembers what you prefer |
+| Tooling   | [oxlint](https://oxc.rs/) + Prettier + Husky                                                            | Fast Rust-based linting, consistent formatting, pre-commit checks so issues never reach a PR                   |
+| Testing   | [Vitest](https://vitest.dev/) + React Testing Library                                                   | Unit/hook tests colocated with the code they cover                                                             |
 
 ## How this project is built
 
@@ -61,25 +67,26 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                        | Status         |
-| ------- | ------------------------------------------------------------------- | -------------- |
-| v0.1.0  | Project docs and repo setup                                         | ✅ done        |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy        | ✅ done        |
-| v0.3.0  | Language switching + visual theme                                   | ✅ done        |
-| v0.4.0  | Login with Clerk                                                    | ✅ done        |
-| v0.5.0  | Database (Neon) wired up                                            | ✅ done        |
-| v0.6.0  | Settings tab                                                        | 🚧 in progress |
-| v0.7.0  | Timers tab                                                          | ⏳ pending     |
-| v0.8.0  | Dashboard tab                                                       | ⏳ pending     |
-| v0.9.0  | AI Chat tab (Groq)                                                  | ⏳ pending     |
-| v0.10.0 | Security & accessibility hardening                                  | ⏳ pending     |
-| v0.11.0 | Badges and social sharing                                           | ⏳ pending     |
-| v0.12.0 | Google Calendar integration                                         | ⏳ pending     |
-| v0.13.0 | Spotify/SoundCloud integration                                      | ⏳ pending     |
-| v1.0.0  | App store packaging                                                 | ⏳ pending     |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning) | ⏳ pending     |
-| v1.2.0  | More themes, more languages, dyslexia-friendly font option          | ⏳ pending     |
-| v1.3.0  | Relaxation tab: guided breathing exercises + curated calming music  | ⏳ pending     |
+| Version | What it adds                                                                           | Status         |
+| ------- | -------------------------------------------------------------------------------------- | -------------- |
+| v0.1.0  | Project docs and repo setup                                                            | ✅ done        |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                           | ✅ done        |
+| v0.3.0  | Language switching + visual theme                                                      | ✅ done        |
+| v0.4.0  | Login with Clerk                                                                       | ✅ done        |
+| v0.5.0  | Database (Neon) wired up                                                               | ✅ done        |
+| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done        |
+| v0.7.0  | Timers tab                                                                             | 🚧 in progress |
+| v0.8.0  | Dashboard tab                                                                          | ⏳ pending     |
+| v0.9.0  | AI Chat tab (Groq)                                                                     | ⏳ pending     |
+| v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending     |
+| v0.11.0 | Badges and social sharing                                                              | ⏳ pending     |
+| v0.12.0 | Google Calendar integration                                                            | ⏳ pending     |
+| v0.13.0 | Spotify/SoundCloud integration                                                         | ⏳ pending     |
+| v1.0.0  | App store packaging                                                                    | ⏳ pending     |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending     |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending     |
+| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music    | ⏳ pending     |
+| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending     |
 
 ## Getting started
 

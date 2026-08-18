@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import Paper from '@mui/material/Paper'
+import { layout } from '@/theme/tokens'
 
 export const ShellContainer = styled.div`
   display: flex;
@@ -9,12 +10,13 @@ export const ShellContainer = styled.div`
   width: 100%;
 `
 
-// 56px matches MUI's default BottomNavigation height, so content never sits
-// underneath the fixed nav bar.
+// Padding-top clears the fixed header (src/app/Header), padding-bottom
+// clears the fixed bottom nav below, so content never sits under either.
 export const ContentArea = styled.main`
   flex: 1 1 auto;
   overflow-y: auto;
-  padding-bottom: 56px;
+  padding-top: ${layout.headerHeight}px;
+  padding-bottom: ${layout.bottomNavHeight}px;
 `
 
 export const NavContainer = styled(Paper).attrs({ elevation: 3 })`

@@ -5,12 +5,24 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
 import { FiSettings } from 'react-icons/fi'
 import { useSettingsTab } from './useSettingsTab'
+import { DeleteAccountDialog } from './DeleteAccountDialog/DeleteAccountDialog'
 import { IconWrapper, SettingsContainer, SettingsSection } from './SettingsTab.styles'
 
+// Profile/avatar editing lives in the header's UserButton (always visible
+// once signed in) — showing it again here would just duplicate it. This
+// section only has the two actions deliberately kept outside Clerk's menu.
 export function SettingsTab() {
   const { t } = useTranslation()
-  const { language, mode, accountLabel, handleLanguageChange, handleThemeChange, handleSignOut } =
-    useSettingsTab()
+  const {
+    language,
+    mode,
+    isDeleteDialogOpen,
+    handleLanguageChange,
+    handleThemeChange,
+    handleSignOut,
+    openDeleteDialog,
+    closeDeleteDialog,
+  } = useSettingsTab()
 
   return (
     <SettingsContainer>
@@ -24,9 +36,11 @@ export function SettingsTab() {
 
       <SettingsSection>
         <Typography variant="subtitle2">{t('settings.account.label')}</Typography>
-        {accountLabel && <Typography variant="body2">{accountLabel}</Typography>}
         <Button size="small" variant="outlined" onClick={handleSignOut}>
           {t('settings.account.signOut')}
+        </Button>
+        <Button size="small" variant="text" color="error" onClick={openDeleteDialog}>
+          {t('settings.account.deleteAccount')}
         </Button>
       </SettingsSection>
 
@@ -46,6 +60,8 @@ export function SettingsTab() {
           <ToggleButton value="system">{t('settings.theme.system')}</ToggleButton>
         </ToggleButtonGroup>
       </SettingsSection>
+
+      <DeleteAccountDialog open={isDeleteDialogOpen} onClose={closeDeleteDialog} />
     </SettingsContainer>
   )
 }

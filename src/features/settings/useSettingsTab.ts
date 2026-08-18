@@ -1,18 +1,16 @@
 import type { MouseEvent } from 'react'
-import { useClerk, useUser } from '@clerk/clerk-react'
+import { useState } from 'react'
+import { useClerk } from '@clerk/clerk-react'
 import { useLanguagePreference } from '@/i18n/useLanguagePreference'
 import type { SupportedLanguage } from '@/i18n/i18n.interfaces'
 import { useThemeMode } from '@/theme/useThemeMode'
 import type { ThemeMode } from '@/theme/theme.interfaces'
 
-// TODO(iteration/05-settings-tab, v0.6.0): grow this hook alongside the rest
-// of Settings (full profile editing, delete account). For now the account
-// section is just an email + sign-out — a seed of the real thing.
 export function useSettingsTab() {
   const { language, setLanguage } = useLanguagePreference()
   const { mode, setMode } = useThemeMode()
-  const { user } = useUser()
   const { signOut } = useClerk()
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   const handleLanguageChange = (
     _event: MouseEvent<HTMLElement>,
@@ -29,11 +27,21 @@ export function useSettingsTab() {
     }
   }
 
-  const accountLabel = user?.primaryEmailAddress?.emailAddress ?? user?.username ?? ''
-
   const handleSignOut = () => {
     void signOut()
   }
 
-  return { language, mode, accountLabel, handleLanguageChange, handleThemeChange, handleSignOut }
+  const openDeleteDialog = () => setIsDeleteDialogOpen(true)
+  const closeDeleteDialog = () => setIsDeleteDialogOpen(false)
+
+  return {
+    language,
+    mode,
+    isDeleteDialogOpen,
+    handleLanguageChange,
+    handleThemeChange,
+    handleSignOut,
+    openDeleteDialog,
+    closeDeleteDialog,
+  }
 }

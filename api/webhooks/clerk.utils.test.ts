@@ -39,6 +39,15 @@ describe('getPrimaryEmail', () => {
 
 describe('verifyClerkWebhook', () => {
   it('throws for a signature that does not match the payload', () => {
+    // Deliberately no "whsec_" prefix: svix only strips it if present (it's
+    // optional — see standardwebhooks' Webhook constructor) and falls back to
+    // decoding the whole string as base64 either way, so this is just as
+    // valid a fixture — but a bare "whsec_..." string is exactly what trips
+    // GitHub's secret scanner (that prefix is also Stripe's webhook-secret
+    // format), even though this was always a fake, hardcoded, never-valid
+    // value. This base64 happens to decode to "not-a-real-secret-fake-test-value".
+    const fakeSigningKey = 'bm90LWEtcmVhbC1zZWNyZXQtZmFrZS10ZXN0LXZhbHVl'
+
     expect(() =>
       verifyClerkWebhook(
         '{"type":"user.created"}',
@@ -47,7 +56,7 @@ describe('verifyClerkWebhook', () => {
           'svix-timestamp': String(Math.floor(Date.now() / 1000)),
           'svix-signature': 'v1,not-a-real-signature',
         },
-        'whsec_00000000000000000000000000000000',
+        fakeSigningKey,
       ),
     ).toThrow()
   })

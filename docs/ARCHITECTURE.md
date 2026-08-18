@@ -4,7 +4,9 @@
 
 ```
 src/
-  app/                  # App shell: router, providers, bottom tab navigation
+  app/                  # App shell: router, providers, fixed header, bottom tab nav
+    Header/               # Always rendered (signed in or not): logo+name, and once
+                            # signed in, avatar (UserButton) + Settings shortcut
   auth/                 # AuthGate (gates the app on Clerk sign-in), SignInScreen
   features/
     timers/
@@ -41,9 +43,18 @@ inferred types in one file, since that's how Drizzle itself is meant to be used.
 
 ## Navigation shell
 
-Bottom tab bar (mobile-first) with four tabs, added incrementally per the roadmap:
-Timers, AI Chat, Dashboard, Settings. Routing via React Router; the tab bar and
-route definitions live in `src/app/`.
+Two pieces of fixed chrome, both from `src/theme/tokens.ts`'s `layout` heights so
+they never drift out of sync with the content padding around them:
+
+- **Header** (top, always rendered — see `src/app/Header/`): app logo/name on the
+  left; once signed in, the account avatar (Clerk's `<UserButton>`) and a Settings
+  shortcut on the right. Present on the sign-in screen too, just without the
+  account controls.
+- **Bottom tab bar** (mobile-first, three tabs — Timers, AI Chat, Dashboard).
+  Settings isn't one of them; it's reached only via the header, since it's an
+  account-level concern rather than a core feature tab.
+
+Routing via React Router; the tab bar and route definitions live in `src/app/`.
 
 ## Data flow
 

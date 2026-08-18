@@ -1,4 +1,7 @@
 {
+  "app": {
+    "shortName": "ND App"
+  },
   "nav": {
     "timers": "Timers",
     "chat": "Chat IA",
@@ -25,7 +28,7 @@
   },
   "settings": {
     "title": "Ajustes",
-    "description": "Más preferencias de cuenta y de la app llegarán pronto.",
+    "description": "Gestioná tu cuenta, idioma y apariencia.",
     "language": {
       "label": "Idioma",
       "en": "English",
@@ -39,7 +42,15 @@
     },
     "account": {
       "label": "Cuenta",
-      "signOut": "Cerrar sesión"
+      "signOut": "Cerrar sesión",
+      "deleteAccount": "Eliminar cuenta",
+      "deleteDialog": {
+        "title": "¿Eliminar tu cuenta?",
+        "body": "Esto borra tu cuenta para siempre, junto con todo lo que tiene: temporizadores, historial, preferencias. No se puede deshacer.",
+        "cancel": "Cancelar",
+        "confirm": "Eliminar para siempre",
+        "error": "Algo salió mal al eliminar tu cuenta. Intentá de nuevo."
+      }
     }
   }
 }

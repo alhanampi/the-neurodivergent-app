@@ -1,4 +1,7 @@
 {
+  "app": {
+    "shortName": "ND App"
+  },
   "nav": {
     "timers": "Timers",
     "chat": "AI Chat",
@@ -25,7 +28,7 @@
   },
   "settings": {
     "title": "Settings",
-    "description": "More account and app preferences are coming soon.",
+    "description": "Manage your account, language, and appearance.",
     "language": {
       "label": "Language",
       "en": "English",
@@ -39,7 +42,15 @@
     },
     "account": {
       "label": "Account",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "deleteAccount": "Delete account",
+      "deleteDialog": {
+        "title": "Delete your account?",
+        "body": "This permanently deletes your account and everything in it — timers, history, preferences. This can't be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete permanently",
+        "error": "Something went wrong deleting your account. Please try again."
+      }
     }
   }
 }
