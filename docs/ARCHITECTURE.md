@@ -18,6 +18,13 @@ src/
       StopTimerDialog/       # Confirmation before stopping a timer with progress
     ai-chat/
     dashboard/
+      DashboardTab.tsx        # Stat tiles + @mui/x-charts bar charts (time
+      useDashboardTab.ts        # spent, by-preset breakdown), date-range filter
+      DashboardTab.styles.ts
+      DashboardTab.interfaces.ts # Reuses TimerSession/TimerPresetId from
+      DashboardTab.utils.ts      # timers/ (same client bundle, not a
+      useDashboardTab.utils.ts   # server-boundary crossing) rather than
+                                  # duplicating them
     settings/
   components/           # Shared, cross-feature UI building blocks (same file split)
   hooks/                # Shared hooks not tied to one feature
@@ -71,7 +78,10 @@ Browser (React)
    │     ├─ /api/chat            → Groq (API key stays server-side)
    │     ├─ /api/preferences     → verifies the Clerk token, reads/writes Neon
    │     ├─ /api/timer-sessions  → verifies the Clerk token, reads/writes Neon
-   │     │                          (GET recent history, POST a finished run)
+   │     │                          (GET recent history — or, with
+   │     │                          ?startDate&endDate, every session in that
+   │     │                          range for the Dashboard tab — POST a
+   │     │                          finished run)
    │     └─ /api/webhooks/*      → Clerk webhook (svix-verified) → Neon,
    │                                upserts/deletes the user + preferences rows
    │

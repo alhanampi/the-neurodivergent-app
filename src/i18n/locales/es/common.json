@@ -12,10 +12,6 @@
     "chat": {
       "title": "Chat IA",
       "description": "Conversá sobre una tarea y dividila en pasos chicos y manejables. Próximamente."
-    },
-    "dashboard": {
-      "title": "Panel",
-      "description": "Mirá tus tareas completadas, el tiempo dedicado y tu progreso. Próximamente."
     }
   },
   "auth": {
@@ -84,6 +80,33 @@
       "empty": "Todavía no hay sesiones — iniciá un temporizador para ver tu historial acá.",
       "completed": "Completado",
       "stopped": "Detenido antes"
+    }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "loading": "Cargando tus estadísticas…",
+    "empty": "Todavía no hay sesiones en este rango — iniciá un temporizador para ver tus estadísticas acá.",
+    "rangePresets": {
+      "7d": "7 días",
+      "30d": "30 días",
+      "90d": "90 días",
+      "all": "Todo"
+    },
+    "stats": {
+      "totalTime": "Tiempo total",
+      "sessions": "Sesiones",
+      "completionRate": "Completadas"
+    },
+    "duration": {
+      "hoursMinutes": "{{hours}}h {{minutes}} min",
+      "hoursOnly": "{{hours}}h",
+      "minutesOnly": "{{minutes}} min"
+    },
+    "charts": {
+      "timeSpentTitle": "Tiempo dedicado",
+      "byPresetTitle": "Por tipo",
+      "minutesSeriesLabel": "Minutos",
+      "minutesValue": "{{minutes}} min"
     }
   },
   "settings": {

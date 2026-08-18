@@ -59,11 +59,14 @@ export default defineConfig({
   build: {
     // MUI + Clerk + i18next + @clerk/localizations (2 full locales, ~170kB
     // raw between them) push the single bundle past Vite's 500kB default
-    // warning threshold; the Timers tab (v0.7.0) pushed it past 750kB too.
-    // Real fix is code-splitting (lazy-load heavier per-route chunks) —
-    // tracked for v0.10.0 (security/perf hardening) — this just stops the
-    // warning from being noise until then.
-    chunkSizeWarningLimit: 850,
+    // warning threshold; the Timers tab (v0.7.0) pushed it past 750kB too;
+    // @mui/x-charts (v0.8.0, Dashboard tab) pushed it past 850kB, to
+    // ~1.1MB raw / ~340kB gzipped. Real fix is code-splitting (lazy-load
+    // heavier per-route chunks — the Dashboard tab specifically, since
+    // @mui/x-charts is the newest and heaviest addition) — tracked for
+    // v0.10.0 (security/perf hardening) — this just stops the warning from
+    // being noise until then.
+    chunkSizeWarningLimit: 1150,
   },
   test: {
     globals: true,
