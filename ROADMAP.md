@@ -27,7 +27,7 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 | v1.0.0  | `iteration/13-app-store-packaging` | Capacitor/PWABuilder wrap evaluation; store assets; submission prep                                                                                                                                                                                                                                                                                                                                                                                                   | pending     |
 | v1.1.0  | `iteration/14-model-selection`     | Let the user pick between multiple LLM models for the AI Chat tab for specific uses (e.g. a faster/cheaper model for quick check-ins vs. a stronger reasoning model for harder task breakdowns); model choice becomes a per-conversation or per-preference setting instead of one hardcoded model                                                                                                                                                                     | pending     |
 | v1.2.0  | `iteration/15-personalization`     | More color themes beyond light/dark; more UI languages beyond en/es; font choice in Settings, including a dyslexia-friendly option (e.g. Atkinson Hyperlegible / OpenDyslexic)                                                                                                                                                                                                                                                                                        | pending     |
-| v1.3.0  | `iteration/16-relaxation-tab`      | New tab: guided relaxation/mindfulness exercises (breathing patterns, short grounding exercises — built in-house, no external API) plus curated relaxation music/ambience via embedded public Spotify/SoundCloud playlists, mapped by category (focus, sleep, nature) rather than an algorithmic recommendation                                                                                                                                                       | pending     |
+| v1.3.0  | `iteration/16-relaxation-tab`      | New tab: guided relaxation/mindfulness exercises with custom animations (box/square breathing, expanding-wave breathing, short grounding exercises — built in-house, no external API, timed animation paced to the actual breathing count) plus curated relaxation music/ambience via embedded public Spotify/SoundCloud playlists, mapped by category (focus, sleep, nature) rather than an algorithmic recommendation                                               | pending     |
 | v1.4.0  | `iteration/17-task-roulette`       | New tab: user enters pending tasks with a difficulty level, spins a wheel (`react-custom-roulette`) to randomly get one to work on; harder tasks earn more points; user sets a points threshold that triggers a break suggestion + prompt to share the earned badge on social media; task selection is weighted by time-of-day relevance (e.g. a task tagged "buy groceries" gets a higher chance of coming up near store-closing time than a non-time-sensitive one) | pending     |
 
 ## Notes and open decisions
@@ -98,6 +98,14 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   [Freesound.org](https://freesound.org/docs/api/overview.html) is a good fit for
   short ambient/nature sound loops behind the breathing exercises specifically —
   free API access is non-commercial only, so revisit if the app ever monetizes.
+- **Relaxation animations (iteration 16):** custom-built, not a library — box/square
+  breathing (4-4-4-4 hold pattern) and an expanding-wave style are simple enough as
+  CSS/`styled-components` keyframe animations driven by a hook that tracks the
+  current phase and duration, no need for an animation dependency. Must respect the
+  `prefers-reduced-motion` handling already added in iteration 2
+  (`src/index.css`) — for users with that preference, replace the moving shape with
+  a static one plus a text/number countdown instead of skipping the exercise
+  content entirely.
 - **Linter (iteration 1):** used [oxlint](https://oxc.rs/) instead of ESLint —
   `npm create vite@latest` now defaults to it, it's a Rust-based linter that's
   meaningfully faster, and its `react`/`typescript`/`jsx-a11y`/`import` plugins

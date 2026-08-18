@@ -31,8 +31,9 @@ Coming later: **badges** for showing up and finishing things, **social sharing**
 your wins, two-way integrations with **Google Calendar** and
 **Spotify/SoundCloud** (so a "study for 20 minutes" task can queue up a focus
 playlist automatically), more **themes/languages/fonts** (including a
-dyslexia-friendly option), a **relaxation tab** with guided breathing exercises
-and calming music, and a **task roulette** that randomly picks a pending task
+dyslexia-friendly option), a **relaxation tab** with animated breathing exercises
+(box breathing, expanding waves) and calming music, and a **task roulette** that
+randomly picks a pending task
 for you (weighted by difficulty and time of day) so you don't have to decide.
 
 ## Tech stack
@@ -80,7 +81,7 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v1.0.0  | App store packaging                                                                    | ⏳ pending     |
 | v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending     |
 | v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending     |
-| v1.3.0  | Relaxation tab: guided breathing exercises + curated calming music                     | ⏳ pending     |
+| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music    | ⏳ pending     |
 | v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending     |
 
 ## Getting started
