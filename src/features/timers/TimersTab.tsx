@@ -2,13 +2,27 @@ import { useTranslation } from 'react-i18next'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
-import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
-import { FiBell, FiClock, FiPause, FiPlay, FiPlus, FiVolume2, FiVolumeX, FiX } from 'react-icons/fi'
+import {
+  FiBell,
+  FiClock,
+  FiPause,
+  FiPlay,
+  FiPlus,
+  FiPlusCircle,
+  FiVolume2,
+  FiVolumeX,
+  FiX,
+} from 'react-icons/fi'
 import { useTimersTab } from './useTimersTab'
-import { CUSTOM_PRESET_ID, MAX_CUSTOM_MINUTES, MIN_CUSTOM_MINUTES } from './TimersTab.constants'
+import {
+  ADD_MINUTES_STEP,
+  CUSTOM_PRESET_ID,
+  MAX_CUSTOM_MINUTES,
+  MIN_CUSTOM_MINUTES,
+} from './TimersTab.constants'
 import {
   formatSeconds,
   formatSessionTimestamp,
@@ -39,6 +53,7 @@ import {
   TimerCardName,
   TimerCardPhaseTag,
   TimerCardTime,
+  TimerCardTimeGroup,
   TimersContainer,
   TimersList,
 } from './TimersTab.styles'
@@ -72,6 +87,7 @@ export function TimersTab() {
     closePomodoroDialog,
     confirmPomodoro,
     updateTimerMinutes,
+    addMinutesToTimer,
     toggleTimer,
     requestStop,
     cancelStopRequest,
@@ -138,14 +154,6 @@ export function TimersTab() {
           </ToggleButtonGroup>
         </PresetRow>
 
-        <TextField
-          size="small"
-          fullWidth
-          value={nameDraft}
-          onChange={(event) => setNameDraft(event.target.value)}
-          placeholder={t('timers.namePlaceholder')}
-        />
-
         <Button variant="contained" startIcon={<FiPlus />} onClick={openAddDialog}>
           {t('timers.addTimer')}
         </Button>
@@ -190,7 +198,16 @@ export function TimersTab() {
                     ariaLabel={t('timers.durationLabel')}
                   />
                 ) : (
-                  <TimerCardTime>{formatSeconds(timer.remainingSeconds)}</TimerCardTime>
+                  <TimerCardTimeGroup>
+                    <TimerCardTime>{formatSeconds(timer.remainingSeconds)}</TimerCardTime>
+                    <IconButton
+                      size="small"
+                      aria-label={t('timers.addMinutes', { minutes: ADD_MINUTES_STEP })}
+                      onClick={() => addMinutesToTimer(timer.id, ADD_MINUTES_STEP)}
+                    >
+                      <FiPlusCircle size={16} />
+                    </IconButton>
+                  </TimerCardTimeGroup>
                 )}
 
                 <IconButton
@@ -237,6 +254,8 @@ export function TimersTab() {
 
       <AddTimerDialog
         open={isAddDialogOpen}
+        name={nameDraft}
+        onNameChange={setNameDraft}
         minutes={draftMinutes}
         onMinutesChange={setDraftMinutes}
         min={MIN_CUSTOM_MINUTES}
@@ -247,6 +266,8 @@ export function TimersTab() {
 
       <PomodoroDialog
         open={isPomodoroDialogOpen}
+        name={nameDraft}
+        onNameChange={setNameDraft}
         focusMinutes={pomodoroFocusMinutes}
         breakMinutes={pomodoroBreakMinutes}
         onFocusMinutesChange={setPomodoroFocusMinutes}

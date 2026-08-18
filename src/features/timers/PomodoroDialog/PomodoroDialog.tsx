@@ -5,17 +5,21 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import TextField from '@mui/material/TextField'
 import { MinutesInput } from '../MinutesInput/MinutesInput'
-import { PhaseLabel, PhaseRow } from './PomodoroDialog.styles'
+import { NameFieldWrapper, PhaseLabel, PhaseRow } from './PomodoroDialog.styles'
 import type { PomodoroDialogProps } from './PomodoroDialog.interfaces'
 
 // Opened instead of AddTimerDialog when "Add timer" is pressed with Focus
 // selected (see useTimersTab's openAddDialog) — a Focus timer is always a
-// full focus/break Pomodoro, not a single duration. Both fields start at the
-// classic 20/10 split every time this opens, and the explanation text below
-// tracks whatever the user adjusts them to, live.
+// full focus/break Pomodoro, not a single duration. Both duration fields
+// start at the classic 20/10 split every time this opens (name resets to
+// empty too), and the explanation text below tracks whatever the user
+// adjusts them to, live.
 export function PomodoroDialog({
   open,
+  name,
+  onNameChange,
   focusMinutes,
   breakMinutes,
   onFocusMinutesChange,
@@ -31,6 +35,15 @@ export function PomodoroDialog({
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{t('timers.pomodoroDialog.title')}</DialogTitle>
       <DialogContent>
+        <NameFieldWrapper>
+          <TextField
+            size="small"
+            fullWidth
+            value={name}
+            onChange={(event) => onNameChange(event.target.value)}
+            label={t('timers.namePlaceholder')}
+          />
+        </NameFieldWrapper>
         <DialogContentText>
           {t('timers.pomodoroDialog.explanation', { focusMinutes, breakMinutes })}
         </DialogContentText>

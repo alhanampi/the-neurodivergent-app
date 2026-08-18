@@ -123,3 +123,37 @@ export function getActivePresetId(
 export function getPhaseTranslationKey(kind: TimerPhaseKind): string {
   return `timers.pomodoro.phase.${kind}`
 }
+
+/** Extends a timer that's already running or paused by some number of
+ * minutes — used by the card's "add minutes" button for when a task runs
+ * long and the countdown shouldn't just end on it. Adds the same delta to
+ * both `plannedSeconds` and `remainingSeconds` (so the progress bar's
+ * fraction — elapsed vs. planned — stays meaningful instead of jumping),
+ * nudges a running timer's wall-clock end timestamp out by the same amount
+ * (paused has none to adjust), and, for a Pomodoro, extends its *current*
+ * phase's seconds too so the phase stays internally consistent with the
+ * timer's own plannedSeconds. Not meant for an idle timer — that already has
+ * its own free-form MinutesInput for setting an exact duration; callers
+ * guard on status themselves. */
+export function addMinutesToTimerInstance(
+  timer: TimerInstance,
+  minutesToAdd: number,
+): TimerInstance {
+  const addedSeconds = Math.max(0, Math.round(minutesToAdd)) * 60
+  if (addedSeconds === 0) return timer
+
+  const phases = timer.phases?.map((phase, index) =>
+    index === (timer.phaseIndex ?? 0) ? { ...phase, seconds: phase.seconds + addedSeconds } : phase,
+  )
+
+  return {
+    ...timer,
+    plannedSeconds: timer.plannedSeconds + addedSeconds,
+    remainingSeconds: timer.remainingSeconds + addedSeconds,
+    endTimestampMs:
+      timer.endTimestampMs != null
+        ? timer.endTimestampMs + addedSeconds * 1000
+        : timer.endTimestampMs,
+    ...(phases ? { phases } : {}),
+  }
+}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addMinutesToTimerInstance,
   clampCustomMinutes,
   clampMinutes,
   computeRemainingSeconds,
@@ -212,5 +213,55 @@ describe('getPhaseTranslationKey', () => {
   it('namespaces a phase kind under timers.pomodoro.phase', () => {
     expect(getPhaseTranslationKey('focus')).toBe('timers.pomodoro.phase.focus')
     expect(getPhaseTranslationKey('break')).toBe('timers.pomodoro.phase.break')
+  })
+})
+
+describe('addMinutesToTimerInstance', () => {
+  it('extends both planned and remaining seconds by the same amount', () => {
+    const running: TimerInstance = { ...baseTimer, status: 'running', remainingSeconds: 400 }
+    const result = addMinutesToTimerInstance(running, 5)
+
+    expect(result.plannedSeconds).toBe(600 + 5 * 60)
+    expect(result.remainingSeconds).toBe(400 + 5 * 60)
+  })
+
+  it("pushes a running timer's end timestamp out by the same delta", () => {
+    const running: TimerInstance = { ...baseTimer, status: 'running', endTimestampMs: 1_000_000 }
+    const result = addMinutesToTimerInstance(running, 5)
+
+    expect(result.endTimestampMs).toBe(1_000_000 + 5 * 60 * 1000)
+  })
+
+  it('leaves a paused timer without an end timestamp alone', () => {
+    const paused: TimerInstance = { ...baseTimer, status: 'paused', endTimestampMs: null }
+    const result = addMinutesToTimerInstance(paused, 5)
+
+    expect(result.endTimestampMs).toBeNull()
+    expect(result.plannedSeconds).toBe(600 + 5 * 60)
+  })
+
+  it("extends a Pomodoro timer's current phase too, leaving the other untouched", () => {
+    const pomodoro: TimerInstance = {
+      ...baseTimer,
+      status: 'running',
+      presetId: 'pomodoro-focus',
+      phases: [
+        { kind: 'focus', seconds: 1200 },
+        { kind: 'break', seconds: 600 },
+      ],
+      phaseIndex: 0,
+    }
+    const result = addMinutesToTimerInstance(pomodoro, 5)
+
+    expect(result.phases).toEqual([
+      { kind: 'focus', seconds: 1200 + 5 * 60 },
+      { kind: 'break', seconds: 600 },
+    ])
+  })
+
+  it('is a no-op for zero (or negative) minutes', () => {
+    const running: TimerInstance = { ...baseTimer, status: 'running' }
+    expect(addMinutesToTimerInstance(running, 0)).toBe(running)
+    expect(addMinutesToTimerInstance(running, -5)).toBe(running)
   })
 })

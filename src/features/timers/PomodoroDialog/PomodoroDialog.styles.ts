@@ -1,5 +1,9 @@
 import styled from 'styled-components'
 
+export const NameFieldWrapper = styled.div`
+  padding: 4px 0 12px;
+`
+
 export const PhaseRow = styled.div`
   display: flex;
   align-items: center;

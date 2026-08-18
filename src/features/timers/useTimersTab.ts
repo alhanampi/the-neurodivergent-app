@@ -13,6 +13,7 @@ import {
   TIMER_PRESETS,
 } from './TimersTab.constants'
 import {
+  addMinutesToTimerInstance,
   clampMinutes,
   computeRemainingSeconds,
   createTimerId,
@@ -274,7 +275,10 @@ export function useTimersTab() {
   // of its own, so it falls back to DEFAULT_CUSTOM_MINUTES) — always reset
   // on open, regardless of whatever was left over from last time, so the
   // user actively confirms a duration rather than silently inheriting one.
+  // The name draft resets to empty here too, now that it's set inside
+  // whichever popup opens rather than in the always-visible composer.
   const openAddDialog = useCallback(() => {
+    setNameDraftState('')
     if (selectedPresetId === POMODORO_PRESET_ID) {
       setPomodoroFocusMinutesState(DEFAULT_POMODORO_FOCUS_MINUTES)
       setPomodoroBreakMinutesState(DEFAULT_POMODORO_BREAK_MINUTES)
@@ -351,6 +355,23 @@ export function useTimersTab() {
           }
           return { ...timer, plannedSeconds: seconds, remainingSeconds: seconds }
         }),
+      )
+    },
+    [applyTimers],
+  )
+
+  // Lets a running/paused card's "add minutes" button extend it in place —
+  // guarded on status here too (not just by the UI only rendering the button
+  // for a non-idle card) since an idle timer already has its own free-form
+  // MinutesInput for setting an exact duration instead.
+  const addMinutesToTimer = useCallback(
+    (id: string, minutesToAdd: number) => {
+      applyTimers((current) =>
+        current.map((timer) =>
+          timer.id === id && timer.status !== 'idle'
+            ? addMinutesToTimerInstance(timer, minutesToAdd)
+            : timer,
+        ),
       )
     },
     [applyTimers],
@@ -447,6 +468,7 @@ export function useTimersTab() {
     closePomodoroDialog,
     confirmPomodoro,
     updateTimerMinutes,
+    addMinutesToTimer,
     toggleTimer,
     requestStop,
     cancelStopRequest,

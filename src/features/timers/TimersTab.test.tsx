@@ -21,15 +21,23 @@ function renderTimersTab() {
 
 // Selects the "Custom time" preset (no suggested duration of its own, so its
 // popup always defaults to 10 min) and runs it through the "Add timer"
-// popup, optionally overriding the duration by typing into it, then
-// confirms — mirrors the real flow (select preset → trigger button → popup
-// → confirm) end to end. Focus is deliberately excluded here: it opens a
-// different popup entirely (see addPomodoroViaDialog below).
-async function addTimerViaDialog(user: ReturnType<typeof userEvent.setup>, minutes?: number) {
+// popup, optionally overriding the name and/or duration by typing into the
+// popup's own fields, then confirms — mirrors the real flow (select preset →
+// trigger button → popup → confirm) end to end. Focus is deliberately
+// excluded here: it opens a different popup entirely (see
+// addPomodoroViaDialog below).
+async function addTimerViaDialog(
+  user: ReturnType<typeof userEvent.setup>,
+  minutes?: number,
+  name?: string,
+) {
   await user.click(screen.getByRole('button', { name: 'Custom time' }))
   await user.click(screen.getByRole('button', { name: 'Add timer' }))
   const dialog = screen.getByRole('dialog')
 
+  if (name !== undefined) {
+    await user.type(within(dialog).getByLabelText('Name this timer (optional)'), name)
+  }
   if (minutes !== undefined) {
     const field = within(dialog).getByDisplayValue('10')
     await user.clear(field)
@@ -45,11 +53,14 @@ async function addTimerViaDialog(user: ReturnType<typeof userEvent.setup>, minut
 // popup (20/10 defaults) without needing to select anything first.
 async function addPomodoroViaDialog(
   user: ReturnType<typeof userEvent.setup>,
-  overrides: { focusMinutes?: number; breakMinutes?: number } = {},
+  overrides: { focusMinutes?: number; breakMinutes?: number; name?: string } = {},
 ) {
   await user.click(screen.getByRole('button', { name: 'Add timer' }))
   const dialog = screen.getByRole('dialog')
 
+  if (overrides.name !== undefined) {
+    await user.type(within(dialog).getByLabelText('Name this timer (optional)'), overrides.name)
+  }
   if (overrides.focusMinutes !== undefined) {
     const field = within(dialog).getByDisplayValue('20')
     await user.clear(field)
@@ -92,7 +103,7 @@ describe('TimersTab', () => {
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
 
     const dialog = screen.getByRole('dialog')
-    expect(within(dialog).getByRole('heading', { name: 'Set timer duration' })).toBeInTheDocument()
+    expect(within(dialog).getByRole('heading', { name: 'New timer' })).toBeInTheDocument()
     expect(within(dialog).getByDisplayValue('5')).toBeInTheDocument()
     expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
@@ -126,7 +137,7 @@ describe('TimersTab', () => {
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
 
     await waitFor(() => {
-      expect(screen.queryByRole('heading', { name: 'Set timer duration' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: 'New timer' })).not.toBeInTheDocument()
     })
     expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
@@ -159,8 +170,7 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Fold laundry')
-    await addTimerViaDialog(user)
+    await addTimerViaDialog(user, undefined, 'Fold laundry')
 
     expect(screen.getByText('Fold laundry')).toBeInTheDocument()
   })
@@ -225,6 +235,19 @@ describe('TimersTab', () => {
     const card = screen.getByRole('listitem')
     expect(within(card).queryByDisplayValue('10')).not.toBeInTheDocument()
     expect(within(card).getByText('10:00')).toBeInTheDocument()
+  })
+
+  it('offers an "add minutes" button once a timer has started, extending its remaining time', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await addTimerViaDialog(user)
+    await user.click(screen.getByRole('button', { name: 'Start' }))
+
+    const card = screen.getByRole('listitem')
+    await user.click(within(card).getByRole('button', { name: 'Add 5 minutes' }))
+
+    expect(within(card).getByText('15:00')).toBeInTheDocument()
   })
 
   it('asks for confirmation before stopping a started timer', async () => {
@@ -309,8 +332,7 @@ describe('TimersTab', () => {
       const user = userEvent.setup()
       renderTimersTab()
 
-      await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Deep work')
-      await addPomodoroViaDialog(user, { focusMinutes: 30, breakMinutes: 5 })
+      await addPomodoroViaDialog(user, { focusMinutes: 30, breakMinutes: 5, name: 'Deep work' })
 
       const card = screen.getByRole('listitem')
       expect(within(card).getByText('Deep work')).toBeInTheDocument()
@@ -322,8 +344,7 @@ describe('TimersTab', () => {
       const user = userEvent.setup()
       renderTimersTab()
 
-      await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Deep work')
-      await addPomodoroViaDialog(user)
+      await addPomodoroViaDialog(user, { name: 'Deep work' })
       await user.click(screen.getByRole('button', { name: 'Start' }))
 
       const card = screen.getByRole('listitem')

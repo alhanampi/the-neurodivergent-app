@@ -34,6 +34,11 @@ export const DEFAULT_POMODORO_BREAK_MINUTES = 10
 
 export const MAX_TIMER_NAME_LENGTH = 60
 
+/** How many minutes each tap of a running/paused card's "add minutes" button
+ * adds — same default step as MinutesInput's own +/- nudge, so the two
+ * increment controls feel consistent. */
+export const ADD_MINUTES_STEP = 5
+
 /** How often the running countdown re-derives itself from the wall-clock end
  * timestamp (not by decrementing a counter, so it stays correct even if the
  * tab was backgrounded and the interval got throttled). */
