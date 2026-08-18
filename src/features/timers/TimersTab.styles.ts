@@ -96,6 +96,11 @@ export const TimerCardName = styled.span`
   color: ${({ theme }) => theme.palette.text.primary};
 `
 
+export const TimerCardPhaseTag = styled.span`
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`
+
 export const TimerCardTime = styled.span`
   font-variant-numeric: tabular-nums;
   font-size: 1.1rem;

@@ -19,10 +19,14 @@ function renderTimersTab() {
   )
 }
 
-// Opens the "Add timer" popup, optionally overrides its default (10 min)
-// duration by typing into it, then confirms — mirrors the real two-step
-// flow (trigger button → popup → confirm) end to end.
+// Selects the "Custom time" preset (no suggested duration of its own, so its
+// popup always defaults to 10 min) and runs it through the "Add timer"
+// popup, optionally overriding the duration by typing into it, then
+// confirms — mirrors the real flow (select preset → trigger button → popup
+// → confirm) end to end. Focus is deliberately excluded here: it opens a
+// different popup entirely (see addPomodoroViaDialog below).
 async function addTimerViaDialog(user: ReturnType<typeof userEvent.setup>, minutes?: number) {
+  await user.click(screen.getByRole('button', { name: 'Custom time' }))
   await user.click(screen.getByRole('button', { name: 'Add timer' }))
   const dialog = screen.getByRole('dialog')
 
@@ -30,6 +34,32 @@ async function addTimerViaDialog(user: ReturnType<typeof userEvent.setup>, minut
     const field = within(dialog).getByDisplayValue('10')
     await user.clear(field)
     await user.type(field, String(minutes))
+    await user.tab()
+  }
+
+  await user.click(within(dialog).getByRole('button', { name: 'Add timer' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+}
+
+// Focus is the default selected preset, so "Add timer" opens the Pomodoro
+// popup (20/10 defaults) without needing to select anything first.
+async function addPomodoroViaDialog(
+  user: ReturnType<typeof userEvent.setup>,
+  overrides: { focusMinutes?: number; breakMinutes?: number } = {},
+) {
+  await user.click(screen.getByRole('button', { name: 'Add timer' }))
+  const dialog = screen.getByRole('dialog')
+
+  if (overrides.focusMinutes !== undefined) {
+    const field = within(dialog).getByDisplayValue('20')
+    await user.clear(field)
+    await user.type(field, String(overrides.focusMinutes))
+    await user.tab()
+  }
+  if (overrides.breakMinutes !== undefined) {
+    const field = within(dialog).getByDisplayValue('10')
+    await user.clear(field)
+    await user.type(field, String(overrides.breakMinutes))
     await user.tab()
   }
 
@@ -49,23 +79,39 @@ describe('TimersTab', () => {
     expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Focus' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Short break' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Long break' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Custom time' })).toBeInTheDocument()
     expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
 
-  it('clicking Add timer opens a popup instead of creating a timer immediately', async () => {
+  it('clicking Add timer with Short break selected opens a popup suggesting its predefined 5 minutes', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await user.click(screen.getByRole('button', { name: 'Short break' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
 
-    expect(screen.getByRole('heading', { name: 'Set timer duration' })).toBeInTheDocument()
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByRole('heading', { name: 'Set timer duration' })).toBeInTheDocument()
+    expect(within(dialog).getByDisplayValue('5')).toBeInTheDocument()
     expect(screen.getByText(/No active timers/)).toBeInTheDocument()
   })
 
-  it('the popup defaults to 10 minutes', async () => {
+  it('clicking Add timer with Long break selected opens a popup suggesting its predefined 15 minutes', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await user.click(screen.getByRole('button', { name: 'Long break' }))
+    await user.click(screen.getByRole('button', { name: 'Add timer' }))
+
+    expect(within(screen.getByRole('dialog')).getByDisplayValue('15')).toBeInTheDocument()
+  })
+
+  it('the Custom time popup defaults to 10 minutes, further editable before confirming', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await user.click(screen.getByRole('button', { name: 'Custom time' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
 
     expect(within(screen.getByRole('dialog')).getByDisplayValue('10')).toBeInTheDocument()
@@ -75,6 +121,7 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await user.click(screen.getByRole('button', { name: 'Custom time' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
 
@@ -112,7 +159,6 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
-    await user.click(screen.getByRole('button', { name: 'Custom' }))
     await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Fold laundry')
     await addTimerViaDialog(user)
 
@@ -225,5 +271,64 @@ describe('TimersTab', () => {
     renderTimersTab()
 
     expect(screen.getByText(/No sessions yet/)).toBeInTheDocument()
+  })
+
+  describe('Pomodoro flow', () => {
+    it('Add timer with Focus selected (the default) opens the Pomodoro popup, explaining the 20/10 split', async () => {
+      const user = userEvent.setup()
+      renderTimersTab()
+
+      await user.click(screen.getByRole('button', { name: 'Add timer' }))
+
+      const dialog = screen.getByRole('dialog')
+      expect(
+        within(dialog).getByRole('heading', { name: 'Set up your Pomodoro' }),
+      ).toBeInTheDocument()
+      expect(within(dialog).getByText(/20 min of focus/)).toBeInTheDocument()
+      expect(within(dialog).getByText(/10 min of break/)).toBeInTheDocument()
+      expect(within(dialog).getByDisplayValue('20')).toBeInTheDocument()
+      expect(within(dialog).getByDisplayValue('10')).toBeInTheDocument()
+    })
+
+    it('cancelling the Pomodoro popup creates nothing', async () => {
+      const user = userEvent.setup()
+      renderTimersTab()
+
+      await user.click(screen.getByRole('button', { name: 'Add timer' }))
+      await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole('heading', { name: 'Set up your Pomodoro' }),
+        ).not.toBeInTheDocument()
+      })
+      expect(screen.getByText(/No active timers/)).toBeInTheDocument()
+    })
+
+    it('confirming the Pomodoro popup adds a timer card tagged as Focus, using the (possibly customized) focus duration', async () => {
+      const user = userEvent.setup()
+      renderTimersTab()
+
+      await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Deep work')
+      await addPomodoroViaDialog(user, { focusMinutes: 30, breakMinutes: 5 })
+
+      const card = screen.getByRole('listitem')
+      expect(within(card).getByText('Deep work')).toBeInTheDocument()
+      expect(within(card).getByText('Focus')).toBeInTheDocument()
+      expect(within(card).getByDisplayValue('30')).toBeInTheDocument()
+    })
+
+    it('starting a Pomodoro timer hides duration editing, same as a plain timer', async () => {
+      const user = userEvent.setup()
+      renderTimersTab()
+
+      await user.type(screen.getByPlaceholderText('Name this timer (optional)'), 'Deep work')
+      await addPomodoroViaDialog(user)
+      await user.click(screen.getByRole('button', { name: 'Start' }))
+
+      const card = screen.getByRole('listitem')
+      expect(within(card).getByText('20:00')).toBeInTheDocument()
+      expect(within(card).getByText('Focus')).toBeInTheDocument()
+    })
   })
 })

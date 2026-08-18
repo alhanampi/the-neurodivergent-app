@@ -2,25 +2,35 @@ import type { TimerPresetId } from './TimersTab.interfaces'
 
 export interface TimerPresetDefinition {
   id: Exclude<TimerPresetId, 'custom'>
-  minutes: number
+  /** Suggested single-phase duration to prefill the "Add timer" popup with.
+   * Omitted for `pomodoro-focus` — selecting Focus no longer creates a
+   * single-duration timer at all; it opens the Pomodoro dialog instead (see
+   * PomodoroDialog and useTimersTab's openAddDialog). */
+  minutes?: number
 }
 
-// Starting-point durations for the preset quick-select buttons — the actual
-// duration is always further editable (typed or scrolled) afterward, both
-// in the composer and on an idle timer card, so these are defaults, not
-// fixed values. "Custom" is a separate, fourth button with no preset
-// duration of its own (falls back to DEFAULT_CUSTOM_MINUTES).
+// Starting-point durations for the short/long break quick-select buttons —
+// the actual duration is always further editable (typed or scrolled)
+// afterward, both in the popup and on an idle timer card, so these are
+// defaults, not fixed values. "Custom time" is a separate, fourth button
+// with no preset duration of its own (falls back to DEFAULT_CUSTOM_MINUTES).
 export const TIMER_PRESETS: TimerPresetDefinition[] = [
-  { id: 'pomodoro-focus', minutes: 25 },
+  { id: 'pomodoro-focus' },
   { id: 'short-break', minutes: 5 },
   { id: 'long-break', minutes: 15 },
 ]
 
 export const CUSTOM_PRESET_ID: TimerPresetId = 'custom'
+export const POMODORO_PRESET_ID: TimerPresetId = 'pomodoro-focus'
 
 export const DEFAULT_CUSTOM_MINUTES = 10
 export const MIN_CUSTOM_MINUTES = 1
 export const MAX_CUSTOM_MINUTES = 180
+
+// Defaults offered by the Pomodoro dialog — the classic Pomodoro cadence,
+// always editable before confirming (see PomodoroDialog).
+export const DEFAULT_POMODORO_FOCUS_MINUTES = 20
+export const DEFAULT_POMODORO_BREAK_MINUTES = 10
 
 export const MAX_TIMER_NAME_LENGTH = 60
 

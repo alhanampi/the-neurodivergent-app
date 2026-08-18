@@ -32,9 +32,12 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
-- **Timers tab (iteration 6):** presets (`pomodoro-focus` 25m, `short-break` 5m,
-  `long-break` 15m) are quick-select defaults, not fixed values — every timer's
-  duration is always further editable (composer or an idle card), see below.
+- **Timers tab (iteration 6):** presets (`short-break` 5m, `long-break` 15m) are
+  quick-select defaults, not fixed values — every timer's duration is always
+  further editable (composer or an idle card), see below. `pomodoro-focus`
+  (Focus) is the exception: it's not a single duration at all, it opens a
+  dedicated Pomodoro flow — see the "presets suggest predefined times again,
+  plus a real Pomodoro" revision further down.
   Supports **multiple concurrent timers**: each one is a card (compact row, not a
   full-screen countdown) with an optional user-given name, added via a composer
   form at the top; one shared interval drives every running card's countdown so
@@ -112,6 +115,50 @@ Status legend: `pending` (not started) · `in progress` · `done`.
     (ref-read inside the interval, skip `setState` entirely on ticks where
     nothing actually changed) is the safer default for any interval-driven
     effect that calls back into hook state.
+  - **Presets suggest predefined times again, plus a real Pomodoro (third
+    revision):** reverted the "always defaults to 10" popup behavior — Short
+    break/Long break now prefill `AddTimerDialog` with their suggested minutes
+    (5/15) again, still freely editable before confirming; Custom's button is
+    relabeled "Custom time" to read as its own explicit choice rather than a
+    leftover fourth option. Focus stopped being a single-duration preset
+    entirely: selecting it and pressing "Add timer" opens a new
+    `PomodoroDialog` (`src/features/timers/PomodoroDialog/`) instead, which
+    explains the split ("This will be 20 min of focus followed by 10 min of
+    break") and offers two `MinutesInput` fields — defaulting to 20/10, and
+    editable right there rather than behind a separate "customize" toggle —
+    before creating the timer. A Pomodoro timer carries a `phases` array
+    (`[{kind:'focus',...}, {kind:'break',...}]`) plus a `phaseIndex`;
+    `plannedSeconds`/`remainingSeconds` always mirror whichever phase is
+    active, so every other card affordance (progress bar, `MinutesInput`
+    while idle, the stop confirmation) keeps working unmodified. Once
+    running, a focus phase completing auto-advances the same card straight
+    into its break phase (no extra tap — friction between phases works
+    against the whole point of the structure) with a distinct two-note
+    "chime" (`playChimeSound`, Web Audio, separate from the ambient tick) and
+    its own notification; the break completing then finishes the timer for
+    real. Each phase logs its own history session as it completes
+    (`presetId` resolves to `pomodoro-focus`/`short-break` depending on which
+    phase was active — both already-valid ids, no server-side changes
+    needed), so a manual stop only ever loses the _current_ phase's partial
+    progress, not any earlier one. Per the user's ask ("no debe tener sonido
+    excepto cuando termina"), a Pomodoro never plays the ambient per-second
+    tick regardless of the sound preference — only the chime, at each phase
+    boundary, unconditionally, since that's essential feedback for a
+    structure the user can't otherwise track without watching the clock.
+    - **Bug found writing this:** `advancePhaseOrFinish`'s phase-transition
+      update went through `setTimers` directly, without syncing `timersRef`
+      the way the tick loop's own countdown update already did. That's fine
+      for a single transition (the assertion runs after the whole `act()`
+      settles and React's own `timersRef.current = timers` effect has caught
+      up) but broke a Pomodoro completing _two_ phases inside one fake-timer
+      burst: the second completion read `timersRef` still holding the first
+      phase's now-stale `endTimestampMs`, saw nothing new to compare against,
+      and silently did nothing. Same family of bug as the two pitfalls
+      above — fixed by routing every `timers` mutation through one
+      `applyTimers` helper that updates `timersRef.current` synchronously,
+      computed from the ref itself rather than React's own (possibly
+      not-yet-flushed) `current` updater argument, before also calling
+      `setTimers`.
 - **Task roulette (iteration 17):** depends on the gamification system from
   iteration 10 (points/badges) and the Timers tab from iteration 6 (the task list
   it spins over) already being in place — it's an extension/consumer of both, not

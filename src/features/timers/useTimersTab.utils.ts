@@ -159,3 +159,35 @@ export function playTickSound(): void {
     // Best-effort — a missed tick isn't worth surfacing to the user.
   }
 }
+
+/** A short two-note "phase complete" chime for a Pomodoro timer — played on
+ * every phase boundary (focus → break, and the final break ending), always,
+ * regardless of the ambient tick-sound preference. A Pomodoro deliberately
+ * has no per-second tick (see useTimersTab's tick effect); this chime is its
+ * one essential audio cue, not decorative ambiance, so it isn't gated by
+ * that same preference. Distinguishable in pitch/pattern from the tick.
+ * Same best-effort/no-op-until-unlocked contract as playTickSound. */
+export function playChimeSound(): void {
+  const context = sharedAudioContext
+  if (!context) return
+
+  try {
+    const notes = [523.25, 783.99] // C5, G5
+    notes.forEach((frequency, index) => {
+      const startTime = context.currentTime + index * 0.12
+      const oscillator = context.createOscillator()
+      const gain = context.createGain()
+      oscillator.type = 'sine'
+      oscillator.frequency.value = frequency
+      gain.gain.setValueAtTime(0.0001, startTime)
+      gain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.01)
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.18)
+      oscillator.connect(gain)
+      gain.connect(context.destination)
+      oscillator.start(startTime)
+      oscillator.stop(startTime + 0.2)
+    })
+  } catch {
+    // Best-effort — a missed chime isn't worth surfacing to the user.
+  }
+}

@@ -28,7 +28,7 @@
       "pomodoro-focus": "Focus",
       "short-break": "Short break",
       "long-break": "Long break",
-      "custom": "Custom"
+      "custom": "Custom time"
     },
     "durationLabel": "Timer duration in minutes",
     "minutesUnit": "min",
@@ -49,6 +49,22 @@
       "title": "Set timer duration",
       "cancel": "Cancel",
       "confirm": "Add timer"
+    },
+    "pomodoroDialog": {
+      "title": "Set up your Pomodoro",
+      "explanation": "This will be {{focusMinutes}} min of focus followed by {{breakMinutes}} min of break — feel free to adjust either below.",
+      "focusLabel": "Focus duration in minutes",
+      "breakLabel": "Break duration in minutes",
+      "cancel": "Cancel",
+      "confirm": "Add timer"
+    },
+    "pomodoro": {
+      "phase": {
+        "focus": "Focus",
+        "break": "Break"
+      },
+      "phaseCompleteTitle": "Phase complete!",
+      "phaseCompleteBody": "{{phase}} — {{minutes}} min"
     },
     "stopDialog": {
       "title": "Stop this timer?",

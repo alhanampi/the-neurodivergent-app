@@ -12,11 +12,15 @@ import { CUSTOM_PRESET_ID, MAX_CUSTOM_MINUTES, MIN_CUSTOM_MINUTES } from './Time
 import {
   formatSeconds,
   formatSessionTimestamp,
+  getActivePhase,
+  getActivePresetId,
+  getPhaseTranslationKey,
   getPresetTranslationKey,
   getProgressFraction,
 } from './TimersTab.utils'
 import { MinutesInput } from './MinutesInput/MinutesInput'
 import { AddTimerDialog } from './AddTimerDialog/AddTimerDialog'
+import { PomodoroDialog } from './PomodoroDialog/PomodoroDialog'
 import { StopTimerDialog } from './StopTimerDialog/StopTimerDialog'
 import {
   ComposerSection,
@@ -33,6 +37,7 @@ import {
   TimerCard,
   TimerCardInfo,
   TimerCardName,
+  TimerCardPhaseTag,
   TimerCardTime,
   TimersContainer,
   TimersList,
@@ -48,6 +53,9 @@ export function TimersTab() {
     draftMinutes,
     nameDraft,
     isAddDialogOpen,
+    pomodoroFocusMinutes,
+    pomodoroBreakMinutes,
+    isPomodoroDialogOpen,
     history,
     isHistoryLoading,
     notificationPermission,
@@ -59,6 +67,10 @@ export function TimersTab() {
     openAddDialog,
     closeAddDialog,
     addTimer,
+    setPomodoroFocusMinutes,
+    setPomodoroBreakMinutes,
+    closePomodoroDialog,
+    confirmPomodoro,
     updateTimerMinutes,
     toggleTimer,
     requestStop,
@@ -143,46 +155,54 @@ export function TimersTab() {
         <HistoryEmpty>{t('timers.noActiveTimers')}</HistoryEmpty>
       ) : (
         <TimersList>
-          {timers.map((timer) => (
-            <TimerCard key={timer.id}>
-              <IconButton
-                aria-label={timer.status === 'running' ? t('timers.pause') : t('timers.start')}
-                onClick={() => toggleTimer(timer.id)}
-              >
-                {timer.status === 'running' ? <FiPause size={20} /> : <FiPlay size={20} />}
-              </IconButton>
+          {timers.map((timer) => {
+            const activePhase = getActivePhase(timer)
+            return (
+              <TimerCard key={timer.id}>
+                <IconButton
+                  aria-label={timer.status === 'running' ? t('timers.pause') : t('timers.start')}
+                  onClick={() => toggleTimer(timer.id)}
+                >
+                  {timer.status === 'running' ? <FiPause size={20} /> : <FiPlay size={20} />}
+                </IconButton>
 
-              <TimerCardInfo>
-                <TimerCardName>
-                  {timer.name || t(getPresetTranslationKey(timer.presetId))}
-                </TimerCardName>
-                <LinearProgress
-                  variant="determinate"
-                  value={getProgressFraction(timer.plannedSeconds, timer.remainingSeconds) * 100}
-                />
-              </TimerCardInfo>
+                <TimerCardInfo>
+                  <TimerCardName>
+                    {timer.name || t(getPresetTranslationKey(getActivePresetId(timer)))}
+                  </TimerCardName>
+                  {activePhase && (
+                    <TimerCardPhaseTag>
+                      {t(getPhaseTranslationKey(activePhase.kind))}
+                    </TimerCardPhaseTag>
+                  )}
+                  <LinearProgress
+                    variant="determinate"
+                    value={getProgressFraction(timer.plannedSeconds, timer.remainingSeconds) * 100}
+                  />
+                </TimerCardInfo>
 
-              {timer.status === 'idle' ? (
-                <MinutesInput
-                  value={Math.round(timer.plannedSeconds / 60)}
-                  onChange={(minutes) => updateTimerMinutes(timer.id, minutes)}
-                  min={MIN_CUSTOM_MINUTES}
-                  max={MAX_CUSTOM_MINUTES}
-                  ariaLabel={t('timers.durationLabel')}
-                />
-              ) : (
-                <TimerCardTime>{formatSeconds(timer.remainingSeconds)}</TimerCardTime>
-              )}
+                {timer.status === 'idle' ? (
+                  <MinutesInput
+                    value={Math.round(timer.plannedSeconds / 60)}
+                    onChange={(minutes) => updateTimerMinutes(timer.id, minutes)}
+                    min={MIN_CUSTOM_MINUTES}
+                    max={MAX_CUSTOM_MINUTES}
+                    ariaLabel={t('timers.durationLabel')}
+                  />
+                ) : (
+                  <TimerCardTime>{formatSeconds(timer.remainingSeconds)}</TimerCardTime>
+                )}
 
-              <IconButton
-                size="small"
-                aria-label={t('timers.stop')}
-                onClick={() => requestStop(timer.id)}
-              >
-                <FiX />
-              </IconButton>
-            </TimerCard>
-          ))}
+                <IconButton
+                  size="small"
+                  aria-label={t('timers.stop')}
+                  onClick={() => requestStop(timer.id)}
+                >
+                  <FiX />
+                </IconButton>
+              </TimerCard>
+            )
+          })}
         </TimersList>
       )}
 
@@ -223,6 +243,18 @@ export function TimersTab() {
         max={MAX_CUSTOM_MINUTES}
         onCancel={closeAddDialog}
         onConfirm={addTimer}
+      />
+
+      <PomodoroDialog
+        open={isPomodoroDialogOpen}
+        focusMinutes={pomodoroFocusMinutes}
+        breakMinutes={pomodoroBreakMinutes}
+        onFocusMinutesChange={setPomodoroFocusMinutes}
+        onBreakMinutesChange={setPomodoroBreakMinutes}
+        min={MIN_CUSTOM_MINUTES}
+        max={MAX_CUSTOM_MINUTES}
+        onCancel={closePomodoroDialog}
+        onConfirm={confirmPomodoro}
       />
 
       <StopTimerDialog

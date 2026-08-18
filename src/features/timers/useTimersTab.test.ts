@@ -20,6 +20,7 @@ const mockGetStoredSoundPreference = vi.fn(() => false)
 const mockSetStoredSoundPreference = vi.fn((_enabled: boolean) => {})
 const mockUnlockAudio = vi.fn(() => {})
 const mockPlayTickSound = vi.fn(() => {})
+const mockPlayChimeSound = vi.fn(() => {})
 
 vi.mock('./useTimersTab.utils', () => ({
   fetchTimerHistory: (getToken: unknown) => mockFetchTimerHistory(getToken),
@@ -32,6 +33,7 @@ vi.mock('./useTimersTab.utils', () => ({
   setStoredSoundPreference: (enabled: boolean) => mockSetStoredSoundPreference(enabled),
   unlockAudio: () => mockUnlockAudio(),
   playTickSound: () => mockPlayTickSound(),
+  playChimeSound: () => mockPlayChimeSound(),
 }))
 
 describe('useTimersTab', () => {
@@ -44,6 +46,7 @@ describe('useTimersTab', () => {
     mockSetStoredSoundPreference.mockClear()
     mockUnlockAudio.mockClear()
     mockPlayTickSound.mockClear()
+    mockPlayChimeSound.mockClear()
     mockGetStoredSoundPreference.mockReturnValue(false)
   })
 
@@ -59,7 +62,7 @@ describe('useTimersTab', () => {
     expect(result.current.isAddDialogOpen).toBe(false)
   })
 
-  it('opening the Add dialog resets the draft duration to the default, regardless of preset', () => {
+  it("opening the Add dialog resets the draft duration to the selected preset's suggested default", () => {
     const { result } = renderHook(() => useTimersTab())
 
     act(() => result.current.selectPreset('long-break'))
@@ -67,16 +70,53 @@ describe('useTimersTab', () => {
     act(() => result.current.openAddDialog())
 
     expect(result.current.isAddDialogOpen).toBe(true)
+    expect(result.current.draftMinutes).toBe(15)
+  })
+
+  it("the Custom preset's Add dialog still defaults to 10 minutes", () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    act(() => result.current.selectPreset('custom'))
+    act(() => result.current.openAddDialog())
+
     expect(result.current.draftMinutes).toBe(10)
+  })
+
+  it('opening the Add dialog while Focus is selected opens the Pomodoro dialog instead, defaulting to 20/10', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    // 'pomodoro-focus' (Focus) is the default selected preset.
+    act(() => result.current.setPomodoroFocusMinutes(90))
+    act(() => result.current.setPomodoroBreakMinutes(90))
+    act(() => result.current.openAddDialog())
+
+    expect(result.current.isPomodoroDialogOpen).toBe(true)
+    expect(result.current.isAddDialogOpen).toBe(false)
+    expect(result.current.pomodoroFocusMinutes).toBe(20)
+    expect(result.current.pomodoroBreakMinutes).toBe(10)
   })
 
   it('closing the Add dialog without confirming adds nothing', () => {
     const { result } = renderHook(() => useTimersTab())
 
+    act(() => result.current.selectPreset('custom'))
     act(() => result.current.openAddDialog())
+    expect(result.current.isAddDialogOpen).toBe(true)
     act(() => result.current.closeAddDialog())
 
     expect(result.current.isAddDialogOpen).toBe(false)
+    expect(result.current.timers).toEqual([])
+  })
+
+  it('closing the Pomodoro dialog without confirming adds nothing', () => {
+    const { result } = renderHook(() => useTimersTab())
+
+    // 'pomodoro-focus' (Focus) is the default selected preset.
+    act(() => result.current.openAddDialog())
+    expect(result.current.isPomodoroDialogOpen).toBe(true)
+    act(() => result.current.closePomodoroDialog())
+
+    expect(result.current.isPomodoroDialogOpen).toBe(false)
     expect(result.current.timers).toEqual([])
   })
 
@@ -280,5 +320,142 @@ describe('useTimersTab', () => {
 
     expect(mockRequestNotificationPermission).toHaveBeenCalledTimes(1)
     expect(result.current.notificationPermission).toBe('granted')
+  })
+
+  describe('Pomodoro timers', () => {
+    it('confirmPomodoro creates a two-phase timer, clears the name draft, and closes the dialog', () => {
+      const { result } = renderHook(() => useTimersTab())
+
+      act(() => result.current.setNameDraft('Deep work'))
+      // 'pomodoro-focus' (Focus) is the default selected preset.
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setPomodoroFocusMinutes(1))
+      act(() => result.current.setPomodoroBreakMinutes(1))
+      act(() => result.current.confirmPomodoro())
+
+      expect(result.current.timers).toHaveLength(1)
+      const timer = result.current.timers[0]
+      expect(timer).toMatchObject({
+        presetId: 'pomodoro-focus',
+        name: 'Deep work',
+        status: 'idle',
+        plannedSeconds: 60,
+        remainingSeconds: 60,
+        phaseIndex: 0,
+      })
+      expect(timer.phases).toEqual([
+        { kind: 'focus', seconds: 60 },
+        { kind: 'break', seconds: 60 },
+      ])
+      expect(result.current.nameDraft).toBe('')
+      expect(result.current.isPomodoroDialogOpen).toBe(false)
+    })
+
+    it('auto-advances from focus to break when the focus phase runs out, keeping the card and logging a focus session', () => {
+      const { result } = renderHook(() => useTimersTab())
+
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setPomodoroFocusMinutes(1))
+      act(() => result.current.setPomodoroBreakMinutes(1))
+      act(() => result.current.confirmPomodoro())
+      const id = result.current.timers[0].id
+
+      act(() => result.current.toggleTimer(id))
+      act(() => vi.advanceTimersByTime(60_000))
+
+      expect(result.current.timers).toHaveLength(1)
+      const timer = result.current.timers.find((candidate) => candidate.id === id)
+      expect(timer?.phaseIndex).toBe(1)
+      expect(timer?.status).toBe('running')
+      expect(timer?.plannedSeconds).toBe(60)
+
+      expect(mockPostTimerSession).toHaveBeenCalledTimes(1)
+      const [focusSession] = mockPostTimerSession.mock.calls[0] as unknown as [
+        { presetId: string; completed: boolean },
+      ]
+      expect(focusSession.presetId).toBe('pomodoro-focus')
+      expect(focusSession.completed).toBe(true)
+
+      expect(mockPlayChimeSound).toHaveBeenCalledTimes(1)
+      expect(mockNotifyTimerComplete).toHaveBeenCalledTimes(1)
+    })
+
+    it('finishes the Pomodoro once the break phase runs out too, logging a break session and notifying again', () => {
+      const { result } = renderHook(() => useTimersTab())
+
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setPomodoroFocusMinutes(1))
+      act(() => result.current.setPomodoroBreakMinutes(1))
+      act(() => result.current.confirmPomodoro())
+      const id = result.current.timers[0].id
+
+      act(() => result.current.toggleTimer(id))
+      act(() => vi.advanceTimersByTime(120_000)) // 60s focus + 60s break
+
+      expect(result.current.timers).toHaveLength(0)
+      expect(mockPostTimerSession).toHaveBeenCalledTimes(2)
+      const [breakSession] = mockPostTimerSession.mock.calls[1] as unknown as [
+        { presetId: string; completed: boolean },
+      ]
+      expect(breakSession.presetId).toBe('short-break')
+      expect(breakSession.completed).toBe(true)
+
+      expect(mockPlayChimeSound).toHaveBeenCalledTimes(2)
+      expect(mockNotifyTimerComplete).toHaveBeenCalledTimes(2)
+    })
+
+    it('never plays the ambient tick sound for a Pomodoro timer, even with sound enabled', () => {
+      mockGetStoredSoundPreference.mockReturnValue(true)
+      const { result } = renderHook(() => useTimersTab())
+
+      act(() => result.current.openAddDialog())
+      act(() => result.current.confirmPomodoro())
+      act(() => result.current.toggleTimer(result.current.timers[0].id))
+      act(() => vi.advanceTimersByTime(2500))
+
+      expect(mockPlayTickSound).not.toHaveBeenCalled()
+    })
+
+    it('editing an idle Pomodoro only changes its focus phase, leaving break untouched', () => {
+      const { result } = renderHook(() => useTimersTab())
+
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setPomodoroFocusMinutes(20))
+      act(() => result.current.setPomodoroBreakMinutes(10))
+      act(() => result.current.confirmPomodoro())
+      const id = result.current.timers[0].id
+
+      act(() => result.current.updateTimerMinutes(id, 45))
+
+      const timer = result.current.timers.find((candidate) => candidate.id === id)
+      expect(timer?.plannedSeconds).toBe(45 * 60)
+      expect(timer?.phases).toEqual([
+        { kind: 'focus', seconds: 45 * 60 },
+        { kind: 'break', seconds: 10 * 60 },
+      ])
+    })
+
+    it('a manual stop mid-focus logs only the focus phase, with a pomodoro-focus presetId', () => {
+      const { result } = renderHook(() => useTimersTab())
+
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setPomodoroFocusMinutes(1))
+      act(() => result.current.setPomodoroBreakMinutes(1))
+      act(() => result.current.confirmPomodoro())
+      const id = result.current.timers[0].id
+
+      act(() => result.current.toggleTimer(id))
+      act(() => vi.advanceTimersByTime(10_000))
+      act(() => result.current.requestStop(id))
+      act(() => result.current.confirmStop())
+
+      expect(result.current.timers).toHaveLength(0)
+      expect(mockPostTimerSession).toHaveBeenCalledTimes(1)
+      const [session] = mockPostTimerSession.mock.calls[0] as unknown as [
+        { presetId: string; completed: boolean },
+      ]
+      expect(session.presetId).toBe('pomodoro-focus')
+      expect(session.completed).toBe(false)
+    })
   })
 })

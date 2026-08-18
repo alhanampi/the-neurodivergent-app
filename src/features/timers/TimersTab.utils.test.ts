@@ -6,12 +6,16 @@ import {
   createTimerId,
   formatSeconds,
   formatSessionTimestamp,
+  getActivePhase,
+  getActivePresetId,
+  getPhaseTranslationKey,
   getPresetDefaultMinutes,
   getPresetTranslationKey,
   getProgressFraction,
   sanitizeTimerName,
 } from './TimersTab.utils'
 import { DEFAULT_CUSTOM_MINUTES, MAX_TIMER_NAME_LENGTH } from './TimersTab.constants'
+import type { TimerInstance } from './TimersTab.interfaces'
 
 describe('formatSeconds', () => {
   it('formats sub-hour durations as M:SS', () => {
@@ -68,13 +72,19 @@ describe('clampMinutes', () => {
 
 describe('getPresetDefaultMinutes', () => {
   it('resolves a known preset to its default duration', () => {
-    expect(getPresetDefaultMinutes('pomodoro-focus')).toBe(25)
     expect(getPresetDefaultMinutes('short-break')).toBe(5)
     expect(getPresetDefaultMinutes('long-break')).toBe(15)
   })
 
   it('falls back to DEFAULT_CUSTOM_MINUTES for custom', () => {
     expect(getPresetDefaultMinutes('custom')).toBe(DEFAULT_CUSTOM_MINUTES)
+  })
+
+  it('falls back to DEFAULT_CUSTOM_MINUTES for pomodoro-focus, which has no single-phase default', () => {
+    // Focus no longer creates a single-duration timer — selecting it opens
+    // the Pomodoro dialog instead, so this preset carries no `minutes` of
+    // its own (see TIMER_PRESETS).
+    expect(getPresetDefaultMinutes('pomodoro-focus')).toBe(DEFAULT_CUSTOM_MINUTES)
   })
 })
 
@@ -134,5 +144,73 @@ describe('getProgressFraction', () => {
 
   it('never goes negative for a zero-length plan', () => {
     expect(getProgressFraction(0, 0)).toBe(0)
+  })
+})
+
+const baseTimer: TimerInstance = {
+  id: 't1',
+  presetId: 'custom',
+  name: null,
+  plannedSeconds: 600,
+  status: 'idle',
+  remainingSeconds: 600,
+  startedAt: null,
+  endTimestampMs: null,
+}
+
+describe('getActivePhase', () => {
+  it('is null for a plain timer with no phases', () => {
+    expect(getActivePhase(baseTimer)).toBeNull()
+  })
+
+  it('resolves the phase at phaseIndex for a Pomodoro timer', () => {
+    const pomodoro: TimerInstance = {
+      ...baseTimer,
+      presetId: 'pomodoro-focus',
+      phases: [
+        { kind: 'focus', seconds: 1200 },
+        { kind: 'break', seconds: 600 },
+      ],
+      phaseIndex: 1,
+    }
+    expect(getActivePhase(pomodoro)).toEqual({ kind: 'break', seconds: 600 })
+  })
+
+  it('defaults phaseIndex to 0 when unset', () => {
+    const pomodoro: TimerInstance = {
+      ...baseTimer,
+      presetId: 'pomodoro-focus',
+      phases: [{ kind: 'focus', seconds: 1200 }],
+    }
+    expect(getActivePhase(pomodoro)).toEqual({ kind: 'focus', seconds: 1200 })
+  })
+})
+
+describe('getActivePresetId', () => {
+  it("returns a plain timer's own presetId", () => {
+    expect(getActivePresetId(baseTimer)).toBe('custom')
+  })
+
+  it('maps the active phase to pomodoro-focus/short-break for a Pomodoro timer', () => {
+    const focusPhase: TimerInstance = {
+      ...baseTimer,
+      presetId: 'pomodoro-focus',
+      phases: [
+        { kind: 'focus', seconds: 1200 },
+        { kind: 'break', seconds: 600 },
+      ],
+      phaseIndex: 0,
+    }
+    const breakPhase: TimerInstance = { ...focusPhase, phaseIndex: 1 }
+
+    expect(getActivePresetId(focusPhase)).toBe('pomodoro-focus')
+    expect(getActivePresetId(breakPhase)).toBe('short-break')
+  })
+})
+
+describe('getPhaseTranslationKey', () => {
+  it('namespaces a phase kind under timers.pomodoro.phase', () => {
+    expect(getPhaseTranslationKey('focus')).toBe('timers.pomodoro.phase.focus')
+    expect(getPhaseTranslationKey('break')).toBe('timers.pomodoro.phase.break')
   })
 })

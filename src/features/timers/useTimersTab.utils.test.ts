@@ -4,6 +4,7 @@ import {
   getNotificationPermission,
   getStoredSoundPreference,
   notifyTimerComplete,
+  playChimeSound,
   playTickSound,
   postTimerSession,
   requestNotificationPermission,
@@ -217,6 +218,7 @@ describe('unlockAudio / playTickSound', () => {
     vi.stubGlobal('AudioContext', undefined)
     expect(() => unlockAudio()).not.toThrow()
     expect(() => playTickSound()).not.toThrow()
+    expect(() => playChimeSound()).not.toThrow()
   })
 
   it('plays a synthesized tick through the unlocked context', () => {
@@ -255,5 +257,47 @@ describe('unlockAudio / playTickSound', () => {
     expect(context.createOscillator).toHaveBeenCalledTimes(1)
     expect(oscillator.connect).toHaveBeenCalledWith(gain)
     expect(oscillator.start).toHaveBeenCalledTimes(1)
+  })
+
+  it('plays a two-note chime through the unlocked context', async () => {
+    const oscillator = {
+      type: '',
+      frequency: { value: 0 },
+      connect: vi.fn(),
+      start: vi.fn(),
+      stop: vi.fn(),
+    }
+    const gain = {
+      gain: { setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+      connect: vi.fn(),
+    }
+    const context = {
+      state: 'running',
+      currentTime: 0,
+      destination: {},
+      createOscillator: vi.fn(() => oscillator),
+      createGain: vi.fn(() => gain),
+      resume: vi.fn(async () => {}),
+    }
+    vi.stubGlobal(
+      'AudioContext',
+      vi.fn(function AudioContextMock() {
+        return context
+      }),
+    )
+
+    // The shared AudioContext is module-level state, already unlocked and
+    // cached by the "plays a synthesized tick" case above — reset the
+    // module registry and re-import so this test's own stub is the one
+    // that actually gets constructed and used.
+    vi.resetModules()
+    const fresh = await import('./useTimersTab.utils')
+
+    fresh.unlockAudio()
+    fresh.playChimeSound()
+
+    // Two notes, so two oscillators created and started.
+    expect(context.createOscillator).toHaveBeenCalledTimes(2)
+    expect(oscillator.start).toHaveBeenCalledTimes(2)
   })
 })

@@ -6,7 +6,12 @@ import {
   MIN_CUSTOM_MINUTES,
   TIMER_PRESETS,
 } from './TimersTab.constants'
-import type { TimerPresetId } from './TimersTab.interfaces'
+import type {
+  TimerInstance,
+  TimerPhase,
+  TimerPhaseKind,
+  TimerPresetId,
+} from './TimersTab.interfaces'
 
 /** Formats a duration as `M:SS`, or `H:MM:SS` past an hour. */
 export function formatSeconds(totalSeconds: number): string {
@@ -91,4 +96,30 @@ export function createTimerId(): string {
 export function getProgressFraction(plannedSeconds: number, remainingSeconds: number): number {
   if (plannedSeconds <= 0) return 0
   return Math.min(1, Math.max(0, 1 - remainingSeconds / plannedSeconds))
+}
+
+/** The currently active phase of a Pomodoro timer, or null for a plain
+ * single-duration timer (no `phases`). */
+export function getActivePhase(
+  timer: Pick<TimerInstance, 'phases' | 'phaseIndex'>,
+): TimerPhase | null {
+  if (!timer.phases) return null
+  return timer.phases[timer.phaseIndex ?? 0] ?? null
+}
+
+/** The preset id that best describes a timer's current state — its own
+ * `presetId` for a plain timer, or a phase-specific id for a Pomodoro
+ * (`pomodoro-focus`/`short-break`, both already valid `TimerPresetId`s) so
+ * labels and logged sessions reflect whichever phase is actually active. */
+export function getActivePresetId(
+  timer: Pick<TimerInstance, 'presetId' | 'phases' | 'phaseIndex'>,
+): TimerPresetId {
+  const phase = getActivePhase(timer)
+  if (!phase) return timer.presetId
+  return phase.kind === 'focus' ? 'pomodoro-focus' : 'short-break'
+}
+
+/** i18n key for a Pomodoro phase's display name ("Focus"/"Break"). */
+export function getPhaseTranslationKey(kind: TimerPhaseKind): string {
+  return `timers.pomodoro.phase.${kind}`
 }

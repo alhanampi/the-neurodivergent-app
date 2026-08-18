@@ -28,7 +28,7 @@
       "pomodoro-focus": "Foco",
       "short-break": "Descanso corto",
       "long-break": "Descanso largo",
-      "custom": "Personalizado"
+      "custom": "Tiempo personalizado"
     },
     "durationLabel": "Duración del temporizador en minutos",
     "minutesUnit": "min",
@@ -49,6 +49,22 @@
       "title": "Definí la duración del temporizador",
       "cancel": "Cancelar",
       "confirm": "Agregar temporizador"
+    },
+    "pomodoroDialog": {
+      "title": "Configurá tu Pomodoro",
+      "explanation": "Van a ser {{focusMinutes}} min de foco seguidos de {{breakMinutes}} min de descanso — podés ajustar ambos abajo.",
+      "focusLabel": "Duración del foco en minutos",
+      "breakLabel": "Duración del descanso en minutos",
+      "cancel": "Cancelar",
+      "confirm": "Agregar temporizador"
+    },
+    "pomodoro": {
+      "phase": {
+        "focus": "Foco",
+        "break": "Descanso"
+      },
+      "phaseCompleteTitle": "¡Fase completada!",
+      "phaseCompleteBody": "{{phase}} — {{minutes}} min"
     },
     "stopDialog": {
       "title": "¿Detener este temporizador?",
