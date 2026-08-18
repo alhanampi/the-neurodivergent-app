@@ -17,6 +17,7 @@ vi.mock('@clerk/clerk-react', () => ({
   }),
   useClerk: () => ({ signOut: vi.fn() }),
   useAuth: () => ({ isSignedIn: false, getToken: async () => null }),
+  UserButton: () => null,
 }))
 
 function renderAppLayout(initialEntries: string[] = ['/']) {

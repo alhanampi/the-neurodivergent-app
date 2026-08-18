@@ -31,6 +31,22 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
+- **Settings tab (iteration 5):** profile/account management delegated to Clerk's
+  `<UserButton>` (themed with our design tokens) instead of hand-building
+  name/avatar/email editing — same reasoning as using `<SignIn>` in iteration 3:
+  password/email-change flows have real security implications better left to
+  Clerk's tested UI. Kept our own explicit "Sign out" and "Delete account" buttons
+  outside that menu rather than relying on Clerk's embedded versions, since an
+  always-visible, plainly-labeled action is more predictable than one buried a
+  click deep in a dropdown — matters for this app's audience. Delete account
+  (`user.delete()`) needed no special Clerk Dashboard toggle — verified end-to-end
+  by actually deleting a real test account. Wired `@clerk/localizations`
+  (`en-US`/`es-ES` subpath imports, not the barrel — same size either way since
+  tree-shaking already dropped unused locales, but subpaths are more explicit) so
+  Clerk's own UI (sign-in, account menu) follows the app's language instead of
+  staying stuck in English — verified Clerk's UI genuinely switches to Spanish.
+  Costs ~170kB raw / ~43kB gzipped for both locales combined; bumped
+  `chunkSizeWarningLimit` again, same v0.10.0 code-splitting note as before.
 - **Neon/Drizzle setup (iteration 4):** `/db` lives at the repo root, not under
   `src/`, specifically so it can never be imported from client code — only `/api`
   and `drizzle-kit` touch it. Language preference is now genuinely account-synced
