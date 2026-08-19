@@ -9,26 +9,27 @@ then pushed and merged into `main`.
 
 Status legend: `pending` (not started) · `in progress` · `done`.
 
-| Version | Branch                             | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Status  |
-| ------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| v0.1.0  | `iteration/00-repo-bootstrap`      | Repo init, `CLAUDE.md`, `ROADMAP.md`, `docs/`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                            | done    |
-| v0.2.0  | `iteration/01-app-scaffold`        | Vite + React + TS app; oxlint/Prettier/Husky; folder conventions; `vite-plugin-pwa` baseline (manifest + icons); bottom-tab navigation shell (React Router) with 4 placeholder tabs; Vitest + RTL; GitHub Actions CI; Vercel project connected and deployed                                                                                                                                                                                                           | done    |
-| v0.3.0  | `iteration/02-i18n-theme`          | react-i18next with `en`/`es` resources; language auto-detect + persisted preference; MUI + styled-components theme bridge; design tokens; light/dark base                                                                                                                                                                                                                                                                                                             | done    |
-| v0.4.0  | `iteration/03-auth-clerk`          | Clerk sign-in/up; protected routes; session handling; user menu                                                                                                                                                                                                                                                                                                                                                                                                       | done    |
-| v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                                                                                                                                                                           | done    |
-| v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account; plus a fixed header (app identity, avatar, Settings shortcut) and the bottom nav trimmed to 3 tabs                                                                                                                                                                                                                                                                         | done    |
-| v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                                                                                                                                                                             | done    |
-| v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                             | done    |
-| v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Tasks" handoff creates a Task + Subtasks with realistic estimated durations, priorities, and due dates (destination changed from the originally-scoped Timers tab to a new Tasks tab, then reshaped mid-iteration into a task/subtask hierarchy with persisted per-subtask timers — see notes below)         | done    |
-| v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                               | pending |
-| v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                       | pending |
-| v0.12.0 | `iteration/11-google-calendar`     | Google Calendar OAuth; two-way sync between tasks and events                                                                                                                                                                                                                                                                                                                                                                                                          | pending |
-| v0.13.0 | `iteration/12-music-integration`   | Spotify/SoundCloud OAuth; attach playlists to tasks/timers; auto-play for the timer's duration                                                                                                                                                                                                                                                                                                                                                                        | pending |
-| v1.0.0  | `iteration/13-app-store-packaging` | Capacitor/PWABuilder wrap evaluation; store assets; submission prep                                                                                                                                                                                                                                                                                                                                                                                                   | pending |
-| v1.1.0  | `iteration/14-model-selection`     | Let the user pick between multiple LLM models for the AI Chat tab for specific uses (e.g. a faster/cheaper model for quick check-ins vs. a stronger reasoning model for harder task breakdowns); model choice becomes a per-conversation or per-preference setting instead of one hardcoded model                                                                                                                                                                     | pending |
-| v1.2.0  | `iteration/15-personalization`     | More color themes beyond light/dark; more UI languages beyond en/es; font choice in Settings, including a dyslexia-friendly option (e.g. Atkinson Hyperlegible / OpenDyslexic)                                                                                                                                                                                                                                                                                        | pending |
-| v1.3.0  | `iteration/16-relaxation-tab`      | New tab: guided relaxation/mindfulness exercises with custom animations (box/square breathing, expanding-wave breathing, short grounding exercises — built in-house, no external API, timed animation paced to the actual breathing count) plus curated relaxation music/ambience via embedded public Spotify/SoundCloud playlists, mapped by category (focus, sleep, nature) rather than an algorithmic recommendation                                               | pending |
-| v1.4.0  | `iteration/17-task-roulette`       | New tab: user enters pending tasks with a difficulty level, spins a wheel (`react-custom-roulette`) to randomly get one to work on; harder tasks earn more points; user sets a points threshold that triggers a break suggestion + prompt to share the earned badge on social media; task selection is weighted by time-of-day relevance (e.g. a task tagged "buy groceries" gets a higher chance of coming up near store-closing time than a non-time-sensitive one) | pending |
+| Version | Branch                             | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Status  |
+| ------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| v0.1.0  | `iteration/00-repo-bootstrap`      | Repo init, `CLAUDE.md`, `ROADMAP.md`, `docs/`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                              | done    |
+| v0.2.0  | `iteration/01-app-scaffold`        | Vite + React + TS app; oxlint/Prettier/Husky; folder conventions; `vite-plugin-pwa` baseline (manifest + icons); bottom-tab navigation shell (React Router) with 4 placeholder tabs; Vitest + RTL; GitHub Actions CI; Vercel project connected and deployed                                                                                                                                                                                                                                                             | done    |
+| v0.3.0  | `iteration/02-i18n-theme`          | react-i18next with `en`/`es` resources; language auto-detect + persisted preference; MUI + styled-components theme bridge; design tokens; light/dark base                                                                                                                                                                                                                                                                                                                                                               | done    |
+| v0.4.0  | `iteration/03-auth-clerk`          | Clerk sign-in/up; protected routes; session handling; user menu                                                                                                                                                                                                                                                                                                                                                                                                                                                         | done    |
+| v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                                                                                                                                                                                                                             | done    |
+| v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account; plus a fixed header (app identity, avatar, Settings shortcut) and the bottom nav trimmed to 3 tabs                                                                                                                                                                                                                                                                                                                           | done    |
+| v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                                                                                                                                                                                                                               | done    |
+| v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                                                                               | done    |
+| v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Tasks" handoff creates a Task + Subtasks with realistic estimated durations, priorities, and due dates (destination changed from the originally-scoped Timers tab to a new Tasks tab, then reshaped mid-iteration into a task/subtask hierarchy with persisted per-subtask timers — see notes below)                                                           | done    |
+| v0.9.5  | `iteration/08b-timers-rethink`     | Timers tab redesign: Pomodoro becomes the tab's default/primary flow instead of one of four equal presets; timers gain an optional link/label to a real Task or Subtask; AI Chat's plan preview gains a "Start a Pomodoro now" option alongside "Send to Tasks" that launches a Timers session directly (no Task rows created) using Pomodoro-shaped step estimates instead of raw minutes — Tasks and its subtask mini-timer are unchanged; also folded the header's avatar+gear pair into one unified account control | done    |
+| v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                                                                                 | pending |
+| v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                                                                         | pending |
+| v0.12.0 | `iteration/11-google-calendar`     | Google Calendar OAuth; two-way sync between tasks and events                                                                                                                                                                                                                                                                                                                                                                                                                                                            | pending |
+| v0.13.0 | `iteration/12-music-integration`   | Spotify/SoundCloud OAuth; attach playlists to tasks/timers; auto-play for the timer's duration                                                                                                                                                                                                                                                                                                                                                                                                                          | pending |
+| v1.0.0  | `iteration/13-app-store-packaging` | Capacitor/PWABuilder wrap evaluation; store assets; submission prep                                                                                                                                                                                                                                                                                                                                                                                                                                                     | pending |
+| v1.1.0  | `iteration/14-model-selection`     | Let the user pick between multiple LLM models for the AI Chat tab for specific uses (e.g. a faster/cheaper model for quick check-ins vs. a stronger reasoning model for harder task breakdowns); model choice becomes a per-conversation or per-preference setting instead of one hardcoded model                                                                                                                                                                                                                       | pending |
+| v1.2.0  | `iteration/15-personalization`     | More color themes beyond light/dark; more UI languages beyond en/es; font choice in Settings, including a dyslexia-friendly option (e.g. Atkinson Hyperlegible / OpenDyslexic)                                                                                                                                                                                                                                                                                                                                          | pending |
+| v1.3.0  | `iteration/16-relaxation-tab`      | New tab: guided relaxation/mindfulness exercises with custom animations (box/square breathing, expanding-wave breathing, short grounding exercises — built in-house, no external API, timed animation paced to the actual breathing count) plus curated relaxation music/ambience via embedded public Spotify/SoundCloud playlists, mapped by category (focus, sleep, nature) rather than an algorithmic recommendation                                                                                                 | pending |
+| v1.4.0  | `iteration/17-task-roulette`       | New tab: user enters pending tasks with a difficulty level, spins a wheel (`react-custom-roulette`) to randomly get one to work on; harder tasks earn more points; user sets a points threshold that triggers a break suggestion + prompt to share the earned badge on social media; task selection is weighted by time-of-day relevance (e.g. a task tagged "buy groceries" gets a higher chance of coming up near store-closing time than a non-time-sensitive one)                                                   | pending |
 
 ## Notes and open decisions
 
@@ -446,6 +447,151 @@ Status legend: `pending` (not started) · `in progress` · `done`.
     wall-clock `endTimestampMs` out by the same amount, and, for a Pomodoro,
     extends its _current_ phase's seconds too. Idle timers are untouched —
     they already have `MinutesInput` for setting an exact duration.
+- **Timers tab rethink, scoped (2026-08-19, pre-iteration-9 design pause):**
+  the user paused before starting iteration 9 to think through why the Timers
+  tab "doesn't do much" — not a bug fix, a product-direction decision. Root
+  cause identified: since mid-iteration-8 gave every Subtask its own
+  start/pause/±minutes countdown, Timers and Tasks now both let you run a
+  countdown and nothing steers a user toward one over the other, making
+  Timers feel redundant. This note is the spec for the iteration that
+  addresses that — **design only, no code changed by this note itself.**
+  - **Tasks is out of scope, deliberately.** An earlier draft of this note
+    considered simplifying the Subtask mini-timer down to a plain progress
+    marker, to remove the overlap from that side — the user rejected that;
+    Tasks and its mini-timer are unchanged by this note and by the iteration
+    it describes. See the "Tasks hierarchy + per-subtask timers" note above
+    ("Deferred, not forgotten": kept as two separate timer surfaces on
+    purpose) for the fuller history.
+  - **Differentiation is conceptual, not a new mechanism.** Timers is
+    positioned as the real structured-session tool (Pomodoro phases, sound,
+    rich session history feeding the Dashboard); Tasks stays the
+    lightweight persisted checklist with simple per-subtask progress
+    tracking. What actually resolves the "redundant" feeling isn't a
+    technical change to either tab — it's giving Timers a real entry point
+    (see "Start a Pomodoro now" below) instead of requiring someone to think
+    to open it on their own.
+  - **Pomodoro becomes the default flow.** Today: `Add timer` → choose a
+    preset among 4 → for Focus, a separate `PomodoroDialog`. Direction: the
+    tab's primary/first CTA opens Pomodoro setup directly (focus/break
+    minutes, still editable, same fields as today's `PomodoroDialog`); Short
+    break / Long break / Custom remain reachable as a secondary, less
+    prominent path rather than peers in the same button row. Rationale:
+    fewer decisions before starting is more neurodivergent-friendly than
+    four equally-weighted options, and Pomodoro's structure (forced breaks,
+    auto-advancing phases) is the more supportive default for this audience
+    than an undifferentiated countdown.
+  - **Optional task/subtask link when starting a timer directly.** Covers
+    using Timers on its own (not via chat): an optional "what are you
+    working on?" picker (recent/active Tasks/Subtasks, or free text). Shape:
+    a nullable reference (e.g. `taskId`/`subtaskId`) plus a snapshotted
+    label string on `TimerInstance`/`TimerSession`, so history stays
+    readable even if the source task is later edited/deleted. Surfaces in
+    the active timer card, session history, and the Dashboard (group/filter
+    by task). Explicitly not a button added _to_ a Task/Subtask — the link
+    is offered from the Timers side only.
+  - **"Start a Pomodoro now" in the chat plan preview.** `PlanPreviewCard`
+    gains a second action next to the existing "Send to Tasks": confirming
+    it does not call `POST /api/tasks` at all — it starts a Pomodoro session
+    in the Timers tab (navigating there, mirroring the existing "go to
+    chat" deep-link pattern but in the opposite direction), labeled with the
+    plan's task title, using the first step's Pomodoro-shaped estimate (see
+    below) to prefill focus/break minutes. This is the concrete answer to
+    "chat should offer the idea of going to Timers too," and is what gives
+    Timers a reason to exist distinct from Tasks: immediate structured work,
+    no checklist-creation step first.
+  - **Chat plan estimates become Pomodoro-shaped.** `chat-plan.utils.ts`'s
+    `buildPlanSystemPrompt` should ask the model to express each step's
+    duration as a suggested Pomodoro breakdown (focus block count + break
+    pattern) rather than, or alongside, a raw minute count; `PlanPreviewCard`
+    displays that shape per step, still editable before confirming either
+    action. **Open question, not decided here:** whether the underlying
+    stored `estimatedMinutes` on a Subtask stays the source of truth
+    (Pomodoro phrasing computed for display only) or a structured breakdown
+    gets stored — an implementation detail for whoever picks this up.
+  - **Explicitly deferred / out of scope for this note:** any DB schema
+    changes (belong to the implementation iteration, not this design pass);
+    any change to the Tasks tab or its subtask mini-timer; merging the two
+    timer engines; a button added to a Task/Subtask that launches a Timers
+    session (the bridge only goes chat → Timers, per the decision above).
+  - **Next step:** when `iteration/08b-timers-rethink` is picked up for
+    real, follow the standard local-first workflow (branch, implement, user
+    tries it locally, approve before push/merge) — this note is the spec to
+    build from, not a finished implementation plan.
+- **Timers tab rethink — implemented (2026-08-19, same day, branch
+  `iteration/08b-timers-rethink`):** built the design above end to end. Tried
+  locally and approved by the user the same day; pushed and merged into
+  `main`.
+  - **Pomodoro-as-default:** `TimersTab`'s composer now leads with a single
+    full-width "Start a Pomodoro" button (`useTimersTab`'s new
+    `openPomodoroDialog`, decoupled entirely from `selectedPresetId`) that
+    opens `PomodoroDialog` directly. Short break/Long break/Custom moved
+    into a collapsed-by-default "Other timer options" row
+    (`isOtherTimersOpen`/`toggleOtherTimers`); `selectedPresetId`'s initial
+    value moved off `pomodoro-focus` to `short-break` since Focus is no
+    longer offered there. The old `openAddDialog` "select
+    `pomodoro-focus` → routes to the Pomodoro dialog anyway" branch was kept
+    as defense in depth rather than deleted, even though the secondary row
+    can't produce that selection anymore.
+  - **Optional task/subtask link:** new `timerSessions.taskId`/`subtaskId`/
+    `taskLabel` columns (nullable, `onDelete: 'set null'`, migration
+    `0004_glorious_zarek.sql` — generated and applied non-interactively this
+    time, since these are new columns, not the rename-ambiguous case the
+    earlier subtasks migration hit) plus matching fields on the client's
+    `TimerInstance`/`TimerSession`. `POST /api/timer-sessions` verifies a
+    given `taskId`/`subtaskId` actually belongs to the caller
+    (`verifyTaskLinkOwnership`, same IDOR-safe pattern as
+    `conversationBelongsToUser`) before writing it — a `subtaskId` without
+    its parent `taskId`, or a `taskId` without a `taskLabel` snapshot, is
+    rejected as malformed rather than silently accepted. New
+    `TaskLinkPicker` component (plain MUI `Autocomplete`, **not** `freeSolo`
+    — arbitrary free text is already covered by the existing Name field, so
+    this stays a picker over real Tasks/Subtasks or nothing) appears in both
+    `AddTimerDialog` and `PomodoroDialog` whenever `useTimersTab`'s
+    `taskLinkOptions` is non-empty (fetched via the Tasks feature's own
+    `fetchTasks`, cross-feature reuse — same convention as `PlanPreviewCard`
+    already reusing `MinutesInput`). `TimersTab.utils.ts`'s
+    `buildTaskLinkOptions` flattens Tasks into one option per Task (skipped
+    entirely if every one of its Subtasks is already completed) plus one per
+    incomplete Subtask, labeled "Task → Subtask". Linked sessions show their
+    label on the active timer card and in session history.
+  - **Chat → Timers bridge:** `PlanPreviewCard` gained a second action,
+    "Start a Pomodoro now", next to "Send to Tasks" — `useAiChatTab`'s new
+    `startPomodoroFromPlan` calls `navigate('/timers', { state: {
+startPomodoro: {...} } })` with no `/api/tasks` call at all.
+    `useTimersTab` consumes that router state once on mount
+    (`consumedPomodoroPrefillRef`, the same one-shot-ref shape as
+    `useAiChatTab`'s own `consumedDeepLinkConversationIdRef` "go to chat"
+    handling, just in the opposite direction) and opens `PomodoroDialog`
+    pre-filled from it.
+  - **Chat plan estimates, Pomodoro-shaped — resolved the open question as
+    display-only.** Rather than changing `buildPlanSystemPrompt`'s requested
+    JSON shape (which would have touched the Groq schema, `chat-plan`'s
+    validation, and `PlanStepDraft`/`Subtask.estimatedMinutes`), a step's
+    existing `minutes` stays the sole source of truth end to end; a new pure
+    helper, `estimatePomodoroBreakdown` (`AiChatTab.utils.ts`, reusing the
+    Timers tab's own `DEFAULT_POMODORO_FOCUS_MINUTES`/`_BREAK_MINUTES`
+    rather than duplicating them), derives a block count fresh on every
+    render for display only ("~2 pomodoros (20 min focus + 10 min break)",
+    under each step in `PlanPreviewCard`) and to prefill the "Start a
+    Pomodoro now" bridge above. Smaller, no schema/prompt risk, and reversible
+    later without a migration if a stored breakdown turns out to be wanted
+    after all.
+  - **Tests:** `useTimersTab.test.ts` needed a `MemoryRouter` wrapper
+    (`renderTimersHook`, matching `useTasksTab.test.ts`'s own
+    `renderTasksHook` — `useLocation` throws outside a Router) since the
+    hook now reads router state; every Pomodoro-flow test that used to rely
+    on `pomodoro-focus` being the default `selectedPresetId` was switched to
+    call the new `openPomodoroDialog` directly. `TimersTab.test.tsx` likewise
+    needed `MemoryRouter`, plus an `openOtherTimers` test helper that's a
+    no-op if the secondary row is already open (its own toggle button would
+    otherwise close it again on a second call within one test). New coverage:
+    `buildTaskLinkOptions`, the task-link fields round-tripping through
+    `parseCreateTimerSessionBody`, and `estimatePomodoroBreakdown`.
+  - **Not done in this pass, left for whoever merges it:** no new Playwright
+    e2e spec for the chat → Timers bridge specifically (the existing
+    `chat-to-tasks.spec.ts` still only covers "Send to Tasks"); `npm audit`
+    not re-run since no dependency changed (`TaskLinkPicker` uses
+    `@mui/material`'s existing `Autocomplete`, already a dependency).
 - **Task roulette (iteration 17):** depends on the gamification system from
   iteration 10 (points/badges) and the Timers tab from iteration 6 (the task list
   it spins over) already being in place — it's an extension/consumer of both, not
@@ -463,6 +609,24 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   `/settings` is still a real route, just reached differently. Extracted
   `useClerkAppearanceVariables` (`src/theme/`) so the Clerk-theming object (used by
   SignIn, and now both UserButton instances) isn't hand-copied per component.
+  - **Avatar + gear unified into one control (2026-08-19, small standalone fix,
+    same session as the Timers rethink above but unrelated to it — done on the
+    same branch since nothing had been committed yet; flag if it should be its
+    own branch instead):** the user found the avatar-plus-separate-gear-icon
+    pairing confusing — two adjacent controls that read as peers but opened
+    genuinely different things (Clerk's own profile/account menu vs. this
+    app's own Settings page). Fix: the gear `IconButton` is gone; `<UserButton>`
+    now renders a custom `<UserButton.MenuItems>` item (`<UserButton.Action>`,
+    not `<UserButton.Link>`, specifically so clicking it calls
+    `useHeader`'s `goToSettings` — a real React Router `navigate('/settings')` —
+    instead of an `href` navigation, which would have full-page-reloaded since
+    `ClerkProvider` isn't configured with `routerPush`/`routerReplace` here).
+    `useHeader.ts` lost `isSettingsActive` along with it — a color-highlighted
+    gear made sense as an always-visible icon, but has no equivalent once
+    Settings is a menu item that's only visible while the dropdown is open.
+    Settings' own explicit "Sign out"/"Delete account" buttons are untouched
+    (see the Settings tab note below) — only the entry point into the Settings
+    _page_ moved, not anything on it.
 - **Settings tab (iteration 5):** profile/account management delegated to Clerk's
   `<UserButton>` (themed with our design tokens) instead of hand-building
   name/avatar/email editing — same reasoning as using `<SignIn>` in iteration 3:

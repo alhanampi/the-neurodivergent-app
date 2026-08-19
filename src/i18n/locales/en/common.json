@@ -28,6 +28,14 @@
     "addMinutes": "Add {{minutes}} minutes",
     "namePlaceholder": "Name this timer (optional)",
     "addTimer": "Add timer",
+    "startPomodoro": "Start a Pomodoro",
+    "otherTimers": {
+      "toggle": "Other timer options"
+    },
+    "taskLink": {
+      "label": "What are you working on? (optional)",
+      "placeholder": "Link a Task or Subtask"
+    },
     "noActiveTimers": "No active timers — add one above to get started.",
     "start": "Start",
     "pause": "Pause",
@@ -123,6 +131,9 @@
       "removeStepLabel": "Remove step",
       "discard": "Discard",
       "sendToTasks": "Send to Tasks",
+      "startPomodoro": "Start a Pomodoro now",
+      "pomodoroEstimate_one": "~{{count}} pomodoro ({{focusMinutes}} min focus + {{breakMinutes}} min break)",
+      "pomodoroEstimate_other": "~{{count}} pomodoros ({{focusMinutes}} min focus + {{breakMinutes}} min break)",
       "error": "Couldn't build a plan from this conversation yet. Try again in a moment."
     },
     "error": {

@@ -5,6 +5,7 @@ import {
   listTimerSessions,
   parseCreateTimerSessionBody,
   parseDateRangeQuery,
+  verifyTaskLinkOwnership,
 } from './_lib/timer-sessions.utils.js'
 
 export default async function handler(req: VercelApiRequest, res: VercelApiResponse) {
@@ -30,6 +31,10 @@ export default async function handler(req: VercelApiRequest, res: VercelApiRespo
     const body = parseCreateTimerSessionBody(req.body)
     if (!body) {
       res.status(400).json({ error: 'Invalid timer session' })
+      return
+    }
+    if (!(await verifyTaskLinkOwnership(userId, body.taskId ?? null, body.subtaskId ?? null))) {
+      res.status(400).json({ error: 'Invalid task link' })
       return
     }
 

@@ -21,6 +21,7 @@ function renderCard(overrides: Partial<PlanPreviewCardProps> = {}) {
     onRemoveStep: vi.fn(),
     onDiscard: vi.fn(),
     onConfirm: vi.fn(),
+    onStartPomodoro: vi.fn(),
     isSending: false,
     ...overrides,
   }
@@ -99,5 +100,27 @@ describe('PlanPreviewCard', () => {
     renderCard({ steps: [] })
 
     expect(screen.getByRole('button', { name: 'Send to Tasks' })).toBeDisabled()
+  })
+
+  it('shows a Pomodoro-shaped estimate per step', () => {
+    renderCard()
+
+    // Both fixture steps (10 and 5 minutes) round to the same single block,
+    // so the identical text legitimately appears once per step.
+    expect(screen.getAllByText('~1 pomodoro (20 min focus + 10 min break)')).toHaveLength(2)
+  })
+
+  it('calls onStartPomodoro from its own button', async () => {
+    const user = userEvent.setup()
+    const props = renderCard()
+
+    await user.click(screen.getByRole('button', { name: 'Start a Pomodoro now' }))
+    expect(props.onStartPomodoro).toHaveBeenCalled()
+  })
+
+  it('disables "Start a Pomodoro now" once there are no steps left', () => {
+    renderCard({ steps: [] })
+
+    expect(screen.getByRole('button', { name: 'Start a Pomodoro now' })).toBeDisabled()
   })
 })

@@ -28,6 +28,14 @@
     "addMinutes": "Agregar {{minutes}} minutos",
     "namePlaceholder": "Nombrá este temporizador (opcional)",
     "addTimer": "Agregar temporizador",
+    "startPomodoro": "Iniciar un Pomodoro",
+    "otherTimers": {
+      "toggle": "Otras opciones de temporizador"
+    },
+    "taskLink": {
+      "label": "¿En qué estás trabajando? (opcional)",
+      "placeholder": "Vincular una Tarea o Subtarea"
+    },
     "noActiveTimers": "No hay temporizadores activos — agregá uno arriba para empezar.",
     "start": "Iniciar",
     "pause": "Pausar",
@@ -123,6 +131,9 @@
       "removeStepLabel": "Quitar paso",
       "discard": "Descartar",
       "sendToTasks": "Enviar a Tareas",
+      "startPomodoro": "Iniciar un Pomodoro ahora",
+      "pomodoroEstimate_one": "~{{count}} pomodoro ({{focusMinutes}} min de foco + {{breakMinutes}} min de descanso)",
+      "pomodoroEstimate_other": "~{{count}} pomodoros ({{focusMinutes}} min de foco + {{breakMinutes}} min de descanso)",
       "error": "Todavía no pude armar un plan con esta conversación. Probá de nuevo en un momento."
     },
     "error": {

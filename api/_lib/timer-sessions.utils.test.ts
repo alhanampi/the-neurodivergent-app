@@ -12,12 +12,65 @@ const validBody = {
 
 describe('parseCreateTimerSessionBody', () => {
   it('accepts a well-formed preset session', () => {
-    expect(parseCreateTimerSessionBody(validBody)).toEqual({ ...validBody, label: null })
+    expect(parseCreateTimerSessionBody(validBody)).toEqual({
+      ...validBody,
+      label: null,
+      taskId: null,
+      subtaskId: null,
+      taskLabel: null,
+    })
+  })
+
+  it('accepts a session linked to a Task, with a label', () => {
+    const body = { ...validBody, taskId: 7, taskLabel: 'Clean the kitchen' }
+    expect(parseCreateTimerSessionBody(body)).toEqual({
+      ...validBody,
+      label: null,
+      taskId: 7,
+      subtaskId: null,
+      taskLabel: 'Clean the kitchen',
+    })
+  })
+
+  it('accepts a session linked to a Subtask, carrying its parent taskId too', () => {
+    const body = { ...validBody, taskId: 7, subtaskId: 12, taskLabel: 'Wash the dishes' }
+    expect(parseCreateTimerSessionBody(body)).toEqual({
+      ...validBody,
+      label: null,
+      taskId: 7,
+      subtaskId: 12,
+      taskLabel: 'Wash the dishes',
+    })
+  })
+
+  it('rejects a subtaskId with no taskId', () => {
+    expect(parseCreateTimerSessionBody({ ...validBody, subtaskId: 12, taskLabel: 'x' })).toBeNull()
+  })
+
+  it('rejects a taskId with no label', () => {
+    expect(parseCreateTimerSessionBody({ ...validBody, taskId: 7 })).toBeNull()
+  })
+
+  it('rejects a non-positive or non-integer taskId', () => {
+    expect(parseCreateTimerSessionBody({ ...validBody, taskId: 0, taskLabel: 'x' })).toBeNull()
+    expect(parseCreateTimerSessionBody({ ...validBody, taskId: 1.5, taskLabel: 'x' })).toBeNull()
+  })
+
+  it('rejects an empty or overlong taskLabel', () => {
+    expect(parseCreateTimerSessionBody({ ...validBody, taskId: 7, taskLabel: '   ' })).toBeNull()
+    expect(
+      parseCreateTimerSessionBody({ ...validBody, taskId: 7, taskLabel: 'x'.repeat(200) }),
+    ).toBeNull()
   })
 
   it('accepts a custom session with a label', () => {
     const body = { ...validBody, presetId: 'custom', label: 'Fold laundry' }
-    expect(parseCreateTimerSessionBody(body)).toEqual(body)
+    expect(parseCreateTimerSessionBody(body)).toEqual({
+      ...body,
+      taskId: null,
+      subtaskId: null,
+      taskLabel: null,
+    })
   })
 
   it('rejects an unknown presetId', () => {

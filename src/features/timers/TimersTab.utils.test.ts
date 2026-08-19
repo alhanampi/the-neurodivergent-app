@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addMinutesToTimerInstance,
+  buildTaskLinkOptions,
   clampCustomMinutes,
   clampMinutes,
   computeRemainingSeconds,
@@ -17,6 +18,7 @@ import {
 } from './TimersTab.utils'
 import { DEFAULT_CUSTOM_MINUTES, MAX_TIMER_NAME_LENGTH } from './TimersTab.constants'
 import type { TimerInstance } from './TimersTab.interfaces'
+import type { TaskRecord } from '@/features/tasks/TasksTab.interfaces'
 
 describe('formatSeconds', () => {
   it('formats sub-hour durations as M:SS', () => {
@@ -157,6 +159,7 @@ const baseTimer: TimerInstance = {
   remainingSeconds: 600,
   startedAt: null,
   endTimestampMs: null,
+  taskLink: null,
 }
 
 describe('getActivePhase', () => {
@@ -263,5 +266,126 @@ describe('addMinutesToTimerInstance', () => {
     const running: TimerInstance = { ...baseTimer, status: 'running' }
     expect(addMinutesToTimerInstance(running, 0)).toBe(running)
     expect(addMinutesToTimerInstance(running, -5)).toBe(running)
+  })
+})
+
+function makeTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
+  return {
+    id: 1,
+    conversationId: null,
+    title: 'Clean the kitchen',
+    description: null,
+    priority: 'medium',
+    dueDate: null,
+    createdAt: '2026-08-18T10:00:00.000Z',
+    subtasks: [],
+    ...overrides,
+  }
+}
+
+describe('buildTaskLinkOptions', () => {
+  it('offers a Task with no subtasks yet', () => {
+    const options = buildTaskLinkOptions([makeTask()])
+    expect(options).toEqual([
+      { key: 'task-1', taskId: 1, subtaskId: null, label: 'Clean the kitchen' },
+    ])
+  })
+
+  it('offers the Task plus one option per incomplete subtask, labeled "Task → Subtask"', () => {
+    const task = makeTask({
+      subtasks: [
+        {
+          id: 10,
+          taskId: 1,
+          title: 'Wash dishes',
+          estimatedMinutes: 15,
+          priority: 'medium',
+          dueDate: null,
+          completed: false,
+          completedAt: null,
+          timerStatus: 'idle',
+          remainingSeconds: 900,
+          timerEndAt: null,
+          sortOrder: 0,
+          createdAt: '2026-08-18T10:00:00.000Z',
+        },
+      ],
+    })
+
+    expect(buildTaskLinkOptions([task])).toEqual([
+      { key: 'task-1', taskId: 1, subtaskId: null, label: 'Clean the kitchen' },
+      { key: 'subtask-10', taskId: 1, subtaskId: 10, label: 'Clean the kitchen → Wash dishes' },
+    ])
+  })
+
+  it('skips a completed subtask, keeping the still-incomplete one (and the Task itself)', () => {
+    const task = makeTask({
+      subtasks: [
+        {
+          id: 10,
+          taskId: 1,
+          title: 'Wash dishes',
+          estimatedMinutes: 15,
+          priority: 'medium',
+          dueDate: null,
+          completed: true,
+          completedAt: '2026-08-18T11:00:00.000Z',
+          timerStatus: 'idle',
+          remainingSeconds: 0,
+          timerEndAt: null,
+          sortOrder: 0,
+          createdAt: '2026-08-18T10:00:00.000Z',
+        },
+        {
+          id: 11,
+          taskId: 1,
+          title: 'Take out the trash',
+          estimatedMinutes: 5,
+          priority: 'low',
+          dueDate: null,
+          completed: false,
+          completedAt: null,
+          timerStatus: 'idle',
+          remainingSeconds: 300,
+          timerEndAt: null,
+          sortOrder: 1,
+          createdAt: '2026-08-18T10:00:00.000Z',
+        },
+      ],
+    })
+
+    expect(buildTaskLinkOptions([task])).toEqual([
+      { key: 'task-1', taskId: 1, subtaskId: null, label: 'Clean the kitchen' },
+      {
+        key: 'subtask-11',
+        taskId: 1,
+        subtaskId: 11,
+        label: 'Clean the kitchen → Take out the trash',
+      },
+    ])
+  })
+
+  it('skips a Task whose every subtask is already completed', () => {
+    const task = makeTask({
+      subtasks: [
+        {
+          id: 10,
+          taskId: 1,
+          title: 'Wash dishes',
+          estimatedMinutes: 15,
+          priority: 'medium',
+          dueDate: null,
+          completed: true,
+          completedAt: '2026-08-18T11:00:00.000Z',
+          timerStatus: 'idle',
+          remainingSeconds: 0,
+          timerEndAt: null,
+          sortOrder: 0,
+          createdAt: '2026-08-18T10:00:00.000Z',
+        },
+      ],
+    })
+
+    expect(buildTaskLinkOptions([task])).toEqual([])
   })
 })

@@ -7,7 +7,8 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
 import { MinutesInput } from '../MinutesInput/MinutesInput'
-import { NameFieldWrapper, PhaseLabel, PhaseRow } from './PomodoroDialog.styles'
+import { TaskLinkPicker } from '../TaskLinkPicker/TaskLinkPicker'
+import { NameFieldWrapper, PhaseLabel, PhaseRow, TaskLinkWrapper } from './PomodoroDialog.styles'
 import type { PomodoroDialogProps } from './PomodoroDialog.interfaces'
 
 // Opened instead of AddTimerDialog when "Add timer" is pressed with Focus
@@ -26,6 +27,9 @@ export function PomodoroDialog({
   onBreakMinutesChange,
   min,
   max,
+  taskLinkOptions,
+  taskLink,
+  onTaskLinkChange,
   onCancel,
   onConfirm,
 }: PomodoroDialogProps) {
@@ -68,6 +72,15 @@ export function PomodoroDialog({
             ariaLabel={t('timers.pomodoroDialog.breakLabel')}
           />
         </PhaseRow>
+        {taskLinkOptions.length > 0 && (
+          <TaskLinkWrapper>
+            <TaskLinkPicker
+              options={taskLinkOptions}
+              value={taskLink}
+              onChange={onTaskLinkChange}
+            />
+          </TaskLinkWrapper>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>{t('timers.pomodoroDialog.cancel')}</Button>

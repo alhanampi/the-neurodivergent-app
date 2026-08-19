@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { MIN_MESSAGES_FOR_PLAN } from './AiChatTab.constants'
 import {
+  estimatePomodoroBreakdown,
   getStoredConversationId,
   groupConversationsByDate,
   setStoredConversationId,
@@ -325,6 +326,22 @@ export function useAiChatTab() {
     }
   }, [planSteps, planTaskTitle, planTaskDescription, activeConversationId, getToken, navigate, t])
 
+  // "Start a Pomodoro now" (see ROADMAP.md's "Timers tab rethink" note) —
+  // navigates to the Timers tab with router state carrying a prefill built
+  // from the plan's title and its first step's Pomodoro-shaped estimate,
+  // mirroring the existing "go to chat" deep link (useAiChatTab's own
+  // consumedDeepLinkConversationIdRef effect above) but in the opposite
+  // direction. Deliberately does NOT call the Tasks API at all — no
+  // Task/Subtask rows are created by this action, unlike sendPlanToTasks.
+  // The Timers tab consumes `startPomodoro` the same one-shot-ref way (see
+  // useTimersTab.ts's consumedPomodoroPrefillRef).
+  const startPomodoroFromPlan = useCallback(() => {
+    if (!planSteps || planSteps.length === 0) return
+    const { focusMinutes, breakMinutes } = estimatePomodoroBreakdown(planSteps[0].minutes)
+    const label = planTaskTitle.trim() || planSteps[0].title
+    navigate('/timers', { state: { startPomodoro: { label, focusMinutes, breakMinutes } } })
+  }, [planSteps, planTaskTitle, navigate])
+
   const renameConversation = useCallback(
     async (id: number, title: string) => {
       const renamed = await renameConversationRequest(id, title, getToken)
@@ -398,6 +415,7 @@ export function useAiChatTab() {
     updatePlanTaskDescription,
     discardPlan,
     sendPlanToTasks,
+    startPomodoroFromPlan,
     renameConversation,
     requestDeleteConversation,
     cancelDeleteConversation,

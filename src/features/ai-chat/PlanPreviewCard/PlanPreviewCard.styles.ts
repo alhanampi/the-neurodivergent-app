@@ -41,8 +41,14 @@ export const StepUtilityRow = styled.div`
   gap: 6px;
 `
 
+export const PomodoroEstimate = styled.span`
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`
+
 export const ActionsRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 `
