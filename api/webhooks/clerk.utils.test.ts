@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getPrimaryEmail, verifyClerkWebhook } from './clerk.utils'
+import { getPrimaryEmail, verifyClerkWebhook } from './clerk.utils.js'
 
 // Note: upsertUser/deleteUser (the DB-writing side) aren't unit-tested here
 // — they're thin passthroughs to Drizzle's own query builder. The logic

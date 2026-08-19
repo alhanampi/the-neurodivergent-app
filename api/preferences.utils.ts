@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../db/client'
-import { preferences } from '../db/schema'
-import { SUPPORTED_LANGUAGES } from './preferences.interfaces'
-import type { SupportedLanguage } from './preferences.interfaces'
+import { db } from '../db/client.js'
+import { preferences } from '../db/schema.js'
+import { SUPPORTED_LANGUAGES } from './preferences.interfaces.js'
+import type { SupportedLanguage } from './preferences.interfaces.js'
 
 export function isSupportedLanguage(value: unknown): value is SupportedLanguage {
   return typeof value === 'string' && (SUPPORTED_LANGUAGES as readonly string[]).includes(value)

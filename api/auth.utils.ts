@@ -1,5 +1,5 @@
 import { verifyToken } from '@clerk/backend'
-import type { VercelApiRequest } from './vercel-http.interfaces'
+import type { VercelApiRequest } from './vercel-http.interfaces.js'
 
 /** Verifies the Clerk session token from the Authorization header and
  * returns the signed-in user's id, or null if it's missing/invalid. Shared

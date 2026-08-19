@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isSupportedLanguage } from './preferences.utils'
+import { isSupportedLanguage } from './preferences.utils.js'
 
 describe('isSupportedLanguage', () => {
   it('accepts en and es', () => {

@@ -1,10 +1,10 @@
-import type { VercelApiRequest, VercelApiResponse } from './vercel-http.interfaces'
-import { getUserIdFromRequest } from './auth.utils'
+import type { VercelApiRequest, VercelApiResponse } from './vercel-http.interfaces.js'
+import { getUserIdFromRequest } from './auth.utils.js'
 import {
   getLanguagePreference,
   isSupportedLanguage,
   setLanguagePreference,
-} from './preferences.utils'
+} from './preferences.utils.js'
 
 export default async function handler(req: VercelApiRequest, res: VercelApiResponse) {
   const userId = await getUserIdFromRequest(req)
