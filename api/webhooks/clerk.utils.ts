@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm'
 import { Webhook } from 'svix'
-import { db } from '../../db/client'
-import { preferences, users } from '../../db/schema'
-import type { VercelApiRequest } from '../vercel-http.interfaces'
-import type { ClerkWebhookEvent, ClerkWebhookUserCreatedOrUpdated } from './clerk.interfaces'
+import { db } from '../../db/client.js'
+import { preferences, users } from '../../db/schema.js'
+import type { VercelApiRequest } from '../vercel-http.interfaces.js'
+import type { ClerkWebhookEvent, ClerkWebhookUserCreatedOrUpdated } from './clerk.interfaces.js'
 
 function headerValue(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')

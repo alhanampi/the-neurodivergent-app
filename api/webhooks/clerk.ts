@@ -1,6 +1,9 @@
-import type { VercelApiRequest, VercelApiResponse } from '../vercel-http.interfaces'
-import { deleteUser, readRawBody, upsertUser, verifyClerkWebhook } from './clerk.utils'
-import type { ClerkWebhookUserCreatedOrUpdated, ClerkWebhookUserDeleted } from './clerk.interfaces'
+import type { VercelApiRequest, VercelApiResponse } from '../vercel-http.interfaces.js'
+import { deleteUser, readRawBody, upsertUser, verifyClerkWebhook } from './clerk.utils.js'
+import type {
+  ClerkWebhookUserCreatedOrUpdated,
+  ClerkWebhookUserDeleted,
+} from './clerk.interfaces.js'
 
 // Raw body required for svix signature verification — see readRawBody.
 export const config = {

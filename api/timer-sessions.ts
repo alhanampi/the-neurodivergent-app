@@ -1,11 +1,11 @@
-import type { VercelApiRequest, VercelApiResponse } from './vercel-http.interfaces'
-import { getUserIdFromRequest } from './auth.utils'
+import type { VercelApiRequest, VercelApiResponse } from './vercel-http.interfaces.js'
+import { getUserIdFromRequest } from './auth.utils.js'
 import {
   createTimerSession,
   listTimerSessions,
   parseCreateTimerSessionBody,
   parseDateRangeQuery,
-} from './timer-sessions.utils'
+} from './timer-sessions.utils.js'
 
 export default async function handler(req: VercelApiRequest, res: VercelApiResponse) {
   const userId = await getUserIdFromRequest(req)

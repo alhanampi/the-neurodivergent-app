@@ -272,6 +272,27 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   use it) — documented in [docs/SECURITY.md](../docs/SECURITY.md#accepted-risks).
   `/api` routes don't run under plain `npm run dev` (Vite doesn't serve them) — use
   `vercel dev` to exercise the webhook/preferences endpoints locally.
+- **Vercel build failing on every `/api`/`/db` file (found post-v0.8.0 merge,
+  fixed on branch `fix/vercel-esm-import-extensions`):** `tsc -b` passes clean
+  locally, but Vercel's own build kept failing with `TS2307` ("Cannot find
+  module") and `TS2835` ("Relative import paths need explicit file extensions
+  ... when '--moduleResolution' is 'node16' or 'nodenext'") across
+  `preferences.ts`, `timer-sessions.ts`, `timer-sessions.utils.ts`, and their
+  test files. Root cause: `tsconfig.api.json` sets
+  `"moduleResolution": "bundler"` (matching how Vite bundles `src/`, so
+  extensionless relative imports resolve fine there), but Vercel's own
+  per-function build step for `/api` doesn't honor that — with
+  `"type": "module"` in `package.json`, it resolves each function under
+  Node's real ESM rules (`node16`/`nodenext`), which require the literal
+  `.js` extension on a relative import even though the source file is `.ts`
+  (TypeScript's own documented convention for this mode — the import
+  specifier names the compiled output, not the source file). Fixed by adding
+  `.js` to every relative import across `api/` and `db/` (`./foo` →
+  `./foo.js`); `tsc -b`'s own `bundler` resolution accepts a `.js` specifier
+  pointing at a same-named `.ts` file without complaint, so this satisfies
+  both build paths at once. `src/` is unaffected — Vite's bundler resolution
+  there was never the problem. Verified locally (typecheck/lint/test/build
+  all clean); the real confirmation is Vercel's next build.
 - **Vite dev-server blank flash (iteration 4, fixed):** the first time a
   Clerk-authenticated route rendered under `npm run dev`, Vite's dependency
   scanner discovered `@clerk/backend`/`drizzle-orm`/`@neondatabase/serverless`

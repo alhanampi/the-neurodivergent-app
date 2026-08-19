@@ -1,13 +1,13 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm'
-import { db } from '../db/client'
-import { timerSessions } from '../db/schema'
-import { TIMER_PRESET_IDS } from './timer-sessions.interfaces'
+import { db } from '../db/client.js'
+import { timerSessions } from '../db/schema.js'
+import { TIMER_PRESET_IDS } from './timer-sessions.interfaces.js'
 import type {
   CreateTimerSessionBody,
   DateRangeFilter,
   TimerPresetId,
   TimerSessionRecord,
-} from './timer-sessions.interfaces'
+} from './timer-sessions.interfaces.js'
 
 /** Longest a single timer session is allowed to claim, in seconds (24h) —
  * a sanity ceiling against malformed or malicious payloads, not a product

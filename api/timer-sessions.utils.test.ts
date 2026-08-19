@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseCreateTimerSessionBody, parseDateRangeQuery } from './timer-sessions.utils'
+import { parseCreateTimerSessionBody, parseDateRangeQuery } from './timer-sessions.utils.js'
 
 const validBody = {
   presetId: 'pomodoro-focus',
