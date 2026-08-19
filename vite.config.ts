@@ -87,19 +87,15 @@ export default defineConfig({
     // silent reload, which is the outcome we actually want either way.
     exclude: ['@clerk/backend', '@neondatabase/serverless', 'drizzle-orm'],
   },
-  build: {
-    // MUI + Clerk + i18next + @clerk/localizations (2 full locales, ~170kB
-    // raw between them) push the single bundle past Vite's 500kB default
-    // warning threshold; the Timers tab (v0.7.0) pushed it past 750kB too;
-    // @mui/x-charts (v0.8.0, Dashboard tab) pushed it past 850kB, to
-    // ~1.1MB raw / ~340kB gzipped; react-markdown + remark-gfm + groq-sdk
-    // (v0.9.0, AI Chat + Tasks tabs) pushed it past 1150kB, to ~1.32MB raw /
-    // ~400kB gzipped. Real fix is code-splitting (lazy-load heavier
-    // per-route chunks — Dashboard and AI Chat are the two biggest
-    // candidates now) — tracked for v0.10.0 (security/perf hardening) —
-    // this just stops the warning from being noise until then.
-    chunkSizeWarningLimit: 1350,
-  },
+  // No chunkSizeWarningLimit override anymore (v0.10.0): every tab route is
+  // now its own React.lazy chunk (see src/app/AppLayout/AppLayout.tsx)
+  // instead of all bundled into one file. The single bundle had grown to
+  // ~1.32MB raw / ~400kB gzipped by v0.9.0 (MUI + Clerk + i18next +
+  // @mui/x-charts + react-markdown/remark-gfm/groq-sdk, all loaded up front
+  // regardless of which tab you actually opened) — splitting it dropped the
+  // main entry chunk to ~400kB raw / ~117kB gzipped, comfortably back under
+  // Vite's default 500kB warning threshold, so the default is doing its job
+  // again rather than being silenced.
   test: {
     globals: true,
     environment: 'jsdom',

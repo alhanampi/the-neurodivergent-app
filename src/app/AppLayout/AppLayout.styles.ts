@@ -19,6 +19,21 @@ export const ContentArea = styled.main`
   padding-bottom: ${layout.bottomNavHeight}px;
 `
 
+// Shown briefly while a lazy-loaded tab's chunk downloads (see AppLayout.tsx's
+// Suspense boundary) — fills the same space the tab itself will occupy rather
+// than the whole viewport, so switching tabs doesn't cover the header/nav.
+// <output> (not a plain <div role="status">) carries an implicit
+// role="status"/aria-live="polite" on its own — oxlint's jsx-a11y rule flags
+// the role-on-div spelling in favor of the semantic element that already
+// means the same thing.
+export const RouteLoadingFallback = styled.output`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40dvh;
+  width: 100%;
+`
+
 export const NavContainer = styled(Paper).attrs({ elevation: 3 })`
   position: fixed;
   bottom: 0;
