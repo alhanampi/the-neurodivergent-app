@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import { TimersTab } from '@/features/timers/TimersTab'
 import { AiChatTab } from '@/features/ai-chat/AiChatTab'
+import { TasksTab } from '@/features/tasks/TasksTab'
 import { DashboardTab } from '@/features/dashboard/DashboardTab'
 import { SettingsTab } from '@/features/settings/SettingsTab'
 import { useAppLayout } from './useAppLayout'
@@ -16,6 +17,7 @@ export function AppLayout() {
         <Routes>
           <Route path="/" element={<TimersTab />} />
           <Route path="/chat" element={<AiChatTab />} />
+          <Route path="/tasks" element={<TasksTab />} />
           <Route path="/dashboard" element={<DashboardTab />} />
           <Route path="/settings" element={<SettingsTab />} />
         </Routes>
