@@ -19,7 +19,7 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 | v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account; plus a fixed header (app identity, avatar, Settings shortcut) and the bottom nav trimmed to 3 tabs                                                                                                                                                                                                                                                                         | done    |
 | v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                                                                                                                                                                             | done    |
 | v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                             | done    |
-| v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Timers" handoff creates timer entries with estimated durations                                                                                                                                                                                                                                               | pending |
+| v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Tasks" handoff creates a Task + Subtasks with realistic estimated durations, priorities, and due dates (destination changed from the originally-scoped Timers tab to a new Tasks tab, then reshaped mid-iteration into a task/subtask hierarchy with persisted per-subtask timers — see notes below)         | done    |
 | v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                               | pending |
 | v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                       | pending |
 | v0.12.0 | `iteration/11-google-calendar`     | Google Calendar OAuth; two-way sync between tasks and events                                                                                                                                                                                                                                                                                                                                                                                                          | pending |
@@ -32,6 +32,224 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 
 ## Notes and open decisions
 
+- **Production was down: Vercel's 12-Function Hobby limit, `api/_lib/` fix
+  (found overnight during iteration 8, fixed on `main` and iteration 8
+  together):** while testing iteration 8 locally, discovered `main`'s last
+  3 production deploys (in the ~20h before this was found) had all been
+  silently failing with `exceeded_serverless_functions_per_deployment` —
+  Vercel's Hobby plan caps a deployment at 12 Serverless Functions, and
+  Vercel's zero-config `/api` convention counts _every_ file directly under
+  `api/` (not just route handlers) as its own Function. This project's
+  file-split convention (CLAUDE.md) gives every route 2-4 sibling files
+  (`.utils.ts`, `.interfaces.ts`, `.constants.ts`), so `main` alone was
+  already at 11 files before this iteration added anything — the first
+  deploy that pushed past that (a routine merge, nothing unusual about it)
+  started failing with no visible signal short of checking deploy status by
+  hand. Iteration 8 alone would have added ~19 more files, making this
+  impossible to ignore. Fix: moved every non-handler file into `api/_lib/`
+  (Vercel excludes underscore-prefixed paths from Function detection),
+  leaving only genuine route handlers directly under `api/` — 9 total after
+  this iteration, comfortably under the cap. See
+  [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for the folder layout and
+  the full explanation; every relative import across `api/` was
+  mechanically rewritten to match (verified via `typecheck`/`lint`/`test`/
+  `build`, all clean). Also found and fixed while chasing this: `vite.config.ts`'s
+  Vitest `test` block had no `exclude` for `e2e/`, so Vitest tried (and
+  failed) to execute the new Playwright spec as one of its own tests —
+  added `exclude: ['**/node_modules/**', '**/dist/**', './e2e/**']`.
+  **This needs to reach `main`/production on its own** (independent of
+  whether iteration 8 ships yet) since production is down until it does —
+  flagged to the user as soon as found rather than silently worked around.
+- **Local-only Clerk/Groq keys never reached Vercel (found same night):**
+  `CLERK_SECRET_KEY`, `GROQ_API_KEY`, and `VITE_CLERK_PUBLISHABLE_KEY` had
+  only ever been added to `.env.local` by hand, never registered on the
+  Vercel project itself — `vercel dev` builds a function's runtime env from
+  Vercel Cloud's registered variables (matching the target environment),
+  not from arbitrary local-only additions to `.env.local`, so every
+  authenticated route 401'd locally regardless of a valid session. Fixed by
+  `vercel env add` for the Development environment. **Still open:** these
+  three (plus `CLERK_WEBHOOK_SECRET`, needed for the Clerk→Neon user sync —
+  see the item below) are registered for Development only; Production/Preview
+  need the same before this iteration's routes will work once deployed for
+  real.
+- **New local users never sync to Neon under `vercel dev` (found same
+  night, not a bug — a documented local-dev limitation):** the Clerk
+  webhook (`api/webhooks/clerk.ts`) that creates a user's row in Neon can
+  only be reached by Clerk at a public HTTPS URL, never at `localhost` — so
+  a Clerk account only ever used locally has no corresponding `users` row,
+  and any insert that references it (a new conversation, a task) fails its
+  foreign key. Worked around for this session by fetching the user's email
+  from Clerk's Backend API and inserting the `users`/`preferences` rows by
+  hand to unblock local testing. Not something to "fix" in code — it's
+  inherent to how webhooks work — but worth remembering for future
+  iterations: a brand-new Clerk account only exercised through `vercel dev`
+  will need this same manual step, or its webhook forwarded via a tool like
+  the Clerk CLI/ngrok. In production this isn't an issue: Clerk can reach
+  the real deployed webhook URL directly.
+- **Tasks hierarchy + per-subtask timers + realistic time estimates
+  (2026-08-19, mid-iteration-8 revision):** the flat Tasks checklist from the
+  first pass of this iteration was reshaped into a two-level hierarchy after
+  the user tried it: a **Task** (`tasks` table — title, description
+  explaining what its subtasks are, priority, due date, nullable
+  `conversationId` back to its source chat) grouping **Subtasks** (new
+  `subtasks` table — title, `estimatedMinutes`, priority, due date,
+  completed, and a real persisted timer:
+  `timerStatus`/`remainingSeconds`/`timerEndAt`). This is a deliberate
+  reversal of the original "no timer pressure, on purpose" design note from
+  the first pass — the user explicitly asked for start/pause/±minutes on
+  each subtask, so the flat "just a checklist label" `estimatedMinutes` is
+  gone; the Task level still carries no timer of its own, only a rollup.
+  - **Timer persistence, not client-only:** unlike the Timers tab's
+    client-only `TimerInstance`, a subtask's timer state is written to the
+    DB on every start/pause/±minutes action (never per-tick) so it survives
+    a refresh or device switch — confirmed explicitly with the user over the
+    simpler client-only alternative. The live countdown is still derived
+    client-side every render tick from `timerEndAt` (mirrors
+    `TimersTab.utils.ts`'s wall-clock technique), just sourced from a
+    server-persisted timestamp instead of pure React state.
+  - **Progress bar is all-or-nothing per subtask, weighted by minutes** —
+    confirmed with the user over giving partial credit for an in-progress
+    timer, specifically so subtracting time from a running subtask can't
+    make the bar regress.
+  - **"Go to chat" deep-links to the exact source conversation** (via the
+    new `conversationId` FK, `onDelete: 'set null'`) rather than opening AI
+    Chat generically — reverses the first pass's explicit choice not to keep
+    that link ("traceability wasn't part of the ask ... revisit if asked
+    later"). `useAiChatTab.ts` now reads `location.state.conversationId` on
+    mount (consumed once via a ref) and calls the existing
+    `selectConversation`.
+  - **Manual add, two popups:** `AddTaskDialog` creates an empty Task
+    (`steps: []`); `AddSubtaskDialog` (scoped to one task) adds a subtask to
+    it — mirrors `AddTimerDialog`'s fully-controlled popup shape, each with
+    its own small `useAddXDialog.ts` owning the draft state (title/
+    description/priority/dueDate/minutes), reset every time it opens.
+  - **New shared `PriorityControl`/`DueDateField` components**
+    (`src/features/tasks/`) — a `ToggleButtonGroup` (low/medium/high, same
+    pattern as the Timers/Dashboard preset selectors) and a native
+    `<input type="date">` via MUI `TextField` (no `@mui/x-date-pickers` —
+    same call the Dashboard tab already made), reused by both dialogs and
+    the inline editors on `TaskCard`/`SubtaskRow` so priority/due date stay
+    editable after creation, not just at creation time.
+  - **API**: `POST /api/tasks` now creates one Task plus 0+ subtasks in a
+    single batch (`steps: []` for the manual-add case, non-empty for an
+    approved AI plan); `PATCH /api/tasks/[id]` edits the Task's own fields.
+    Two new routes, `api/subtasks.ts` (create) and `api/subtasks/[id].ts`
+    (PATCH/DELETE) — PATCH takes a single flexible body covering both plain
+    field edits and a `timerAction` (`start`/`pause`/`addMinutes`/
+    `subtractMinutes`), computed server-side from the row's current state.
+    `api/` route-handler count is now 11 (added 2), still under Vercel
+    Hobby's 12-Function cap flagged earlier in this file.
+  - **`POST /api/chat-plan`'s response gained `taskTitle`/`taskDescription`**
+    alongside `steps` — the model now also names and summarizes the overall
+    task, shown as editable fields in `PlanPreviewCard` above the step list,
+    and becomes the created Task's title/description on confirm. Priority/
+    due date are deliberately NOT requested from the model (no real basis
+    for either) — user-set only, after creation.
+  - **Prompt rewrite for realistic time estimates:** the user's core
+    complaint — the AI was estimating unrealistically short durations (e.g.
+    "20 minutes to bathe a cat," which doesn't cover chasing/rinsing/
+    drying/cleanup) — is addressed with string-only prompt changes, no
+    schema/logic impact. `chat-plan.utils.ts`'s `buildPlanSystemPrompt` now
+    explicitly asks for real-world durations including setup/cleanup/
+    friction, and explicitly forbids shrinking estimates to fit a time
+    budget mentioned earlier in the conversation. `chat.utils.ts`'s
+    `buildSystemPrompt` (the live conversational persona) gained a
+    parallel guideline: sanity-check a user-stated time budget against what
+    the task actually needs, and if it's probably not enough, say so plainly
+    (never scolding) and offer concrete options — do a smaller slice now,
+    extend the time, or split across sessions — rather than silently
+    proposing a plan that pretends to fit. This is the main lever for "help
+    estimate when time does NOT reach," per the user's stated goal.
+  - **Migration needs a human at a real terminal:** `drizzle-kit generate`
+    prompts interactively to resolve whether the new `subtasks` table /
+    `tasks` column changes are renames or genuinely new — it refused to run
+    non-interactively (`Interactive prompts require a TTY terminal`). Schema
+    changes are in `db/schema.ts`; run `npm run db:generate` then
+    `npm run db:migrate` locally (interactive prompts: answer "created" /
+    "no, add column" for each, not "renamed from") before testing this
+    against a real database. Not run as part of this change for that reason.
+  - **Deferred, not forgotten:** no `timerSessions`/Dashboard integration for
+    subtask timers (would reopen the exact "no timer pressure" tension the
+    original flat Tasks tab existed to avoid — kept as two separate timer
+    surfaces); no auto-pause/notification when a subtask's timer hits 0 (just
+    shows `0:00` and waits for the user).
+- **AI Chat + Tasks tabs (iteration 8):** built alongside a reference app the
+  user already had (`c:\CODE\2026\ai-chat-app`) — reused as a _pattern_
+  source, not literal code: the SSE streaming shape (`res.write('data:
+...\n\n')` server-side, a `response.body.getReader()` loop client-side) and
+  the optimistic-update-with-rollback idea for the Tasks list. Everything
+  else was rebuilt fresh for this project's stack (MUI + styled-components +
+  the file-split convention vs. the reference's SCSS + hand-rolled
+  components; Drizzle vs. raw SQL) — the reference had no system prompt and
+  no structured/JSON-mode output at all, so the task-breakdown prompt and the
+  plan-extraction mechanism are entirely new work.
+  - **Groq via `groq-sdk`**, `openai/gpt-oss-120b` (see the existing "AI
+    model" note below — unchanged). Two Groq call shapes: `/api/chat`
+    streams a normal reply over SSE; a separate, explicit "Convert to plan"
+    action (`/api/chat-plan`) makes a second, non-streaming call with
+    `response_format: {type:'json_object'}` over the existing conversation
+    history, returning `{steps:[{title,minutes}]}`. Kept these as two
+    distinct actions rather than trying to detect "this looks like a plan"
+    inside the streamed reply — explicit and predictable beats inferred,
+    especially for an audience this app is built for.
+  - **Conversations + messages persisted to Neon** (new `conversations` /
+    `messages` tables) — the user asked for this explicitly rather than an
+    ephemeral in-memory chat, so a conversation survives a refresh/reopen.
+    Sidebar groups by `updatedAt` (Today/Yesterday/This week/Older), not
+    `createdAt`, so a conversation you keep returning to stays near the top.
+    Conversation title is derived deterministically from the first user
+    message (trimmed/collapsed/truncated to 48 chars) rather than spending an
+    extra Groq call just to name it.
+  - **Accepted risk — no DB transaction around the chat write sequence:**
+    the user message is written to Neon before calling Groq, and the
+    assistant message is written after the stream completes; this project's
+    `neon-http` Drizzle driver doesn't support `db.transaction()`, so a
+    failure between those two writes (e.g. the process dying mid-stream)
+    can leave an orphaned user message with no reply. Small window, low
+    consequence (worst case: a dangling row, not corrupted data or a security
+    issue) — documented in
+    [docs/SECURITY.md](../docs/SECURITY.md#accepted-risks) alongside the
+    existing `esbuild`/`drizzle-kit` entry rather than built around with
+    retry/cleanup logic this iteration.
+  - **The "send plan to Timers" pivot:** ROADMAP originally scoped the
+    handoff as creating Timers-tab entries. Mid-iteration the user asked for
+    a **new "Tasks" tab** instead — a flat, persisted checklist
+    (`tasks` table: title, estimated minutes as a label only, completed
+    boolean) with no timer attached and no "start a timer from this task"
+    shortcut, specifically so working through an AI-built plan doesn't carry
+    the pressure of a running countdown. This is the first change to the
+    tab count since iteration 5 fixed it at three (when Settings moved to
+    the header specifically to keep it there) — Tasks is the 4th tab, placed
+    right after AI Chat (its source), with Dashboard staying last as the
+    review tab. A plan is never persisted as its own entity; it's a
+    transient, editable client-side draft (`PlanPreviewCard`) until the user
+    confirms, at which point it becomes real `tasks` rows via
+    `POST /api/tasks`. No link is kept from a task back to its source
+    conversation — traceability wasn't part of the ask and was left out to
+    keep scope minimal; revisit if asked later.
+  - **Bug found while implementing:** a `useEffect` in `useAiChatTab.ts`
+    keyed on the active conversation id was refetching+clearing `messages`
+    on every id change, including the id change that happens right after
+    `sendMessage` creates a brand-new conversation — which wiped the
+    just-streamed assistant reply a moment after it arrived (a real
+    flash/loss bug, not a test artifact). Fixed by removing that effect and
+    replacing it with an explicit `loadConversationMessages(id)` call, guarded
+    by a "latest requested id" ref (so a late-resolving fetch can't stomp
+    newer state), invoked only from the user-driven "select a conversation"
+    handler — `startNewChat()`/delete-confirm now clear `messages` directly
+    themselves instead of relying on an effect to notice.
+  - **Testing:** `@clerk/testing`'s official Playwright helper
+    (`clerkSetup()`/`clerk.signIn()`) drives the one real sign-in the e2e
+    flow needs; `/api/chat` and `/api/chat-plan` are mocked at the network
+    layer (`page.route`) so the spec needs no `GROQ_API_KEY` and produces no
+    Groq spend. The spec `test.skip()`s itself without a dedicated
+    `E2E_CLERK_TEST_EMAIL`/`E2E_CLERK_TEST_PASSWORD` test-mode user (see
+    `.env.example`) — not wired into CI this iteration, same deferral as
+    the rate-limiting/CSP items already tracked for v0.10.0.
+  - Added `react-markdown` + `remark-gfm` for assistant-message rendering
+    (no syntax-highlighting package — this isn't a coding assistant) and
+    `groq-sdk` for the API calls; pushed the bundle further, bumped
+    `chunkSizeWarningLimit` again (same recurring note as prior iterations).
 - **Dashboard tab (iteration 7):** chart library is `@mui/x-charts` (user's
   choice between it and Recharts — picked for inheriting the app's MUI theme
   automatically, so the charts use the same muted teal as the rest of the app

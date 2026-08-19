@@ -4,15 +4,10 @@
   },
   "nav": {
     "timers": "Timers",
-    "chat": "AI Chat",
+    "chat": "Chat",
+    "tasks": "Tasks",
     "dashboard": "Dashboard",
     "settings": "Settings"
-  },
-  "comingSoon": {
-    "chat": {
-      "title": "AI Chat",
-      "description": "Talk through a task and break it into small, doable steps. Coming in a future iteration."
-    }
   },
   "auth": {
     "brandTitle": "The Neurodivergent App",
@@ -81,6 +76,104 @@
       "empty": "No sessions yet — start a timer to see your history here.",
       "completed": "Completed",
       "stopped": "Stopped early"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "newChat": "New chat",
+    "emptyState": {
+      "title": "What are you working on?",
+      "description": "Tell me about a task and I'll help you break it into small, doable steps."
+    },
+    "composer": {
+      "placeholder": "Tell me what you're working on…",
+      "send": "Send"
+    },
+    "assistantTyping": "The assistant is typing…",
+    "loadingConversation": "Loading this conversation…",
+    "sidebar": {
+      "toggleLabel": "Open conversations",
+      "title": "Conversations",
+      "groups": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "thisWeek": "This week",
+        "older": "Older"
+      },
+      "empty": "No conversations yet.",
+      "loading": "Loading your conversations…",
+      "renameLabel": "Rename conversation",
+      "renameSave": "Save name",
+      "renameCancel": "Cancel rename",
+      "deleteLabel": "Delete conversation",
+      "deleteDialog": {
+        "title": "Delete this conversation?",
+        "body": "This permanently deletes \"{{title}}\" and everything in it. This can't be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete permanently"
+      }
+    },
+    "plan": {
+      "convertButton": "Convert to plan",
+      "generating": "Building your plan…",
+      "title": "Suggested plan",
+      "taskTitleLabel": "Task title",
+      "taskDescriptionLabel": "What this task is about",
+      "stepMinutesLabel": "Step duration in minutes",
+      "removeStepLabel": "Remove step",
+      "discard": "Discard",
+      "sendToTasks": "Send to Tasks",
+      "error": "Couldn't build a plan from this conversation yet. Try again in a moment."
+    },
+    "error": {
+      "sendFailed": "The assistant had trouble responding. Please try again.",
+      "dismiss": "Dismiss",
+      "notConfigured": "Chat isn't available right now. Please try again later."
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "loading": "Loading your tasks…",
+    "empty": "No tasks yet — approve a plan from Chat to see it here.",
+    "addTaskButton": "Add task",
+    "dueDateLabel": "Due date",
+    "priority": {
+      "label": "Priority",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "card": {
+      "collapse": "Collapse task",
+      "expand": "Expand task",
+      "totalMinutesLabel": "Estimated total: {{minutes}} min",
+      "goToChat": "Go to the conversation this task came from",
+      "deleteTask": "Delete task",
+      "addSubtask": "Add subtask"
+    },
+    "item": {
+      "minutesLabel": "{{minutes}} min",
+      "markDone": "Mark as done",
+      "markNotDone": "Mark as not done",
+      "deleteLabel": "Delete subtask",
+      "addMinutes": "Add 5 minutes",
+      "subtractMinutes": "Subtract 5 minutes",
+      "pauseTimer": "Pause timer",
+      "resumeTimer": "Resume timer"
+    },
+    "addTaskDialog": {
+      "title": "New task",
+      "titleLabel": "Task title",
+      "descriptionLabel": "What is this task about? (optional)",
+      "cancel": "Cancel",
+      "confirm": "Add task"
+    },
+    "addSubtaskDialog": {
+      "title": "New subtask",
+      "titleLabel": "Subtask title",
+      "minutesLabel": "Subtask duration in minutes",
+      "cancel": "Cancel",
+      "confirm": "Add subtask"
     }
   },
   "dashboard": {

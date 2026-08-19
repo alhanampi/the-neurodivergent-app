@@ -4,15 +4,10 @@
   },
   "nav": {
     "timers": "Timers",
-    "chat": "Chat IA",
+    "chat": "Chat",
+    "tasks": "Tareas",
     "dashboard": "Panel",
     "settings": "Ajustes"
-  },
-  "comingSoon": {
-    "chat": {
-      "title": "Chat IA",
-      "description": "Conversá sobre una tarea y dividila en pasos chicos y manejables. Próximamente."
-    }
   },
   "auth": {
     "brandTitle": "The Neurodivergent App",
@@ -81,6 +76,104 @@
       "empty": "Todavía no hay sesiones — iniciá un temporizador para ver tu historial acá.",
       "completed": "Completado",
       "stopped": "Detenido antes"
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "newChat": "Nuevo chat",
+    "emptyState": {
+      "title": "¿En qué estás trabajando?",
+      "description": "Contame sobre una tarea y te ayudo a dividirla en pasos chicos y manejables."
+    },
+    "composer": {
+      "placeholder": "Contame en qué estás trabajando…",
+      "send": "Enviar"
+    },
+    "assistantTyping": "El asistente está escribiendo…",
+    "loadingConversation": "Cargando esta conversación…",
+    "sidebar": {
+      "toggleLabel": "Abrir conversaciones",
+      "title": "Conversaciones",
+      "groups": {
+        "today": "Hoy",
+        "yesterday": "Ayer",
+        "thisWeek": "Esta semana",
+        "older": "Más antiguas"
+      },
+      "empty": "Todavía no hay conversaciones.",
+      "loading": "Cargando tus conversaciones…",
+      "renameLabel": "Renombrar conversación",
+      "renameSave": "Guardar nombre",
+      "renameCancel": "Cancelar renombrado",
+      "deleteLabel": "Eliminar conversación",
+      "deleteDialog": {
+        "title": "¿Eliminar esta conversación?",
+        "body": "Esto borra \"{{title}}\" para siempre, junto con todo lo que tiene. No se puede deshacer.",
+        "cancel": "Cancelar",
+        "confirm": "Eliminar para siempre"
+      }
+    },
+    "plan": {
+      "convertButton": "Convertir en plan",
+      "generating": "Armando tu plan…",
+      "title": "Plan sugerido",
+      "taskTitleLabel": "Título de la tarea",
+      "taskDescriptionLabel": "De qué se trata esta tarea",
+      "stepMinutesLabel": "Duración del paso en minutos",
+      "removeStepLabel": "Quitar paso",
+      "discard": "Descartar",
+      "sendToTasks": "Enviar a Tareas",
+      "error": "Todavía no pude armar un plan con esta conversación. Probá de nuevo en un momento."
+    },
+    "error": {
+      "sendFailed": "El asistente tuvo un problema para responder. Probá de nuevo.",
+      "dismiss": "Descartar",
+      "notConfigured": "El chat no está disponible por ahora. Probá de nuevo más tarde."
+    }
+  },
+  "tasks": {
+    "title": "Tareas",
+    "loading": "Cargando tus tareas…",
+    "empty": "Todavía no hay tareas — aprobá un plan desde el Chat para verlo acá.",
+    "addTaskButton": "Agregar tarea",
+    "dueDateLabel": "Fecha límite",
+    "priority": {
+      "label": "Prioridad",
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "card": {
+      "collapse": "Colapsar tarea",
+      "expand": "Expandir tarea",
+      "totalMinutesLabel": "Total estimado: {{minutes}} min",
+      "goToChat": "Ir a la conversación de la que salió esta tarea",
+      "deleteTask": "Eliminar tarea",
+      "addSubtask": "Agregar subtarea"
+    },
+    "item": {
+      "minutesLabel": "{{minutes}} min",
+      "markDone": "Marcar como hecha",
+      "markNotDone": "Marcar como no hecha",
+      "deleteLabel": "Eliminar subtarea",
+      "addMinutes": "Agregar 5 minutos",
+      "subtractMinutes": "Quitar 5 minutos",
+      "pauseTimer": "Pausar temporizador",
+      "resumeTimer": "Reanudar temporizador"
+    },
+    "addTaskDialog": {
+      "title": "Nueva tarea",
+      "titleLabel": "Título de la tarea",
+      "descriptionLabel": "¿De qué se trata esta tarea? (opcional)",
+      "cancel": "Cancelar",
+      "confirm": "Agregar tarea"
+    },
+    "addSubtaskDialog": {
+      "title": "Nueva subtarea",
+      "titleLabel": "Título de la subtarea",
+      "minutesLabel": "Duración de la subtarea en minutos",
+      "cancel": "Cancelar",
+      "confirm": "Agregar subtarea"
     }
   },
   "dashboard": {

@@ -16,7 +16,8 @@ export async function getUserIdFromRequest(req: VercelApiRequest): Promise<strin
     const token = authHeader.slice('Bearer '.length)
     const payload = await verifyToken(token, { secretKey })
     return payload.sub
-  } catch {
+  } catch (error) {
+    console.error('Clerk verifyToken failed:', error)
     return null
   }
 }

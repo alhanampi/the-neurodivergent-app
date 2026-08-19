@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import { db } from '../db/client.js'
-import { preferences } from '../db/schema.js'
+import { db } from '../../db/client.js'
+import { preferences } from '../../db/schema.js'
 import { SUPPORTED_LANGUAGES } from './preferences.interfaces.js'
 import type { SupportedLanguage } from './preferences.interfaces.js'
 

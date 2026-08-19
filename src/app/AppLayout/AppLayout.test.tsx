@@ -38,11 +38,12 @@ afterEach(() => {
 })
 
 describe('AppLayout', () => {
-  it('renders the three bottom navigation tabs (Settings moved to the header)', () => {
+  it('renders the four bottom navigation tabs (Settings moved to the header)', () => {
     renderAppLayout()
 
     expect(screen.getByRole('button', { name: 'Timers' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'AI Chat' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chat' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Tasks' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Settings' })).not.toBeInTheDocument()
   })
@@ -53,13 +54,19 @@ describe('AppLayout', () => {
     expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
   })
 
+  it('reaches the Tasks tab at /tasks', () => {
+    renderAppLayout(['/tasks'])
+
+    expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
+  })
+
   it('reaches Settings by URL (as the header does) with no bottom tab highlighted', () => {
     renderAppLayout(['/settings'])
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
     // MUI's BottomNavigation marks the selected action with aria-selected="true" —
-    // none of the three tabs should have it, since Settings isn't one of them.
-    for (const name of ['Timers', 'AI Chat', 'Dashboard']) {
+    // none of the four tabs should have it, since Settings isn't one of them.
+    for (const name of ['Timers', 'Chat', 'Tasks', 'Dashboard']) {
       expect(screen.getByRole('button', { name })).not.toHaveAttribute('aria-selected', 'true')
     }
   })
@@ -73,7 +80,7 @@ describe('AppLayout', () => {
     await user.click(screen.getByRole('button', { name: 'Español' }))
 
     expect(await screen.findByRole('heading', { name: 'Ajustes' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Chat IA' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chat' })).toBeInTheDocument()
     // "Timers" is kept as-is in Spanish (a short, widely understood loanword)
     // rather than translated to the much longer "Temporizadores" — see
     // src/i18n/locales/es/common.json.

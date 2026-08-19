@@ -7,10 +7,10 @@ every session, before touching any code.
 
 A mobile-first Progressive Web App that helps neurodivergent people organize their
 day: a configurable timer/pomodoro system, an AI chat that breaks tasks into smaller
-steps, and a dashboard of completed tasks and time stats. Fixed header (app
-identity; once signed in, avatar + Settings) above a three-tab bottom navigation.
-Deployed to Vercel; a native app-store wrapper (Capacitor or similar) is a later
-goal, not a current one.
+steps, a checklist of the tasks that chat produces, and a dashboard of completed
+tasks and time stats. Fixed header (app identity; once signed in, avatar + Settings)
+above a four-tab bottom navigation. Deployed to Vercel; a native app-store wrapper
+(Capacitor or similar) is a later goal, not a current one.
 
 Full iteration plan, current status, and scope-by-version: **[ROADMAP.md](./ROADMAP.md)**.
 Always check ROADMAP.md before starting work to see what iteration is active and

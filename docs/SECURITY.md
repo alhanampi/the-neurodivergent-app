@@ -38,6 +38,16 @@ Applied at every iteration, not just the dedicated hardening iteration
   non-breaking fix exists yet (the suggested fix downgrades `drizzle-kit` to
   0.18.1, an ~2-year-old release incompatible with our schema/config format).
   Revisit when `drizzle-kit` ships a version off `@esbuild-kit`.
+- **No DB transaction around `/api/chat`'s write sequence (since v0.9.0):**
+  the user's message is written to Neon before calling Groq, and the
+  assistant's reply is written after the stream completes — with no
+  transaction wrapping the two, since this project's `neon-http` Drizzle
+  driver doesn't support `db.transaction()`. A crash/failure between those
+  two writes leaves an orphaned user message with no reply. Low consequence
+  (a dangling, clearly-incomplete row scoped to that one user — not
+  corrupted or cross-user data, not a security boundary), so accepted rather
+  than built around this iteration. Revisit if Neon/Drizzle add HTTP-driver
+  transaction support, or if `neon-http` gets swapped for a driver that has it.
 
 ## `/api` routes
 

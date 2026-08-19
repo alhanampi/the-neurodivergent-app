@@ -13,16 +13,22 @@ app, and built one small, usable iteration at a time.
 ## What it does
 
 A header sits at the top always — the app's name, and once you're signed in, your
-avatar and a Settings shortcut. Below it, three tabs:
+avatar and a Settings shortcut. Below it, four tabs:
 
 - **⏱️ Timers** — Set a timer and get notified when it's done (pomodoros, 20-minute
   focus blocks, whatever works for you), or just start a stopwatch and mark it
   finished whenever you are. Every session gets saved, so you build up a real
   picture of how you spend your time.
-- **💬 AI Chat** — Stuck staring at a huge task, unsure where to start? Talk it
+- **💬 Chat** — Stuck staring at a huge task, unsure where to start? Talk it
   through with an assistant whose only job is helping you break it into smaller,
-  doable steps. Once you're happy with the plan, send it straight to Timers — each
-  step arrives with its own estimated time.
+  doable steps, with realistic time estimates (and an honest heads-up if your
+  available time isn't enough for what you're planning). Once you're happy with
+  the plan, send it straight to Tasks.
+- **✅ Tasks** — Each plan lands as a collapsible Task explaining what it's for,
+  containing Subtasks you tick off one at a time. Every subtask carries its own
+  priority, due date, and a start/pause/±minutes timer; the Task rolls up a total
+  time estimate and a progress bar. Add tasks/subtasks by hand too, or jump back
+  to the chat that generated one.
 - **📊 Dashboard** — A look back at what you got done: completed tasks, time spent,
   streaks, patterns over time.
 
@@ -77,7 +83,7 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done    |
 | v0.7.0  | Timers tab                                                                             | ✅ done    |
 | v0.8.0  | Dashboard tab                                                                          | ✅ done    |
-| v0.9.0  | AI Chat tab (Groq)                                                                     | ⏳ pending |
+| v0.9.0  | Chat tab (Groq) + Tasks tab (task/subtask hierarchy, priorities, timers)               | ✅ done    |
 | v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending |
 | v0.11.0 | Badges and social sharing                                                              | ⏳ pending |
 | v0.12.0 | Google Calendar integration                                                            | ⏳ pending |
@@ -102,11 +108,13 @@ npm run lint           # oxlint
 ```
 
 You'll need a free [Clerk](https://dashboard.clerk.com) application for sign-in,
-and a [Neon](https://neon.tech) Postgres database (or Vercel's Storage tab → Neon
-integration) — see `.env.example` for which key goes where.
+a [Neon](https://neon.tech) Postgres database (or Vercel's Storage tab → Neon
+integration), and a free [Groq](https://console.groq.com/keys) API key for the AI
+Chat tab — see `.env.example` for which key goes where.
 
 **`npm run dev` doesn't run `/api`** — Vite's dev server only serves the frontend,
-so the Clerk webhook and the preferences sync silently no-op locally (the app
-still works, language just stays localStorage-only instead of following your
-account). To exercise `/api` routes locally too, use `vercel dev` instead (needs
-the Vercel CLI linked to this project: `vercel link`).
+so the Clerk webhook, the preferences sync, and the AI Chat/Tasks routes all
+silently no-op locally (the rest of the app still works — language just stays
+localStorage-only instead of following your account, and the AI Chat/Tasks tabs
+won't load or save anything). To exercise `/api` routes locally too, use
+`vercel dev` instead (needs the Vercel CLI linked to this project: `vercel link`).

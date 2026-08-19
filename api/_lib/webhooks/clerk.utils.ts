@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { Webhook } from 'svix'
-import { db } from '../../db/client.js'
-import { preferences, users } from '../../db/schema.js'
+import { db } from '../../../db/client.js'
+import { preferences, users } from '../../../db/schema.js'
 import type { VercelApiRequest } from '../vercel-http.interfaces.js'
 import type { ClerkWebhookEvent, ClerkWebhookUserCreatedOrUpdated } from './clerk.interfaces.js'
 
