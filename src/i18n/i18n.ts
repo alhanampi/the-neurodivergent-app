@@ -22,4 +22,17 @@ void i18n.use(initReactI18next).init({
   },
 })
 
+// Keeps <html lang="..."> (hardcoded to "en" in index.html, since that's the
+// only reasonable static default) following the live language — without
+// this, a screen reader keeps applying English pronunciation/hyphenation
+// rules to Spanish content after the user switches in Settings, a real WCAG
+// 3.1.1 (Language of Page) failure found during the v0.10.0 accessibility
+// pass. Set once for the language i18next actually initialized with (which
+// may differ from index.html's "en" default — see i18n.utils.ts's
+// detectInitialLanguage), then kept in sync on every future change.
+document.documentElement.lang = i18n.language
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng
+})
+
 export default i18n

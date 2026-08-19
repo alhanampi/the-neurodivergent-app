@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { visuallyHidden } from '@mui/utils'
 import { useTranslation } from 'react-i18next'
 import { useAppLayout } from './useAppLayout'
+import { MAIN_CONTENT_ID } from '../SkipLink/SkipLink.constants'
 import {
   ShellContainer,
   ContentArea,
@@ -45,7 +46,12 @@ export function AppLayout() {
 
   return (
     <ShellContainer>
-      <ContentArea>
+      {/* tabIndex={-1}: a plain <main> isn't natively focusable, so without
+          this the skip link's hash jump would scroll here but leave keyboard
+          focus stranded back on the link itself — the -1 lets the browser's
+          hash-navigation actually move focus onto this element (never reachable
+          by Tab on its own, which is the correct scope for this fix). */}
+      <ContentArea id={MAIN_CONTENT_ID} tabIndex={-1}>
         <Suspense
           fallback={
             <RouteLoadingFallback>

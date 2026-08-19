@@ -132,3 +132,48 @@ environment in `ROADMAP.md`'s open-items list until confirmed.
   WCAG-level accessibility and reduced-motion support, since this app is explicitly
   built for neurodivergent users and a hostile or overwhelming UI is itself a harm
   this project exists to avoid.
+- **v0.10.0 pass — what was actually done, and how:** a targeted review
+  (contrast-ratio calculation against the real token values, `grep` sweeps
+  for known anti-patterns, manual read-through of every `IconButton`/error
+  state) rather than an automated Lighthouse/axe run or manual screen-reader
+  testing — neither was done this iteration, so treat this as "concrete
+  issues found and fixed," not "certified WCAG AA." Fixed:
+  - **Color contrast (WCAG 1.4.3):** light-mode filled-button text
+    (`primaryContrast` on `primary`) measured 4.38:1, just under AA's 4.5:1
+    minimum for normal text. Fixed by using pure white instead of the
+    near-white token previously reused from the background color — see
+    `src/theme/tokens.ts`. Every other text/background pairing in both
+    light and dark mode already cleared AA (checked all of them, see the
+    commit that introduced this fix for the full table).
+  - **`<html lang>` not tracking the live language (WCAG 3.1.1):** was
+    hardcoded to `"en"` in `index.html` and never updated after a user
+    switched to Spanish in Settings — screen readers kept applying English
+    pronunciation to Spanish content. Fixed in `src/i18n/i18n.ts`, which now
+    keeps `document.documentElement.lang` in sync with i18next on init and
+    every `languageChanged` event.
+  - **No skip-to-content link (WCAG 2.4.1):** a keyboard user had no way
+    past the header (logo + account menu) to a tab's actual content without
+    tabbing through it every single time. Added `src/app/SkipLink/` —
+    visually hidden until focused, jumps to the `<main>` content region
+    (`tabIndex={-1}` there so the hash-jump actually moves focus, not just
+    scroll position).
+  - **One error state not announced to screen readers:**
+    `DeleteAccountDialog`'s inline error text had no `role="alert"` — added
+    it, matching the `role="alert"` MUI's `<Alert>` already provides
+    elsewhere (e.g. the AI Chat tab's error banner).
+  - **What was checked and found already correct:** all 19 `IconButton`
+    usages already carry a translated `aria-label`; no `outline: none`
+    anywhere (focus rings are never suppressed); no `onClick` on a
+    non-interactive element without a matching keyboard handler; reduced
+    motion is already handled globally (`src/index.css`, iteration 2); MUI's
+    `Dialog`/`Alert` primitives carry their own WAI-ARIA wiring, trusted
+    rather than re-verified by hand here — same precedent as trusting
+    Clerk's `<SignIn>` for security-sensitive UI.
+  - **Explicitly deferred, not done this pass:** an automated
+    axe-core/Lighthouse CI check (would need wiring into `.github/workflows/ci.yml`
+    or a dedicated script); real screen-reader testing (VoiceOver/NVDA)
+    end-to-end; the Dashboard charts' accessible table-view twin (already
+    tracked separately, see `docs/CHANGELOG.md`'s Dashboard entry); a full
+    keyboard-only walkthrough of every dialog's focus order. Worth a
+    dedicated follow-up pass rather than folding into an already-broad
+    iteration.
