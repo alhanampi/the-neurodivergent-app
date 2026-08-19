@@ -53,9 +53,29 @@ Applied at every iteration, not just the dedicated hardening iteration
 
 - Every route that touches user data checks the Clerk session server-side before
   doing anything — never trust a client-supplied user id.
-- Rate limiting is added in the security-hardening iteration for any route that
-  calls a paid/rate-limited third party (Groq) or handles auth webhooks.
+- Rate limiting (v0.10.0, `api/_lib/rate-limit.utils.ts`, Upstash Redis
+  sliding-window) covers `/api/chat` and `/api/chat-plan` (20/min and
+  10/min respectively, keyed per signed-in user — protects Groq spend and
+  Groq's own rate limit) and the Clerk webhook (60/min, keyed per source IP
+  — a flood guard on a route that does real DB writes on every call, checked
+  before the raw-body read + signature verification). Every other route is
+  either not paid/third-party-backed or not a plausible flood target at this
+  app's scale, so left uncapped — revisit if that changes.
 - Webhook routes (e.g. Clerk) verify the signature before acting on the payload.
+
+### Rate limiting fails open, not closed
+
+`checkRateLimit` returns "not limited" whenever `UPSTASH_REDIS_REST_URL`/
+`UPSTASH_REDIS_REST_TOKEN` aren't set, or the Upstash call itself errors —
+deliberately, so a rate limiter that's misconfigured or briefly unreachable
+never becomes the reason a real, already-authenticated user can't use the
+app. The tradeoff: **until an Upstash Redis database is provisioned and its
+env vars are set on Vercel (Development/Preview/Production), there is
+effectively no rate limiting at all** — the code path exists but the store
+behind it doesn't. See `.env.example` for how to provision it (Vercel
+Marketplace → Upstash integration is the fastest path, sets all three
+environments at once). Track whether this has been done for each
+environment in `ROADMAP.md`'s open-items list until confirmed.
 
 ## Data
 
@@ -74,8 +94,37 @@ Applied at every iteration, not just the dedicated hardening iteration
 ## Headers
 
 - CSP and standard security headers (`X-Content-Type-Options`,
-  `Referrer-Policy`, etc.) are added as part of the security-hardening iteration
-  and reviewed whenever a new external domain (API, CDN, embed) is introduced.
+  `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`,
+  `Strict-Transport-Security`) are set globally in `vercel.json` (added
+  v0.10.0) and reviewed whenever a new external domain (API, CDN, embed) is
+  introduced.
+- **CSP allowlist, and why each entry is there:** `*.clerk.accounts.dev` /
+  `*.clerk.com` (Clerk's frontend API — script/connect/frame — the exact
+  subdomain varies per Clerk instance, hence the wildcard); `img.clerk.com`
+  (user avatars); `challenges.cloudflare.com` (Clerk's Turnstile
+  bot-protection challenge, loaded in an iframe during sign-in — omitting
+  this silently breaks sign-in only when Clerk decides to show a challenge,
+  easy to miss in casual testing); `clerk-telemetry.com` (Clerk SDK's own
+  telemetry beacon).
+- **`style-src` includes `'unsafe-inline'` — an accepted, deliberate
+  weakening.** Both `styled-components` and MUI's `@emotion/react` inject
+  `<style>` tags at runtime (that's how CSS-in-JS works), which a strict
+  `style-src` would block entirely, breaking all styling app-wide. A
+  nonce-based CSP for CSS-in-JS is possible but needs per-request nonce
+  generation threaded through Vite's static build and both styling
+  libraries' nonce APIs — a meaningfully bigger lift than this iteration's
+  scope. `script-src` has no such exception (no `'unsafe-inline'`/
+  `'unsafe-eval'`), so this doesn't weaken protection against injected
+  `<script>` execution, only against injected `<style>` — a much
+  lower-severity primitive.
+- **`frame-ancestors 'none'` + `X-Frame-Options: DENY`:** this app is never
+  meant to be embedded in another site's iframe, so clickjacking protection
+  is set to the strictest option rather than allowlisting anything.
+- **Verify after any Clerk config change:** switching to a custom Clerk
+  domain, enabling a new Clerk feature that loads a new third-party script,
+  or adding a new OAuth provider's SDK can all silently need a new CSP
+  entry — check the browser console for CSP violation reports after any such
+  change, not just at ship time.
 
 ## Accessibility as part of security/trust
 
