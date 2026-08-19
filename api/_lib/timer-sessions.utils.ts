@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm'
-import { db } from '../db/client.js'
-import { timerSessions } from '../db/schema.js'
+import { db } from '../../db/client.js'
+import { timerSessions } from '../../db/schema.js'
 import { TIMER_PRESET_IDS } from './timer-sessions.interfaces.js'
 import type {
   CreateTimerSessionBody,
