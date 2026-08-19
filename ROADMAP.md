@@ -9,29 +9,160 @@ then pushed and merged into `main`.
 
 Status legend: `pending` (not started) · `in progress` · `done`.
 
-| Version | Branch                             | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Status  |
-| ------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| v0.1.0  | `iteration/00-repo-bootstrap`      | Repo init, `CLAUDE.md`, `ROADMAP.md`, `docs/`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                            | done    |
-| v0.2.0  | `iteration/01-app-scaffold`        | Vite + React + TS app; oxlint/Prettier/Husky; folder conventions; `vite-plugin-pwa` baseline (manifest + icons); bottom-tab navigation shell (React Router) with 4 placeholder tabs; Vitest + RTL; GitHub Actions CI; Vercel project connected and deployed                                                                                                                                                                                                           | done    |
-| v0.3.0  | `iteration/02-i18n-theme`          | react-i18next with `en`/`es` resources; language auto-detect + persisted preference; MUI + styled-components theme bridge; design tokens; light/dark base                                                                                                                                                                                                                                                                                                             | done    |
-| v0.4.0  | `iteration/03-auth-clerk`          | Clerk sign-in/up; protected routes; session handling; user menu                                                                                                                                                                                                                                                                                                                                                                                                       | done    |
-| v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                                                                                                                                                                           | done    |
-| v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account; plus a fixed header (app identity, avatar, Settings shortcut) and the bottom nav trimmed to 3 tabs                                                                                                                                                                                                                                                                         | done    |
-| v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                                                                                                                                                                             | done    |
-| v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                             | done    |
-| v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Timers" handoff creates timer entries with estimated durations                                                                                                                                                                                                                                               | pending |
-| v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                               | pending |
-| v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                       | pending |
-| v0.12.0 | `iteration/11-google-calendar`     | Google Calendar OAuth; two-way sync between tasks and events                                                                                                                                                                                                                                                                                                                                                                                                          | pending |
-| v0.13.0 | `iteration/12-music-integration`   | Spotify/SoundCloud OAuth; attach playlists to tasks/timers; auto-play for the timer's duration                                                                                                                                                                                                                                                                                                                                                                        | pending |
-| v1.0.0  | `iteration/13-app-store-packaging` | Capacitor/PWABuilder wrap evaluation; store assets; submission prep                                                                                                                                                                                                                                                                                                                                                                                                   | pending |
-| v1.1.0  | `iteration/14-model-selection`     | Let the user pick between multiple LLM models for the AI Chat tab for specific uses (e.g. a faster/cheaper model for quick check-ins vs. a stronger reasoning model for harder task breakdowns); model choice becomes a per-conversation or per-preference setting instead of one hardcoded model                                                                                                                                                                     | pending |
-| v1.2.0  | `iteration/15-personalization`     | More color themes beyond light/dark; more UI languages beyond en/es; font choice in Settings, including a dyslexia-friendly option (e.g. Atkinson Hyperlegible / OpenDyslexic)                                                                                                                                                                                                                                                                                        | pending |
-| v1.3.0  | `iteration/16-relaxation-tab`      | New tab: guided relaxation/mindfulness exercises with custom animations (box/square breathing, expanding-wave breathing, short grounding exercises — built in-house, no external API, timed animation paced to the actual breathing count) plus curated relaxation music/ambience via embedded public Spotify/SoundCloud playlists, mapped by category (focus, sleep, nature) rather than an algorithmic recommendation                                               | pending |
-| v1.4.0  | `iteration/17-task-roulette`       | New tab: user enters pending tasks with a difficulty level, spins a wheel (`react-custom-roulette`) to randomly get one to work on; harder tasks earn more points; user sets a points threshold that triggers a break suggestion + prompt to share the earned badge on social media; task selection is weighted by time-of-day relevance (e.g. a task tagged "buy groceries" gets a higher chance of coming up near store-closing time than a non-time-sensitive one) | pending |
+| Version | Branch                             | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Status      |
+| ------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| v0.1.0  | `iteration/00-repo-bootstrap`      | Repo init, `CLAUDE.md`, `ROADMAP.md`, `docs/`, `README.md`                                                                                                                                                                                                                                                                                                                                                                                                            | done        |
+| v0.2.0  | `iteration/01-app-scaffold`        | Vite + React + TS app; oxlint/Prettier/Husky; folder conventions; `vite-plugin-pwa` baseline (manifest + icons); bottom-tab navigation shell (React Router) with 4 placeholder tabs; Vitest + RTL; GitHub Actions CI; Vercel project connected and deployed                                                                                                                                                                                                           | done        |
+| v0.3.0  | `iteration/02-i18n-theme`          | react-i18next with `en`/`es` resources; language auto-detect + persisted preference; MUI + styled-components theme bridge; design tokens; light/dark base                                                                                                                                                                                                                                                                                                             | done        |
+| v0.4.0  | `iteration/03-auth-clerk`          | Clerk sign-in/up; protected routes; session handling; user menu                                                                                                                                                                                                                                                                                                                                                                                                       | done        |
+| v0.5.0  | `iteration/04-database-neon`       | Neon Postgres + Drizzle ORM; schema (`users`, `preferences`); `/api` structure; Clerk webhook syncing user + language preference to DB; migrations workflow                                                                                                                                                                                                                                                                                                           | done        |
+| v0.6.0  | `iteration/05-settings-tab`        | Full Settings tab: language, theme, profile/account (via Clerk), sign out, delete account; plus a fixed header (app identity, avatar, Settings shortcut) and the bottom nav trimmed to 3 tabs                                                                                                                                                                                                                                                                         | done        |
+| v0.7.0  | `iteration/06-timers-tab`          | Timer/Pomodoro tab: presets + custom timers, manual start/stop tracking, notifications, session history persisted to Neon                                                                                                                                                                                                                                                                                                                                             | done        |
+| v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                             | done        |
+| v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Tasks" handoff creates checklist entries with estimated durations (destination changed from the originally-scoped Timers tab to a new Tasks tab — see notes below)                                                                                                                                           | in progress |
+| v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                               | pending     |
+| v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                       | pending     |
+| v0.12.0 | `iteration/11-google-calendar`     | Google Calendar OAuth; two-way sync between tasks and events                                                                                                                                                                                                                                                                                                                                                                                                          | pending     |
+| v0.13.0 | `iteration/12-music-integration`   | Spotify/SoundCloud OAuth; attach playlists to tasks/timers; auto-play for the timer's duration                                                                                                                                                                                                                                                                                                                                                                        | pending     |
+| v1.0.0  | `iteration/13-app-store-packaging` | Capacitor/PWABuilder wrap evaluation; store assets; submission prep                                                                                                                                                                                                                                                                                                                                                                                                   | pending     |
+| v1.1.0  | `iteration/14-model-selection`     | Let the user pick between multiple LLM models for the AI Chat tab for specific uses (e.g. a faster/cheaper model for quick check-ins vs. a stronger reasoning model for harder task breakdowns); model choice becomes a per-conversation or per-preference setting instead of one hardcoded model                                                                                                                                                                     | pending     |
+| v1.2.0  | `iteration/15-personalization`     | More color themes beyond light/dark; more UI languages beyond en/es; font choice in Settings, including a dyslexia-friendly option (e.g. Atkinson Hyperlegible / OpenDyslexic)                                                                                                                                                                                                                                                                                        | pending     |
+| v1.3.0  | `iteration/16-relaxation-tab`      | New tab: guided relaxation/mindfulness exercises with custom animations (box/square breathing, expanding-wave breathing, short grounding exercises — built in-house, no external API, timed animation paced to the actual breathing count) plus curated relaxation music/ambience via embedded public Spotify/SoundCloud playlists, mapped by category (focus, sleep, nature) rather than an algorithmic recommendation                                               | pending     |
+| v1.4.0  | `iteration/17-task-roulette`       | New tab: user enters pending tasks with a difficulty level, spins a wheel (`react-custom-roulette`) to randomly get one to work on; harder tasks earn more points; user sets a points threshold that triggers a break suggestion + prompt to share the earned badge on social media; task selection is weighted by time-of-day relevance (e.g. a task tagged "buy groceries" gets a higher chance of coming up near store-closing time than a non-time-sensitive one) | pending     |
 
 ## Notes and open decisions
 
+- **Production was down: Vercel's 12-Function Hobby limit, `api/_lib/` fix
+  (found overnight during iteration 8, fixed on `main` and iteration 8
+  together):** while testing iteration 8 locally, discovered `main`'s last
+  3 production deploys (in the ~20h before this was found) had all been
+  silently failing with `exceeded_serverless_functions_per_deployment` —
+  Vercel's Hobby plan caps a deployment at 12 Serverless Functions, and
+  Vercel's zero-config `/api` convention counts _every_ file directly under
+  `api/` (not just route handlers) as its own Function. This project's
+  file-split convention (CLAUDE.md) gives every route 2-4 sibling files
+  (`.utils.ts`, `.interfaces.ts`, `.constants.ts`), so `main` alone was
+  already at 11 files before this iteration added anything — the first
+  deploy that pushed past that (a routine merge, nothing unusual about it)
+  started failing with no visible signal short of checking deploy status by
+  hand. Iteration 8 alone would have added ~19 more files, making this
+  impossible to ignore. Fix: moved every non-handler file into `api/_lib/`
+  (Vercel excludes underscore-prefixed paths from Function detection),
+  leaving only genuine route handlers directly under `api/` — 9 total after
+  this iteration, comfortably under the cap. See
+  [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for the folder layout and
+  the full explanation; every relative import across `api/` was
+  mechanically rewritten to match (verified via `typecheck`/`lint`/`test`/
+  `build`, all clean). Also found and fixed while chasing this: `vite.config.ts`'s
+  Vitest `test` block had no `exclude` for `e2e/`, so Vitest tried (and
+  failed) to execute the new Playwright spec as one of its own tests —
+  added `exclude: ['**/node_modules/**', '**/dist/**', './e2e/**']`.
+  **This needs to reach `main`/production on its own** (independent of
+  whether iteration 8 ships yet) since production is down until it does —
+  flagged to the user as soon as found rather than silently worked around.
+- **Local-only Clerk/Groq keys never reached Vercel (found same night):**
+  `CLERK_SECRET_KEY`, `GROQ_API_KEY`, and `VITE_CLERK_PUBLISHABLE_KEY` had
+  only ever been added to `.env.local` by hand, never registered on the
+  Vercel project itself — `vercel dev` builds a function's runtime env from
+  Vercel Cloud's registered variables (matching the target environment),
+  not from arbitrary local-only additions to `.env.local`, so every
+  authenticated route 401'd locally regardless of a valid session. Fixed by
+  `vercel env add` for the Development environment. **Still open:** these
+  three (plus `CLERK_WEBHOOK_SECRET`, needed for the Clerk→Neon user sync —
+  see the item below) are registered for Development only; Production/Preview
+  need the same before this iteration's routes will work once deployed for
+  real.
+- **New local users never sync to Neon under `vercel dev` (found same
+  night, not a bug — a documented local-dev limitation):** the Clerk
+  webhook (`api/webhooks/clerk.ts`) that creates a user's row in Neon can
+  only be reached by Clerk at a public HTTPS URL, never at `localhost` — so
+  a Clerk account only ever used locally has no corresponding `users` row,
+  and any insert that references it (a new conversation, a task) fails its
+  foreign key. Worked around for this session by fetching the user's email
+  from Clerk's Backend API and inserting the `users`/`preferences` rows by
+  hand to unblock local testing. Not something to "fix" in code — it's
+  inherent to how webhooks work — but worth remembering for future
+  iterations: a brand-new Clerk account only exercised through `vercel dev`
+  will need this same manual step, or its webhook forwarded via a tool like
+  the Clerk CLI/ngrok. In production this isn't an issue: Clerk can reach
+  the real deployed webhook URL directly.
+- **AI Chat + Tasks tabs (iteration 8):** built alongside a reference app the
+  user already had (`c:\CODE\2026\ai-chat-app`) — reused as a _pattern_
+  source, not literal code: the SSE streaming shape (`res.write('data:
+...\n\n')` server-side, a `response.body.getReader()` loop client-side) and
+  the optimistic-update-with-rollback idea for the Tasks list. Everything
+  else was rebuilt fresh for this project's stack (MUI + styled-components +
+  the file-split convention vs. the reference's SCSS + hand-rolled
+  components; Drizzle vs. raw SQL) — the reference had no system prompt and
+  no structured/JSON-mode output at all, so the task-breakdown prompt and the
+  plan-extraction mechanism are entirely new work.
+  - **Groq via `groq-sdk`**, `openai/gpt-oss-120b` (see the existing "AI
+    model" note below — unchanged). Two Groq call shapes: `/api/chat`
+    streams a normal reply over SSE; a separate, explicit "Convert to plan"
+    action (`/api/chat-plan`) makes a second, non-streaming call with
+    `response_format: {type:'json_object'}` over the existing conversation
+    history, returning `{steps:[{title,minutes}]}`. Kept these as two
+    distinct actions rather than trying to detect "this looks like a plan"
+    inside the streamed reply — explicit and predictable beats inferred,
+    especially for an audience this app is built for.
+  - **Conversations + messages persisted to Neon** (new `conversations` /
+    `messages` tables) — the user asked for this explicitly rather than an
+    ephemeral in-memory chat, so a conversation survives a refresh/reopen.
+    Sidebar groups by `updatedAt` (Today/Yesterday/This week/Older), not
+    `createdAt`, so a conversation you keep returning to stays near the top.
+    Conversation title is derived deterministically from the first user
+    message (trimmed/collapsed/truncated to 48 chars) rather than spending an
+    extra Groq call just to name it.
+  - **Accepted risk — no DB transaction around the chat write sequence:**
+    the user message is written to Neon before calling Groq, and the
+    assistant message is written after the stream completes; this project's
+    `neon-http` Drizzle driver doesn't support `db.transaction()`, so a
+    failure between those two writes (e.g. the process dying mid-stream)
+    can leave an orphaned user message with no reply. Small window, low
+    consequence (worst case: a dangling row, not corrupted data or a security
+    issue) — documented in
+    [docs/SECURITY.md](../docs/SECURITY.md#accepted-risks) alongside the
+    existing `esbuild`/`drizzle-kit` entry rather than built around with
+    retry/cleanup logic this iteration.
+  - **The "send plan to Timers" pivot:** ROADMAP originally scoped the
+    handoff as creating Timers-tab entries. Mid-iteration the user asked for
+    a **new "Tasks" tab** instead — a flat, persisted checklist
+    (`tasks` table: title, estimated minutes as a label only, completed
+    boolean) with no timer attached and no "start a timer from this task"
+    shortcut, specifically so working through an AI-built plan doesn't carry
+    the pressure of a running countdown. This is the first change to the
+    tab count since iteration 5 fixed it at three (when Settings moved to
+    the header specifically to keep it there) — Tasks is the 4th tab, placed
+    right after AI Chat (its source), with Dashboard staying last as the
+    review tab. A plan is never persisted as its own entity; it's a
+    transient, editable client-side draft (`PlanPreviewCard`) until the user
+    confirms, at which point it becomes real `tasks` rows via
+    `POST /api/tasks`. No link is kept from a task back to its source
+    conversation — traceability wasn't part of the ask and was left out to
+    keep scope minimal; revisit if asked later.
+  - **Bug found while implementing:** a `useEffect` in `useAiChatTab.ts`
+    keyed on the active conversation id was refetching+clearing `messages`
+    on every id change, including the id change that happens right after
+    `sendMessage` creates a brand-new conversation — which wiped the
+    just-streamed assistant reply a moment after it arrived (a real
+    flash/loss bug, not a test artifact). Fixed by removing that effect and
+    replacing it with an explicit `loadConversationMessages(id)` call, guarded
+    by a "latest requested id" ref (so a late-resolving fetch can't stomp
+    newer state), invoked only from the user-driven "select a conversation"
+    handler — `startNewChat()`/delete-confirm now clear `messages` directly
+    themselves instead of relying on an effect to notice.
+  - **Testing:** `@clerk/testing`'s official Playwright helper
+    (`clerkSetup()`/`clerk.signIn()`) drives the one real sign-in the e2e
+    flow needs; `/api/chat` and `/api/chat-plan` are mocked at the network
+    layer (`page.route`) so the spec needs no `GROQ_API_KEY` and produces no
+    Groq spend. The spec `test.skip()`s itself without a dedicated
+    `E2E_CLERK_TEST_EMAIL`/`E2E_CLERK_TEST_PASSWORD` test-mode user (see
+    `.env.example`) — not wired into CI this iteration, same deferral as
+    the rate-limiting/CSP items already tracked for v0.10.0.
+  - Added `react-markdown` + `remark-gfm` for assistant-message rendering
+    (no syntax-highlighting package — this isn't a coding assistant) and
+    `groq-sdk` for the API calls; pushed the bundle further, bumped
+    `chunkSizeWarningLimit` again (same recurring note as prior iterations).
 - **Dashboard tab (iteration 7):** chart library is `@mui/x-charts` (user's
   choice between it and Recharts — picked for inheriting the app's MUI theme
   automatically, so the charts use the same muted teal as the rest of the app

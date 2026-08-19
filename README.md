@@ -13,7 +13,7 @@ app, and built one small, usable iteration at a time.
 ## What it does
 
 A header sits at the top always — the app's name, and once you're signed in, your
-avatar and a Settings shortcut. Below it, three tabs:
+avatar and a Settings shortcut. Below it, four tabs:
 
 - **⏱️ Timers** — Set a timer and get notified when it's done (pomodoros, 20-minute
   focus blocks, whatever works for you), or just start a stopwatch and mark it
@@ -21,8 +21,10 @@ avatar and a Settings shortcut. Below it, three tabs:
   picture of how you spend your time.
 - **💬 AI Chat** — Stuck staring at a huge task, unsure where to start? Talk it
   through with an assistant whose only job is helping you break it into smaller,
-  doable steps. Once you're happy with the plan, send it straight to Timers — each
+  doable steps. Once you're happy with the plan, send it straight to Tasks — each
   step arrives with its own estimated time.
+- **✅ Tasks** — A flat checklist of the steps you sent over from AI Chat. Tick
+  them off as you go, no timer pressure attached.
 - **📊 Dashboard** — A look back at what you got done: completed tasks, time spent,
   streaks, patterns over time.
 
@@ -67,26 +69,26 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                                           | Status     |
-| ------- | -------------------------------------------------------------------------------------- | ---------- |
-| v0.1.0  | Project docs and repo setup                                                            | ✅ done    |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                           | ✅ done    |
-| v0.3.0  | Language switching + visual theme                                                      | ✅ done    |
-| v0.4.0  | Login with Clerk                                                                       | ✅ done    |
-| v0.5.0  | Database (Neon) wired up                                                               | ✅ done    |
-| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done    |
-| v0.7.0  | Timers tab                                                                             | ✅ done    |
-| v0.8.0  | Dashboard tab                                                                          | ✅ done    |
-| v0.9.0  | AI Chat tab (Groq)                                                                     | ⏳ pending |
-| v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending |
-| v0.11.0 | Badges and social sharing                                                              | ⏳ pending |
-| v0.12.0 | Google Calendar integration                                                            | ⏳ pending |
-| v0.13.0 | Spotify/SoundCloud integration                                                         | ⏳ pending |
-| v1.0.0  | App store packaging                                                                    | ⏳ pending |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending |
-| v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending |
-| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music    | ⏳ pending |
-| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending |
+| Version | What it adds                                                                           | Status         |
+| ------- | -------------------------------------------------------------------------------------- | -------------- |
+| v0.1.0  | Project docs and repo setup                                                            | ✅ done        |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                           | ✅ done        |
+| v0.3.0  | Language switching + visual theme                                                      | ✅ done        |
+| v0.4.0  | Login with Clerk                                                                       | ✅ done        |
+| v0.5.0  | Database (Neon) wired up                                                               | ✅ done        |
+| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done        |
+| v0.7.0  | Timers tab                                                                             | ✅ done        |
+| v0.8.0  | Dashboard tab                                                                          | ✅ done        |
+| v0.9.0  | AI Chat tab (Groq) + Tasks tab                                                         | 🚧 in progress |
+| v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending     |
+| v0.11.0 | Badges and social sharing                                                              | ⏳ pending     |
+| v0.12.0 | Google Calendar integration                                                            | ⏳ pending     |
+| v0.13.0 | Spotify/SoundCloud integration                                                         | ⏳ pending     |
+| v1.0.0  | App store packaging                                                                    | ⏳ pending     |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending     |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending     |
+| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music    | ⏳ pending     |
+| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending     |
 
 ## Getting started
 
@@ -102,11 +104,13 @@ npm run lint           # oxlint
 ```
 
 You'll need a free [Clerk](https://dashboard.clerk.com) application for sign-in,
-and a [Neon](https://neon.tech) Postgres database (or Vercel's Storage tab → Neon
-integration) — see `.env.example` for which key goes where.
+a [Neon](https://neon.tech) Postgres database (or Vercel's Storage tab → Neon
+integration), and a free [Groq](https://console.groq.com/keys) API key for the AI
+Chat tab — see `.env.example` for which key goes where.
 
 **`npm run dev` doesn't run `/api`** — Vite's dev server only serves the frontend,
-so the Clerk webhook and the preferences sync silently no-op locally (the app
-still works, language just stays localStorage-only instead of following your
-account). To exercise `/api` routes locally too, use `vercel dev` instead (needs
-the Vercel CLI linked to this project: `vercel link`).
+so the Clerk webhook, the preferences sync, and the AI Chat/Tasks routes all
+silently no-op locally (the rest of the app still works — language just stays
+localStorage-only instead of following your account, and the AI Chat/Tasks tabs
+won't load or save anything). To exercise `/api` routes locally too, use
+`vercel dev` instead (needs the Vercel CLI linked to this project: `vercel link`).
