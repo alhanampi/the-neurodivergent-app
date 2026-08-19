@@ -3,7 +3,11 @@ import { useAuth } from '@clerk/clerk-react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { MIN_MESSAGES_FOR_PLAN } from './AiChatTab.constants'
-import { groupConversationsByDate } from './AiChatTab.utils'
+import {
+  getStoredConversationId,
+  groupConversationsByDate,
+  setStoredConversationId,
+} from './AiChatTab.utils'
 import {
   createTasksFromPlan,
   deleteConversationRequest,
@@ -108,20 +112,51 @@ export function useAiChatTab() {
   // here with `{ state: { conversationId } }`. Consumed once via a ref so
   // navigating away and back to /ai-chat (still carrying the same location
   // state, since react-router keeps it until a fresh navigation replaces
-  // it) doesn't re-trigger the same selection on every render.
+  // it) doesn't re-trigger the same selection on every render. Falls back
+  // to whatever conversation was last active (see LAST_CONVERSATION_STORAGE_KEY)
+  // when there's no deep link — this tab fully unmounts on a route change
+  // (it's a separate route, not a hidden/shown tab), so without this a
+  // mid-conversation user who taps another tab and comes back would land on
+  // a blank new chat instead of where they left off. Both paths are
+  // one-shot per mount, guarded by `hasRestoredRef` so a later `location`
+  // change (e.g. from `startNewChat`'s own navigation, if any) can't
+  // re-trigger a restore.
   const consumedDeepLinkConversationIdRef = useRef<number | null>(null)
+  const hasRestoredRef = useRef(false)
   useEffect(() => {
     const state = location.state as { conversationId?: number } | null
     const conversationId = state?.conversationId
-    if (
-      conversationId === undefined ||
-      consumedDeepLinkConversationIdRef.current === conversationId
-    ) {
+
+    if (conversationId !== undefined) {
+      if (consumedDeepLinkConversationIdRef.current === conversationId) return
+      consumedDeepLinkConversationIdRef.current = conversationId
+      hasRestoredRef.current = true
+      selectConversation(conversationId)
       return
     }
-    consumedDeepLinkConversationIdRef.current = conversationId
-    selectConversation(conversationId)
+
+    if (hasRestoredRef.current) return
+    hasRestoredRef.current = true
+    const storedId = getStoredConversationId()
+    if (storedId !== null) selectConversation(storedId)
   }, [location.state, selectConversation])
+
+  // Mirrors the active conversation to localStorage on every change, for
+  // the restore above — one effect covers every path that sets it
+  // (selectConversation, sendMessage assigning a brand-new conversation's
+  // id, startNewChat/delete resetting to null) rather than threading a
+  // persist call through each handler individually. Skips its very first
+  // run: on initial mount `activeConversationId` is still null (the restore
+  // effect above hasn't resolved yet), and persisting that would immediately
+  // wipe out the very value this effect exists to preserve.
+  const isFirstPersistRef = useRef(true)
+  useEffect(() => {
+    if (isFirstPersistRef.current) {
+      isFirstPersistRef.current = false
+      return
+    }
+    setStoredConversationId(activeConversationId)
+  }, [activeConversationId])
 
   const startNewChat = useCallback(() => {
     latestRequestedConversationIdRef.current = null

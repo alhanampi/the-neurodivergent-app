@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import i18n from '@/i18n/i18n'
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
 import { AiChatTab } from './AiChatTab'
+import { LAST_CONVERSATION_STORAGE_KEY } from './AiChatTab.constants'
 import type {
   ClientMessage,
   ConversationSummary,
@@ -87,6 +88,7 @@ function renderChatTab() {
 afterEach(() => {
   void i18n.changeLanguage('en')
   vi.clearAllMocks()
+  localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY)
 })
 
 describe('AiChatTab', () => {
@@ -124,6 +126,42 @@ describe('AiChatTab', () => {
     await user.click(screen.getByRole('button', { name: 'Convert to plan' }))
 
     expect(await screen.findByDisplayValue('Step one')).toBeInTheDocument()
+  })
+
+  it('restores the last active conversation from storage on mount (leaving the tab and coming back)', async () => {
+    localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, '7')
+    mockFetchConversationMessages.mockResolvedValueOnce([
+      { id: 1, role: 'user', content: 'Where I left off', createdAt: 'x' },
+    ])
+
+    renderChatTab()
+
+    expect(await screen.findByText('Where I left off')).toBeInTheDocument()
+    expect(mockFetchConversationMessages).toHaveBeenCalledWith(7, expect.any(Function))
+  })
+
+  it('persists the active conversation id after sending a message', async () => {
+    const user = userEvent.setup()
+    renderChatTab()
+
+    await user.type(
+      screen.getByPlaceholderText("Tell me what you're working on…"),
+      'Help me clean the kitchen',
+    )
+    await user.click(screen.getByRole('button', { name: 'Send' }))
+
+    await waitFor(() => expect(localStorage.getItem(LAST_CONVERSATION_STORAGE_KEY)).toBe('1'))
+  })
+
+  it('clears the stored conversation id when starting a new chat', async () => {
+    const user = userEvent.setup()
+    localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, '7')
+    renderChatTab()
+
+    await user.click(screen.getByRole('button', { name: 'Open conversations' }))
+    await user.click(screen.getByRole('button', { name: 'New chat' }))
+
+    await waitFor(() => expect(localStorage.getItem(LAST_CONVERSATION_STORAGE_KEY)).toBeNull())
   })
 
   it('lists conversations in the sidebar, grouped by recency', async () => {

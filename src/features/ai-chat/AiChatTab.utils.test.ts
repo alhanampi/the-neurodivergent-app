@@ -1,10 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
   formatConversationTimestamp,
+  getStoredConversationId,
   groupConversationsByDate,
   isChatSseFrame,
   parseSseChunk,
+  setStoredConversationId,
 } from './AiChatTab.utils'
+import { LAST_CONVERSATION_STORAGE_KEY } from './AiChatTab.constants'
 import type { ConversationSummary } from './AiChatTab.interfaces'
 
 describe('isChatSseFrame', () => {
@@ -129,5 +132,35 @@ describe('formatConversationTimestamp', () => {
     const result = formatConversationTimestamp('2026-08-18T10:00:00.000Z', 'en')
     expect(typeof result).toBe('string')
     expect(result.length).toBeGreaterThan(0)
+  })
+})
+
+describe('getStoredConversationId / setStoredConversationId', () => {
+  afterEach(() => {
+    localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY)
+  })
+
+  it('returns null when nothing is stored', () => {
+    expect(getStoredConversationId()).toBeNull()
+  })
+
+  it('round-trips a stored id', () => {
+    setStoredConversationId(42)
+    expect(getStoredConversationId()).toBe(42)
+  })
+
+  it('clears the stored value when set to null', () => {
+    setStoredConversationId(42)
+    setStoredConversationId(null)
+    expect(getStoredConversationId()).toBeNull()
+    expect(localStorage.getItem(LAST_CONVERSATION_STORAGE_KEY)).toBeNull()
+  })
+
+  it('treats a corrupted/non-positive stored value as absent', () => {
+    localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, 'not-a-number')
+    expect(getStoredConversationId()).toBeNull()
+
+    localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, '-1')
+    expect(getStoredConversationId()).toBeNull()
   })
 })

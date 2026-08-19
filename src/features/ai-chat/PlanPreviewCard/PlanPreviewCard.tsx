@@ -13,6 +13,7 @@ import {
   Card,
   StepRow,
   StepTitleField,
+  StepUtilityRow,
   TaskFieldsColumn,
 } from './PlanPreviewCard.styles'
 import type { PlanPreviewCardProps } from './PlanPreviewCard.interfaces'
@@ -51,6 +52,7 @@ export function PlanPreviewCard({
         <TextField
           size="small"
           fullWidth
+          multiline
           label={t('chat.plan.taskTitleLabel')}
           value={taskTitle}
           onChange={(event) => onTaskTitleChange(event.target.value)}
@@ -72,29 +74,32 @@ export function PlanPreviewCard({
             <TextField
               size="small"
               fullWidth
+              multiline
               value={step.title}
               onChange={(event) => onTitleChange(step.id, event.target.value)}
             />
           </StepTitleField>
-          <Chip
-            size="small"
-            label={t(`tasks.priority.${step.priority}`)}
-            color={getPriorityChipColor(step.priority)}
-          />
-          <MinutesInput
-            value={step.minutes}
-            onChange={(minutes) => onMinutesChange(step.id, minutes)}
-            min={MIN_CUSTOM_MINUTES}
-            max={MAX_CUSTOM_MINUTES}
-            ariaLabel={t('chat.plan.stepMinutesLabel')}
-          />
-          <IconButton
-            size="small"
-            aria-label={t('chat.plan.removeStepLabel')}
-            onClick={() => onRemoveStep(step.id)}
-          >
-            <FiTrash2 size={16} />
-          </IconButton>
+          <StepUtilityRow>
+            <Chip
+              size="small"
+              label={t(`tasks.priority.${step.priority}`)}
+              color={getPriorityChipColor(step.priority)}
+            />
+            <MinutesInput
+              value={step.minutes}
+              onChange={(minutes) => onMinutesChange(step.id, minutes)}
+              min={MIN_CUSTOM_MINUTES}
+              max={MAX_CUSTOM_MINUTES}
+              ariaLabel={t('chat.plan.stepMinutesLabel')}
+            />
+            <IconButton
+              size="small"
+              aria-label={t('chat.plan.removeStepLabel')}
+              onClick={() => onRemoveStep(step.id)}
+            >
+              <FiTrash2 size={16} />
+            </IconButton>
+          </StepUtilityRow>
         </StepRow>
       ))}
 

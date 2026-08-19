@@ -1,3 +1,4 @@
+import { LAST_CONVERSATION_STORAGE_KEY } from './AiChatTab.constants'
 import type {
   ChatSseFrame,
   ConversationDateGroup,
@@ -107,4 +108,23 @@ export function createDraftId(): string {
     return crypto.randomUUID()
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+/** Reads the last active conversation id remembered across a tab switch
+ * (see LAST_CONVERSATION_STORAGE_KEY) — null if there isn't one, or it's
+ * not a valid positive integer (a hand-edited/corrupted value shouldn't
+ * crash the restore, just be treated as absent). */
+export function getStoredConversationId(): number | null {
+  const raw = localStorage.getItem(LAST_CONVERSATION_STORAGE_KEY)
+  if (raw === null) return null
+  const id = Number(raw)
+  return Number.isInteger(id) && id > 0 ? id : null
+}
+
+export function setStoredConversationId(conversationId: number | null): void {
+  if (conversationId === null) {
+    localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY)
+  } else {
+    localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, String(conversationId))
+  }
 }
