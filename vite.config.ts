@@ -92,18 +92,25 @@ export default defineConfig({
     // raw between them) push the single bundle past Vite's 500kB default
     // warning threshold; the Timers tab (v0.7.0) pushed it past 750kB too;
     // @mui/x-charts (v0.8.0, Dashboard tab) pushed it past 850kB, to
-    // ~1.1MB raw / ~340kB gzipped. Real fix is code-splitting (lazy-load
-    // heavier per-route chunks — the Dashboard tab specifically, since
-    // @mui/x-charts is the newest and heaviest addition) — tracked for
-    // v0.10.0 (security/perf hardening) — this just stops the warning from
-    // being noise until then.
-    chunkSizeWarningLimit: 1150,
+    // ~1.1MB raw / ~340kB gzipped; react-markdown + remark-gfm + groq-sdk
+    // (v0.9.0, AI Chat + Tasks tabs) pushed it past 1150kB, to ~1.32MB raw /
+    // ~400kB gzipped. Real fix is code-splitting (lazy-load heavier
+    // per-route chunks — Dashboard and AI Chat are the two biggest
+    // candidates now) — tracked for v0.10.0 (security/perf hardening) —
+    // this just stops the warning from being noise until then.
+    chunkSizeWarningLimit: 1350,
   },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    // e2e/ holds Playwright specs (test.describe/test.skip from
+    // @playwright/test, a different test runner) — Vitest's default include
+    // glob picks up *.spec.ts too, so it must be excluded explicitly or
+    // Vitest tries to execute it and fails immediately (test.describe()
+    // called outside Playwright's own runner).
+    exclude: ['**/node_modules/**', '**/dist/**', './e2e/**'],
     env: {
       // db/client.ts throws at import time if this is missing — tests for
       // api/ utils that don't actually run a query need a syntactically
