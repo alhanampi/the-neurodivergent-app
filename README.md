@@ -19,12 +19,16 @@ avatar and a Settings shortcut. Below it, four tabs:
   focus blocks, whatever works for you), or just start a stopwatch and mark it
   finished whenever you are. Every session gets saved, so you build up a real
   picture of how you spend your time.
-- **💬 AI Chat** — Stuck staring at a huge task, unsure where to start? Talk it
+- **💬 Chat** — Stuck staring at a huge task, unsure where to start? Talk it
   through with an assistant whose only job is helping you break it into smaller,
-  doable steps. Once you're happy with the plan, send it straight to Tasks — each
-  step arrives with its own estimated time.
-- **✅ Tasks** — A flat checklist of the steps you sent over from AI Chat. Tick
-  them off as you go, no timer pressure attached.
+  doable steps, with realistic time estimates (and an honest heads-up if your
+  available time isn't enough for what you're planning). Once you're happy with
+  the plan, send it straight to Tasks.
+- **✅ Tasks** — Each plan lands as a collapsible Task explaining what it's for,
+  containing Subtasks you tick off one at a time. Every subtask carries its own
+  priority, due date, and a start/pause/±minutes timer; the Task rolls up a total
+  time estimate and a progress bar. Add tasks/subtasks by hand too, or jump back
+  to the chat that generated one.
 - **📊 Dashboard** — A look back at what you got done: completed tasks, time spent,
   streaks, patterns over time.
 
@@ -69,26 +73,26 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                                           | Status         |
-| ------- | -------------------------------------------------------------------------------------- | -------------- |
-| v0.1.0  | Project docs and repo setup                                                            | ✅ done        |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                           | ✅ done        |
-| v0.3.0  | Language switching + visual theme                                                      | ✅ done        |
-| v0.4.0  | Login with Clerk                                                                       | ✅ done        |
-| v0.5.0  | Database (Neon) wired up                                                               | ✅ done        |
-| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done        |
-| v0.7.0  | Timers tab                                                                             | ✅ done        |
-| v0.8.0  | Dashboard tab                                                                          | ✅ done        |
-| v0.9.0  | AI Chat tab (Groq) + Tasks tab                                                         | 🚧 in progress |
-| v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending     |
-| v0.11.0 | Badges and social sharing                                                              | ⏳ pending     |
-| v0.12.0 | Google Calendar integration                                                            | ⏳ pending     |
-| v0.13.0 | Spotify/SoundCloud integration                                                         | ⏳ pending     |
-| v1.0.0  | App store packaging                                                                    | ⏳ pending     |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending     |
-| v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending     |
-| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music    | ⏳ pending     |
-| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending     |
+| Version | What it adds                                                                           | Status     |
+| ------- | -------------------------------------------------------------------------------------- | ---------- |
+| v0.1.0  | Project docs and repo setup                                                            | ✅ done    |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                           | ✅ done    |
+| v0.3.0  | Language switching + visual theme                                                      | ✅ done    |
+| v0.4.0  | Login with Clerk                                                                       | ✅ done    |
+| v0.5.0  | Database (Neon) wired up                                                               | ✅ done    |
+| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                        | ✅ done    |
+| v0.7.0  | Timers tab                                                                             | ✅ done    |
+| v0.8.0  | Dashboard tab                                                                          | ✅ done    |
+| v0.9.0  | Chat tab (Groq) + Tasks tab (task/subtask hierarchy, priorities, timers)               | ✅ done    |
+| v0.10.0 | Security & accessibility hardening                                                     | ⏳ pending |
+| v0.11.0 | Badges and social sharing                                                              | ⏳ pending |
+| v0.12.0 | Google Calendar integration                                                            | ⏳ pending |
+| v0.13.0 | Spotify/SoundCloud integration                                                         | ⏳ pending |
+| v1.0.0  | App store packaging                                                                    | ⏳ pending |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                    | ⏳ pending |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option                             | ⏳ pending |
+| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music    | ⏳ pending |
+| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges | ⏳ pending |
 
 ## Getting started
 
