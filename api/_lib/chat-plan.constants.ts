@@ -8,3 +8,6 @@ export const MAX_PLAN_STEPS = 12
 export const MAX_STEP_TITLE_LENGTH = 120
 export const MIN_STEP_MINUTES = 1
 export const MAX_STEP_MINUTES = 180
+
+export const MAX_TASK_TITLE_LENGTH = 120
+export const MAX_TASK_DESCRIPTION_LENGTH = 500

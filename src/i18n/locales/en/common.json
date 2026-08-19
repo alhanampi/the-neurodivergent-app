@@ -117,6 +117,8 @@
       "convertButton": "Convert to plan",
       "generating": "Building your plan…",
       "title": "Suggested plan",
+      "taskTitleLabel": "Task title",
+      "taskDescriptionLabel": "What this task is about",
       "stepMinutesLabel": "Step duration in minutes",
       "removeStepLabel": "Remove step",
       "discard": "Discard",
@@ -133,11 +135,45 @@
     "title": "Tasks",
     "loading": "Loading your tasks…",
     "empty": "No tasks yet — approve a plan from AI Chat to see it here.",
+    "addTaskButton": "Add task",
+    "dueDateLabel": "Due date",
+    "priority": {
+      "label": "Priority",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "card": {
+      "collapse": "Collapse task",
+      "expand": "Expand task",
+      "totalMinutesLabel": "Estimated total: {{minutes}} min",
+      "goToChat": "Go to the conversation this task came from",
+      "deleteTask": "Delete task",
+      "addSubtask": "Add subtask"
+    },
     "item": {
       "minutesLabel": "{{minutes}} min",
       "markDone": "Mark as done",
       "markNotDone": "Mark as not done",
-      "deleteLabel": "Delete task"
+      "deleteLabel": "Delete subtask",
+      "addMinutes": "Add 5 minutes",
+      "subtractMinutes": "Subtract 5 minutes",
+      "pauseTimer": "Pause timer",
+      "resumeTimer": "Resume timer"
+    },
+    "addTaskDialog": {
+      "title": "New task",
+      "titleLabel": "Task title",
+      "descriptionLabel": "What is this task about? (optional)",
+      "cancel": "Cancel",
+      "confirm": "Add task"
+    },
+    "addSubtaskDialog": {
+      "title": "New subtask",
+      "titleLabel": "Subtask title",
+      "minutesLabel": "Subtask duration in minutes",
+      "cancel": "Cancel",
+      "confirm": "Add subtask"
     }
   },
   "dashboard": {

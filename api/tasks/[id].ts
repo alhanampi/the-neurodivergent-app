@@ -1,5 +1,5 @@
 import { getUserIdFromRequest } from '../_lib/auth.utils.js'
-import { deleteTaskOwned, parseUpdateTaskBody, updateTaskCompleted } from '../_lib/tasks.utils.js'
+import { deleteTaskOwned, parseUpdateTaskBody, updateTaskOwned } from '../_lib/tasks.utils.js'
 import type { VercelApiRequest, VercelApiResponse } from '../_lib/vercel-http.interfaces.js'
 
 export default async function handler(req: VercelApiRequest, res: VercelApiResponse) {
@@ -22,7 +22,7 @@ export default async function handler(req: VercelApiRequest, res: VercelApiRespo
       res.status(400).json({ error: 'Invalid request' })
       return
     }
-    const task = await updateTaskCompleted(userId, id, body.completed)
+    const task = await updateTaskOwned(userId, id, body)
     if (!task) {
       res.status(404).json({ error: 'Task not found' })
       return

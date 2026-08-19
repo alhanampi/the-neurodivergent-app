@@ -38,6 +38,8 @@ const mockStreamChatMessage = vi.fn(
 )
 const mockRequestPlan = vi.fn(async (_id: unknown, _language: unknown, _getToken: unknown) => ({
   ok: true,
+  taskTitle: 'Clean kitchen',
+  taskDescription: 'A few quick steps.',
   steps: [{ id: 's1', title: 'Step one', minutes: 5 }],
 }))
 const mockRenameConversationRequest = vi.fn(

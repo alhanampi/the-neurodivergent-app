@@ -117,6 +117,8 @@
       "convertButton": "Convertir en plan",
       "generating": "Armando tu plan…",
       "title": "Plan sugerido",
+      "taskTitleLabel": "Título de la tarea",
+      "taskDescriptionLabel": "De qué se trata esta tarea",
       "stepMinutesLabel": "Duración del paso en minutos",
       "removeStepLabel": "Quitar paso",
       "discard": "Descartar",
@@ -133,11 +135,45 @@
     "title": "Tareas",
     "loading": "Cargando tus tareas…",
     "empty": "Todavía no hay tareas — aprobá un plan desde el Chat IA para verlo acá.",
+    "addTaskButton": "Agregar tarea",
+    "dueDateLabel": "Fecha límite",
+    "priority": {
+      "label": "Prioridad",
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "card": {
+      "collapse": "Colapsar tarea",
+      "expand": "Expandir tarea",
+      "totalMinutesLabel": "Total estimado: {{minutes}} min",
+      "goToChat": "Ir a la conversación de la que salió esta tarea",
+      "deleteTask": "Eliminar tarea",
+      "addSubtask": "Agregar subtarea"
+    },
     "item": {
       "minutesLabel": "{{minutes}} min",
       "markDone": "Marcar como hecha",
       "markNotDone": "Marcar como no hecha",
-      "deleteLabel": "Eliminar tarea"
+      "deleteLabel": "Eliminar subtarea",
+      "addMinutes": "Agregar 5 minutos",
+      "subtractMinutes": "Quitar 5 minutos",
+      "pauseTimer": "Pausar temporizador",
+      "resumeTimer": "Reanudar temporizador"
+    },
+    "addTaskDialog": {
+      "title": "Nueva tarea",
+      "titleLabel": "Título de la tarea",
+      "descriptionLabel": "¿De qué se trata esta tarea? (opcional)",
+      "cancel": "Cancelar",
+      "confirm": "Agregar tarea"
+    },
+    "addSubtaskDialog": {
+      "title": "Nueva subtarea",
+      "titleLabel": "Título de la subtarea",
+      "minutesLabel": "Duración de la subtarea en minutos",
+      "cancel": "Cancelar",
+      "confirm": "Agregar subtarea"
     }
   },
   "dashboard": {

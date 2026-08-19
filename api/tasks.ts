@@ -1,5 +1,10 @@
 import { getUserIdFromRequest } from './_lib/auth.utils.js'
-import { createTasks, listTasksForUser, parseCreateTasksBody } from './_lib/tasks.utils.js'
+import {
+  conversationBelongsToUser,
+  createTaskWithSubtasks,
+  listTasksForUser,
+  parseCreateTasksBody,
+} from './_lib/tasks.utils.js'
 import type { VercelApiRequest, VercelApiResponse } from './_lib/vercel-http.interfaces.js'
 
 export default async function handler(req: VercelApiRequest, res: VercelApiResponse) {
@@ -18,11 +23,18 @@ export default async function handler(req: VercelApiRequest, res: VercelApiRespo
   if (req.method === 'POST') {
     const body = parseCreateTasksBody(req.body)
     if (!body) {
-      res.status(400).json({ error: 'Invalid tasks' })
+      res.status(400).json({ error: 'Invalid task' })
       return
     }
-    const tasks = await createTasks(userId, body.steps)
-    res.status(201).json({ tasks })
+    if (
+      body.conversationId !== null &&
+      !(await conversationBelongsToUser(userId, body.conversationId))
+    ) {
+      res.status(400).json({ error: 'Invalid conversationId' })
+      return
+    }
+    const task = await createTaskWithSubtasks(userId, body)
+    res.status(201).json({ task })
     return
   }
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { MIN_MESSAGES_FOR_PLAN } from './AiChatTab.constants'
 import { groupConversationsByDate } from './AiChatTab.utils'
 import {
@@ -20,6 +20,7 @@ export function useAiChatTab() {
   const { t, i18n } = useTranslation()
   const { isSignedIn, getToken } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   // SUPPORTED_LANGUAGES is only ever 'en'/'es' in this app (see
   // src/i18n/i18n.ts) — normalized explicitly rather than cast, so an
@@ -36,6 +37,8 @@ export function useAiChatTab() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const [planSteps, setPlanSteps] = useState<PlanStepDraft[] | null>(null)
+  const [planTaskTitle, setPlanTaskTitle] = useState('')
+  const [planTaskDescription, setPlanTaskDescription] = useState('')
   const [isPlanGenerating, setIsPlanGenerating] = useState(false)
   const [isCreatingTasks, setIsCreatingTasks] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -92,17 +95,41 @@ export function useAiChatTab() {
     (id: number) => {
       setActiveConversationId(id)
       setPlanSteps(null)
+      setPlanTaskTitle('')
+      setPlanTaskDescription('')
       setIsSidebarOpen(false)
       void loadConversationMessages(id)
     },
     [loadConversationMessages],
   )
 
+  // Deep-link from the Tasks tab's "go to chat" button (see TaskCard's
+  // onGoToChat / useTasksTab's goToSourceConversation), which navigates
+  // here with `{ state: { conversationId } }`. Consumed once via a ref so
+  // navigating away and back to /ai-chat (still carrying the same location
+  // state, since react-router keeps it until a fresh navigation replaces
+  // it) doesn't re-trigger the same selection on every render.
+  const consumedDeepLinkConversationIdRef = useRef<number | null>(null)
+  useEffect(() => {
+    const state = location.state as { conversationId?: number } | null
+    const conversationId = state?.conversationId
+    if (
+      conversationId === undefined ||
+      consumedDeepLinkConversationIdRef.current === conversationId
+    ) {
+      return
+    }
+    consumedDeepLinkConversationIdRef.current = conversationId
+    selectConversation(conversationId)
+  }, [location.state, selectConversation])
+
   const startNewChat = useCallback(() => {
     latestRequestedConversationIdRef.current = null
     setActiveConversationId(null)
     setMessages([])
     setPlanSteps(null)
+    setPlanTaskTitle('')
+    setPlanTaskDescription('')
     setIsSidebarOpen(false)
   }, [])
 
@@ -200,6 +227,8 @@ export function useAiChatTab() {
     const result = await requestPlan(activeConversationId, language, getToken)
     if (result.ok) {
       setPlanSteps(result.steps)
+      setPlanTaskTitle(result.taskTitle)
+      setPlanTaskDescription(result.taskDescription)
     } else {
       setErrorMessage(t('chat.plan.error'))
     }
@@ -222,24 +251,44 @@ export function useAiChatTab() {
     setPlanSteps((current) => (current ? current.filter((step) => step.id !== id) : current))
   }, [])
 
-  const discardPlan = useCallback(() => setPlanSteps(null), [])
+  const updatePlanTaskTitle = useCallback((title: string) => setPlanTaskTitle(title), [])
+  const updatePlanTaskDescription = useCallback(
+    (description: string) => setPlanTaskDescription(description),
+    [],
+  )
+
+  const discardPlan = useCallback(() => {
+    setPlanSteps(null)
+    setPlanTaskTitle('')
+    setPlanTaskDescription('')
+  }, [])
 
   const sendPlanToTasks = useCallback(async () => {
-    if (!planSteps || planSteps.length === 0) return
+    if (!planSteps || planSteps.length === 0 || planTaskTitle.trim().length === 0) return
 
     setIsCreatingTasks(true)
     setErrorMessage(null)
 
-    const success = await createTasksFromPlan(planSteps, getToken)
+    const success = await createTasksFromPlan(
+      {
+        taskTitle: planTaskTitle.trim(),
+        taskDescription: planTaskDescription.trim(),
+        conversationId: activeConversationId,
+        steps: planSteps,
+      },
+      getToken,
+    )
     setIsCreatingTasks(false)
 
     if (success) {
       setPlanSteps(null)
+      setPlanTaskTitle('')
+      setPlanTaskDescription('')
       navigate('/tasks')
     } else {
       setErrorMessage(t('chat.plan.error'))
     }
-  }, [planSteps, getToken, navigate, t])
+  }, [planSteps, planTaskTitle, planTaskDescription, activeConversationId, getToken, navigate, t])
 
   const renameConversation = useCallback(
     async (id: number, title: string) => {
@@ -273,6 +322,8 @@ export function useAiChatTab() {
       setActiveConversationId(null)
       setMessages([])
       setPlanSteps(null)
+      setPlanTaskTitle('')
+      setPlanTaskDescription('')
     }
   }, [pendingDeleteId, getToken, activeConversationId])
 
@@ -293,6 +344,8 @@ export function useAiChatTab() {
     pendingDeleteId,
     pendingDeleteTitle,
     planSteps,
+    planTaskTitle,
+    planTaskDescription,
     isPlanGenerating,
     isCreatingTasks,
     errorMessage,
@@ -306,6 +359,8 @@ export function useAiChatTab() {
     updatePlanStepTitle,
     updatePlanStepMinutes,
     removePlanStep,
+    updatePlanTaskTitle,
+    updatePlanTaskDescription,
     discardPlan,
     sendPlanToTasks,
     renameConversation,

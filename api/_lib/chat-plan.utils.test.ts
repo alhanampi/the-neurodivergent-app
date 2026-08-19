@@ -33,16 +33,33 @@ describe('buildPlanSystemPrompt', () => {
     expect(prompt).toContain('Spanish')
     expect(prompt).toContain('JSON')
   })
+
+  it('instructs the model to estimate realistic durations without deflating them', () => {
+    const prompt = buildPlanSystemPrompt('en')
+    expect(prompt).toContain('REALISTIC')
+    expect(prompt).toContain('Do NOT shrink')
+  })
+
+  it('asks for taskTitle and taskDescription alongside steps', () => {
+    const prompt = buildPlanSystemPrompt('en')
+    expect(prompt).toContain('taskTitle')
+    expect(prompt).toContain('taskDescription')
+  })
 })
+
+const baseFields = { taskTitle: 'Clean the kitchen', taskDescription: 'A few quick steps.' }
 
 describe('parsePlanResponse', () => {
   it('parses a well-formed response', () => {
-    const raw = JSON.stringify({ steps: [{ title: 'Wash dishes', minutes: 10 }] })
-    expect(parsePlanResponse(raw)).toEqual({ steps: [{ title: 'Wash dishes', minutes: 10 }] })
+    const raw = JSON.stringify({ ...baseFields, steps: [{ title: 'Wash dishes', minutes: 10 }] })
+    expect(parsePlanResponse(raw)).toEqual({
+      ...baseFields,
+      steps: [{ title: 'Wash dishes', minutes: 10 }],
+    })
   })
 
   it('rounds a non-integer minutes value', () => {
-    const raw = JSON.stringify({ steps: [{ title: 'Step', minutes: 10.6 }] })
+    const raw = JSON.stringify({ ...baseFields, steps: [{ title: 'Step', minutes: 10.6 }] })
     expect(parsePlanResponse(raw)?.steps[0].minutes).toBe(11)
   })
 
@@ -51,35 +68,56 @@ describe('parsePlanResponse', () => {
   })
 
   it('rejects a missing steps array', () => {
-    expect(parsePlanResponse(JSON.stringify({}))).toBeNull()
+    expect(parsePlanResponse(JSON.stringify(baseFields))).toBeNull()
+  })
+
+  it('rejects a missing taskTitle or taskDescription', () => {
+    expect(
+      parsePlanResponse(
+        JSON.stringify({ taskDescription: 'x', steps: [{ title: 'Step', minutes: 5 }] }),
+      ),
+    ).toBeNull()
+    expect(
+      parsePlanResponse(JSON.stringify({ taskTitle: 'x', steps: [{ title: 'Step', minutes: 5 }] })),
+    ).toBeNull()
   })
 
   it('rejects an empty steps array', () => {
-    expect(parsePlanResponse(JSON.stringify({ steps: [] }))).toBeNull()
+    expect(parsePlanResponse(JSON.stringify({ ...baseFields, steps: [] }))).toBeNull()
   })
 
   it('rejects more than 12 steps', () => {
     const steps = Array.from({ length: 13 }, (_, i) => ({ title: `Step ${i}`, minutes: 5 }))
-    expect(parsePlanResponse(JSON.stringify({ steps }))).toBeNull()
+    expect(parsePlanResponse(JSON.stringify({ ...baseFields, steps }))).toBeNull()
   })
 
   it('rejects an out-of-range minutes value', () => {
-    expect(parsePlanResponse(JSON.stringify({ steps: [{ title: 'Step', minutes: 0 }] }))).toBeNull()
     expect(
-      parsePlanResponse(JSON.stringify({ steps: [{ title: 'Step', minutes: 181 }] })),
+      parsePlanResponse(JSON.stringify({ ...baseFields, steps: [{ title: 'Step', minutes: 0 }] })),
+    ).toBeNull()
+    expect(
+      parsePlanResponse(
+        JSON.stringify({ ...baseFields, steps: [{ title: 'Step', minutes: 181 }] }),
+      ),
     ).toBeNull()
   })
 
   it('rejects a step title over 120 characters', () => {
     expect(
-      parsePlanResponse(JSON.stringify({ steps: [{ title: 'x'.repeat(121), minutes: 5 }] })),
+      parsePlanResponse(
+        JSON.stringify({ ...baseFields, steps: [{ title: 'x'.repeat(121), minutes: 5 }] }),
+      ),
     ).toBeNull()
   })
 
   it('rejects a non-string title or non-number minutes', () => {
-    expect(parsePlanResponse(JSON.stringify({ steps: [{ title: 42, minutes: 5 }] }))).toBeNull()
     expect(
-      parsePlanResponse(JSON.stringify({ steps: [{ title: 'Step', minutes: 'five' }] })),
+      parsePlanResponse(JSON.stringify({ ...baseFields, steps: [{ title: 42, minutes: 5 }] })),
+    ).toBeNull()
+    expect(
+      parsePlanResponse(
+        JSON.stringify({ ...baseFields, steps: [{ title: 'Step', minutes: 'five' }] }),
+      ),
     ).toBeNull()
   })
 })

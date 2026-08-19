@@ -8,6 +8,10 @@ import type { PlanPreviewCardProps } from './PlanPreviewCard.interfaces'
 
 function renderCard(overrides: Partial<PlanPreviewCardProps> = {}) {
   const props: PlanPreviewCardProps = {
+    taskTitle: 'Clean kitchen',
+    onTaskTitleChange: vi.fn(),
+    taskDescription: 'A few quick steps to tidy up.',
+    onTaskDescriptionChange: vi.fn(),
     steps: [
       { id: '1', title: 'Wash dishes', minutes: 10 },
       { id: '2', title: 'Wipe counters', minutes: 5 },
@@ -33,6 +37,15 @@ afterEach(() => {
 })
 
 describe('PlanPreviewCard', () => {
+  it('renders and edits the task title/description', async () => {
+    const user = userEvent.setup()
+    const props = renderCard()
+
+    expect(screen.getByDisplayValue('Clean kitchen')).toBeInTheDocument()
+    await user.type(screen.getByDisplayValue('Clean kitchen'), '!')
+    expect(props.onTaskTitleChange).toHaveBeenCalledWith('Clean kitchen!')
+  })
+
   it('renders each step title and minutes', () => {
     renderCard()
 

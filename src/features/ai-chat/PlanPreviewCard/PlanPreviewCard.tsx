@@ -6,7 +6,13 @@ import Typography from '@mui/material/Typography'
 import { FiTrash2 } from 'react-icons/fi'
 import { MinutesInput } from '@/features/timers/MinutesInput/MinutesInput'
 import { MAX_CUSTOM_MINUTES, MIN_CUSTOM_MINUTES } from '@/features/timers/TimersTab.constants'
-import { ActionsRow, Card, StepRow, StepTitleField } from './PlanPreviewCard.styles'
+import {
+  ActionsRow,
+  Card,
+  StepRow,
+  StepTitleField,
+  TaskFieldsColumn,
+} from './PlanPreviewCard.styles'
 import type { PlanPreviewCardProps } from './PlanPreviewCard.interfaces'
 
 // Reuses MinutesInput and its bounds from the timers feature — same
@@ -14,7 +20,15 @@ import type { PlanPreviewCardProps } from './PlanPreviewCard.interfaces'
 // for timer types (both live in src/, ship in the same client bundle, no
 // secret/server boundary crossed). All-props, no local business logic —
 // edits are reported up to useAiChatTab immediately, not buffered here.
+// taskTitle/taskDescription are AI-suggested but editable — they become the
+// Task group's own title/description once confirmed; priority/due date are
+// deliberately not editable here (the model has no real basis for either)
+// and stay user-set afterward in the Tasks tab.
 export function PlanPreviewCard({
+  taskTitle,
+  onTaskTitleChange,
+  taskDescription,
+  onTaskDescriptionChange,
   steps,
   onTitleChange,
   onMinutesChange,
@@ -28,6 +42,25 @@ export function PlanPreviewCard({
   return (
     <Card>
       <Typography variant="subtitle2">{t('chat.plan.title')}</Typography>
+
+      <TaskFieldsColumn>
+        <TextField
+          size="small"
+          fullWidth
+          label={t('chat.plan.taskTitleLabel')}
+          value={taskTitle}
+          onChange={(event) => onTaskTitleChange(event.target.value)}
+        />
+        <TextField
+          size="small"
+          fullWidth
+          multiline
+          minRows={2}
+          label={t('chat.plan.taskDescriptionLabel')}
+          value={taskDescription}
+          onChange={(event) => onTaskDescriptionChange(event.target.value)}
+        />
+      </TaskFieldsColumn>
 
       {steps.map((step) => (
         <StepRow key={step.id}>

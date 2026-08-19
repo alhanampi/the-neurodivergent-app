@@ -37,6 +37,8 @@ export function AiChatTab() {
     pendingDeleteId,
     pendingDeleteTitle,
     planSteps,
+    planTaskTitle,
+    planTaskDescription,
     isPlanGenerating,
     isCreatingTasks,
     errorMessage,
@@ -50,6 +52,8 @@ export function AiChatTab() {
     updatePlanStepTitle,
     updatePlanStepMinutes,
     removePlanStep,
+    updatePlanTaskTitle,
+    updatePlanTaskDescription,
     discardPlan,
     sendPlanToTasks,
     renameConversation,
@@ -115,6 +119,10 @@ export function AiChatTab() {
 
       {planSteps && (
         <PlanPreviewCard
+          taskTitle={planTaskTitle}
+          onTaskTitleChange={updatePlanTaskTitle}
+          taskDescription={planTaskDescription}
+          onTaskDescriptionChange={updatePlanTaskDescription}
           steps={planSteps}
           onTitleChange={updatePlanStepTitle}
           onMinutesChange={updatePlanStepMinutes}

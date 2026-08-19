@@ -1,4 +1,13 @@
-import { boolean, index, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core'
 
 /**
  * One row per Clerk user, kept in sync by the Clerk webhook
@@ -94,23 +103,63 @@ export const messages = pgTable(
 )
 
 /**
- * One row per checklist item on the Tasks tab (iteration 8). Created in a
- * batch from an approved AI Chat plan (POST /api/tasks), but deliberately
- * has no FK back to the source conversation — traceability wasn't part of
- * the ask, and keeping this table standalone keeps deleting a conversation
- * from ever affecting tasks the user already has in their list.
- * `estimatedMinutes` is a display label only, not a running timer — the
- * whole point of this tab is a checklist without timer pressure (see
- * ROADMAP.md's iteration 8 notes).
+ * One row per Task on the Tasks tab — a collapsible group with a title and
+ * an explanation of what its Subtasks are (iteration 8, revised post-launch
+ * — see ROADMAP.md's iteration 8 notes for the "hierarchy + priorities +
+ * due dates + per-subtask timers" revision). Created either from an
+ * approved AI Chat plan (POST /api/tasks, which batch-creates this row plus
+ * its `subtasks` in one call) or by hand via the "Add Task" popup.
+ * `conversationId` is nullable and `onDelete: 'set null'` — it links back
+ * to the chat that produced this task (for the "go to chat" shortcut)
+ * without making a task's lifetime depend on its source conversation still
+ * existing; a manually-created task simply has no conversation to link.
  */
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
+  conversationId: integer('conversation_id').references(() => conversations.id, {
+    onDelete: 'set null',
+  }),
   title: text('title').notNull(),
-  estimatedMinutes: integer('estimated_minutes').notNull(),
-  completed: boolean('completed').notNull().default(false),
+  description: text('description'),
+  priority: text('priority').notNull().default('medium'),
+  dueDate: date('due_date'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
 })
+
+/**
+ * One row per checklist item within a Task. `estimatedMinutes` seeds
+ * `remainingSeconds` on creation; unlike the original flat `tasks` table
+ * (see git history), a subtask *does* carry a real, persisted timer —
+ * `timerStatus`/`remainingSeconds`/`timerEndAt` mirror the Timers tab's
+ * wall-clock technique (TimersTab.utils.ts's `computeRemainingSeconds`)
+ * but persisted server-side instead of client-only, so a running subtask
+ * timer survives a refresh or a device switch. `remainingSeconds` is only
+ * authoritative while `timerStatus` is 'idle'/'paused'; while 'running',
+ * the live remaining time is `timerEndAt - now`, recomputed client-side
+ * every render tick — the server only ever writes on a start/pause/±minutes
+ * action, never on a per-second tick.
+ */
+export const subtasks = pgTable(
+  'subtasks',
+  {
+    id: serial('id').primaryKey(),
+    taskId: integer('task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    estimatedMinutes: integer('estimated_minutes').notNull(),
+    priority: text('priority').notNull().default('medium'),
+    dueDate: date('due_date'),
+    completed: boolean('completed').notNull().default(false),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    timerStatus: text('timer_status').notNull().default('idle'),
+    remainingSeconds: integer('remaining_seconds').notNull(),
+    timerEndAt: timestamp('timer_end_at', { withTimezone: true }),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('subtasks_task_idx').on(table.taskId)],
+)

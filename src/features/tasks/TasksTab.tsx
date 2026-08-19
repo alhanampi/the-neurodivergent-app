@@ -1,28 +1,56 @@
 import { useTranslation } from 'react-i18next'
-import Checkbox from '@mui/material/Checkbox'
-import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import { FiCheckSquare, FiTrash2 } from 'react-icons/fi'
+import { FiCheckSquare, FiPlus } from 'react-icons/fi'
+import { AddSubtaskDialog } from './AddSubtaskDialog/AddSubtaskDialog'
+import { AddTaskDialog } from './AddTaskDialog/AddTaskDialog'
+import { TaskCard } from './TaskCard/TaskCard'
 import { useTasksTab } from './useTasksTab'
 import {
+  AddTaskRow,
   EmptyState,
   HeaderRow,
   IconWrapper,
-  TaskList,
-  TaskMinutes,
-  TaskRow,
+  TaskGroups,
   TasksContainer,
-  TaskTitle,
 } from './TasksTab.styles'
 
-// A flat checklist — no timer pressure, on purpose (see ROADMAP.md's
-// iteration 8 notes). estimatedMinutes is a display label only, never a
-// running countdown; there's deliberately no "start a timer from this task"
-// shortcut, which would reintroduce exactly the pressure this tab exists to
-// avoid.
+// Each Task is a collapsible group (TaskCard) explaining what its Subtasks
+// are, with its own timer-driven progress rollup — see ROADMAP.md's
+// iteration 8 notes for the hierarchy revision. estimatedMinutes on a
+// subtask now does drive a real, persisted timer (unlike the original flat
+// checklist), started by tapping a subtask row.
 export function TasksTab() {
   const { t } = useTranslation()
-  const { tasks, isLoading, hasLoadedOnce, toggleTask, deleteTask } = useTasksTab()
+  const {
+    tasks,
+    isLoading,
+    hasLoadedOnce,
+    isTaskExpanded,
+    toggleTaskExpanded,
+    expandedSubtaskId,
+    toggleSubtaskExpanded,
+    deleteTask,
+    setTaskPriority,
+    setTaskDueDate,
+    toggleSubtaskCompleted,
+    deleteSubtask,
+    setSubtaskPriority,
+    setSubtaskDueDate,
+    pauseSubtaskTimer,
+    resumeSubtaskTimer,
+    addSubtaskMinutes,
+    subtractSubtaskMinutes,
+    isAddTaskDialogOpen,
+    openAddTaskDialog,
+    closeAddTaskDialog,
+    confirmAddTask,
+    addSubtaskForTaskId,
+    openAddSubtaskDialog,
+    closeAddSubtaskDialog,
+    confirmAddSubtask,
+    goToSourceConversation,
+  } = useTasksTab()
 
   const isEmpty = hasLoadedOnce && !isLoading && tasks.length === 0
 
@@ -41,35 +69,49 @@ export function TasksTab() {
       {isEmpty && <EmptyState>{t('tasks.empty')}</EmptyState>}
 
       {tasks.length > 0 && (
-        <TaskList>
+        <TaskGroups>
           {tasks.map((task) => (
-            <TaskRow key={task.id} $completed={task.completed}>
-              <Checkbox
-                checked={task.completed}
-                onChange={() => toggleTask(task.id)}
-                slotProps={{
-                  input: {
-                    'aria-label': task.completed
-                      ? t('tasks.item.markNotDone')
-                      : t('tasks.item.markDone'),
-                  },
-                }}
-              />
-              <TaskTitle $completed={task.completed}>{task.title}</TaskTitle>
-              <TaskMinutes>
-                {t('tasks.item.minutesLabel', { minutes: task.estimatedMinutes })}
-              </TaskMinutes>
-              <IconButton
-                size="small"
-                aria-label={t('tasks.item.deleteLabel')}
-                onClick={() => deleteTask(task.id)}
-              >
-                <FiTrash2 size={16} />
-              </IconButton>
-            </TaskRow>
+            <TaskCard
+              key={task.id}
+              task={task}
+              isExpanded={isTaskExpanded(task.id)}
+              onToggleExpand={toggleTaskExpanded}
+              onDeleteTask={deleteTask}
+              onPriorityChange={setTaskPriority}
+              onDueDateChange={setTaskDueDate}
+              onOpenAddSubtask={openAddSubtaskDialog}
+              onGoToChat={goToSourceConversation}
+              expandedSubtaskId={expandedSubtaskId}
+              onToggleSubtaskExpand={toggleSubtaskExpanded}
+              onToggleSubtaskCompleted={toggleSubtaskCompleted}
+              onDeleteSubtask={deleteSubtask}
+              onPauseSubtaskTimer={pauseSubtaskTimer}
+              onResumeSubtaskTimer={resumeSubtaskTimer}
+              onAddSubtaskMinutes={addSubtaskMinutes}
+              onSubtractSubtaskMinutes={subtractSubtaskMinutes}
+              onSubtaskPriorityChange={setSubtaskPriority}
+              onSubtaskDueDateChange={setSubtaskDueDate}
+            />
           ))}
-        </TaskList>
+        </TaskGroups>
       )}
+
+      <AddTaskRow>
+        <Button variant="outlined" startIcon={<FiPlus />} onClick={openAddTaskDialog}>
+          {t('tasks.addTaskButton')}
+        </Button>
+      </AddTaskRow>
+
+      <AddTaskDialog
+        open={isAddTaskDialogOpen}
+        onCancel={closeAddTaskDialog}
+        onConfirm={confirmAddTask}
+      />
+      <AddSubtaskDialog
+        open={addSubtaskForTaskId !== null}
+        onCancel={closeAddSubtaskDialog}
+        onConfirm={confirmAddSubtask}
+      />
     </TasksContainer>
   )
 }

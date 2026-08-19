@@ -10,6 +10,12 @@ export const Card = styled.div`
   background: ${({ theme }) => theme.palette.background.paper};
 `
 
+export const TaskFieldsColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`
+
 export const StepRow = styled.div`
   display: flex;
   align-items: center;

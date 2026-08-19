@@ -81,4 +81,10 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('clarifying questions')
     expect(prompt).toContain('Never scold')
   })
+
+  it('instructs the model to sanity-check a stated time budget against the task', () => {
+    const prompt = buildSystemPrompt('en')
+    expect(prompt).toContain('sanity-check')
+    expect(prompt).toContain('REAL time')
+  })
 })

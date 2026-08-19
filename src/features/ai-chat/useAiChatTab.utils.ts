@@ -122,7 +122,9 @@ export async function streamChatMessage(
   }
 }
 
-export type RequestPlanResult = { ok: true; steps: PlanStepDraft[] } | { ok: false; error: string }
+export type RequestPlanResult =
+  | { ok: true; taskTitle: string; taskDescription: string; steps: PlanStepDraft[] }
+  | { ok: false; error: string }
 
 export async function requestPlan(
   conversationId: number,
@@ -145,7 +147,11 @@ export async function requestPlan(
     if (!response.ok) return { ok: false, error: 'request-failed' }
 
     const body = (await response.json()) as {
-      plan?: { steps: { title: string; minutes: number }[] }
+      plan?: {
+        taskTitle: string
+        taskDescription: string
+        steps: { title: string; minutes: number }[]
+      }
     }
     if (!body.plan) return { ok: false, error: 'request-failed' }
 
@@ -154,7 +160,12 @@ export async function requestPlan(
       title: step.title,
       minutes: step.minutes,
     }))
-    return { ok: true, steps }
+    return {
+      ok: true,
+      taskTitle: body.plan.taskTitle,
+      taskDescription: body.plan.taskDescription,
+      steps,
+    }
   } catch {
     return { ok: false, error: 'network-error' }
   }
@@ -204,8 +215,15 @@ export async function deleteConversationRequest(
   }
 }
 
+export interface CreateTasksFromPlanInput {
+  taskTitle: string
+  taskDescription: string
+  conversationId: number | null
+  steps: PlanStepDraft[]
+}
+
 export async function createTasksFromPlan(
-  steps: PlanStepDraft[],
+  input: CreateTasksFromPlanInput,
   getToken: GetToken,
 ): Promise<boolean> {
   try {
@@ -219,7 +237,10 @@ export async function createTasksFromPlan(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        steps: steps.map((step) => ({ title: step.title, minutes: step.minutes })),
+        title: input.taskTitle,
+        description: input.taskDescription,
+        conversationId: input.conversationId,
+        steps: input.steps.map((step) => ({ title: step.title, minutes: step.minutes })),
       }),
     })
     return response.ok

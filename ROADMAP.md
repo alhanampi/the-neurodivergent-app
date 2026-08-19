@@ -86,6 +86,93 @@ Status legend: `pending` (not started) · `in progress` · `done`.
   will need this same manual step, or its webhook forwarded via a tool like
   the Clerk CLI/ngrok. In production this isn't an issue: Clerk can reach
   the real deployed webhook URL directly.
+- **Tasks hierarchy + per-subtask timers + realistic time estimates
+  (2026-08-19, mid-iteration-8 revision):** the flat Tasks checklist from the
+  first pass of this iteration was reshaped into a two-level hierarchy after
+  the user tried it: a **Task** (`tasks` table — title, description
+  explaining what its subtasks are, priority, due date, nullable
+  `conversationId` back to its source chat) grouping **Subtasks** (new
+  `subtasks` table — title, `estimatedMinutes`, priority, due date,
+  completed, and a real persisted timer:
+  `timerStatus`/`remainingSeconds`/`timerEndAt`). This is a deliberate
+  reversal of the original "no timer pressure, on purpose" design note from
+  the first pass — the user explicitly asked for start/pause/±minutes on
+  each subtask, so the flat "just a checklist label" `estimatedMinutes` is
+  gone; the Task level still carries no timer of its own, only a rollup.
+  - **Timer persistence, not client-only:** unlike the Timers tab's
+    client-only `TimerInstance`, a subtask's timer state is written to the
+    DB on every start/pause/±minutes action (never per-tick) so it survives
+    a refresh or device switch — confirmed explicitly with the user over the
+    simpler client-only alternative. The live countdown is still derived
+    client-side every render tick from `timerEndAt` (mirrors
+    `TimersTab.utils.ts`'s wall-clock technique), just sourced from a
+    server-persisted timestamp instead of pure React state.
+  - **Progress bar is all-or-nothing per subtask, weighted by minutes** —
+    confirmed with the user over giving partial credit for an in-progress
+    timer, specifically so subtracting time from a running subtask can't
+    make the bar regress.
+  - **"Go to chat" deep-links to the exact source conversation** (via the
+    new `conversationId` FK, `onDelete: 'set null'`) rather than opening AI
+    Chat generically — reverses the first pass's explicit choice not to keep
+    that link ("traceability wasn't part of the ask ... revisit if asked
+    later"). `useAiChatTab.ts` now reads `location.state.conversationId` on
+    mount (consumed once via a ref) and calls the existing
+    `selectConversation`.
+  - **Manual add, two popups:** `AddTaskDialog` creates an empty Task
+    (`steps: []`); `AddSubtaskDialog` (scoped to one task) adds a subtask to
+    it — mirrors `AddTimerDialog`'s fully-controlled popup shape, each with
+    its own small `useAddXDialog.ts` owning the draft state (title/
+    description/priority/dueDate/minutes), reset every time it opens.
+  - **New shared `PriorityControl`/`DueDateField` components**
+    (`src/features/tasks/`) — a `ToggleButtonGroup` (low/medium/high, same
+    pattern as the Timers/Dashboard preset selectors) and a native
+    `<input type="date">` via MUI `TextField` (no `@mui/x-date-pickers` —
+    same call the Dashboard tab already made), reused by both dialogs and
+    the inline editors on `TaskCard`/`SubtaskRow` so priority/due date stay
+    editable after creation, not just at creation time.
+  - **API**: `POST /api/tasks` now creates one Task plus 0+ subtasks in a
+    single batch (`steps: []` for the manual-add case, non-empty for an
+    approved AI plan); `PATCH /api/tasks/[id]` edits the Task's own fields.
+    Two new routes, `api/subtasks.ts` (create) and `api/subtasks/[id].ts`
+    (PATCH/DELETE) — PATCH takes a single flexible body covering both plain
+    field edits and a `timerAction` (`start`/`pause`/`addMinutes`/
+    `subtractMinutes`), computed server-side from the row's current state.
+    `api/` route-handler count is now 11 (added 2), still under Vercel
+    Hobby's 12-Function cap flagged earlier in this file.
+  - **`POST /api/chat-plan`'s response gained `taskTitle`/`taskDescription`**
+    alongside `steps` — the model now also names and summarizes the overall
+    task, shown as editable fields in `PlanPreviewCard` above the step list,
+    and becomes the created Task's title/description on confirm. Priority/
+    due date are deliberately NOT requested from the model (no real basis
+    for either) — user-set only, after creation.
+  - **Prompt rewrite for realistic time estimates:** the user's core
+    complaint — the AI was estimating unrealistically short durations (e.g.
+    "20 minutes to bathe a cat," which doesn't cover chasing/rinsing/
+    drying/cleanup) — is addressed with string-only prompt changes, no
+    schema/logic impact. `chat-plan.utils.ts`'s `buildPlanSystemPrompt` now
+    explicitly asks for real-world durations including setup/cleanup/
+    friction, and explicitly forbids shrinking estimates to fit a time
+    budget mentioned earlier in the conversation. `chat.utils.ts`'s
+    `buildSystemPrompt` (the live conversational persona) gained a
+    parallel guideline: sanity-check a user-stated time budget against what
+    the task actually needs, and if it's probably not enough, say so plainly
+    (never scolding) and offer concrete options — do a smaller slice now,
+    extend the time, or split across sessions — rather than silently
+    proposing a plan that pretends to fit. This is the main lever for "help
+    estimate when time does NOT reach," per the user's stated goal.
+  - **Migration needs a human at a real terminal:** `drizzle-kit generate`
+    prompts interactively to resolve whether the new `subtasks` table /
+    `tasks` column changes are renames or genuinely new — it refused to run
+    non-interactively (`Interactive prompts require a TTY terminal`). Schema
+    changes are in `db/schema.ts`; run `npm run db:generate` then
+    `npm run db:migrate` locally (interactive prompts: answer "created" /
+    "no, add column" for each, not "renamed from") before testing this
+    against a real database. Not run as part of this change for that reason.
+  - **Deferred, not forgotten:** no `timerSessions`/Dashboard integration for
+    subtask timers (would reopen the exact "no timer pressure" tension the
+    original flat Tasks tab existed to avoid — kept as two separate timer
+    surfaces); no auto-pause/notification when a subtask's timer hits 0 (just
+    shows `0:00` and waits for the user).
 - **AI Chat + Tasks tabs (iteration 8):** built alongside a reference app the
   user already had (`c:\CODE\2026\ai-chat-app`) — reused as a _pattern_
   source, not literal code: the SSE streaming shape (`res.write('data:

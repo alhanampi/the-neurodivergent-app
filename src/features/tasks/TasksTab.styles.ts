@@ -24,40 +24,16 @@ export const IconWrapper = styled.div`
   color: ${({ theme }) => theme.palette.primary.main};
 `
 
-export const TaskList = styled.ul`
+export const TaskGroups = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 `
 
-export const TaskRow = styled.li<{ $completed: boolean }>`
+export const AddTaskRow = styled.div`
   display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-  background: ${({ theme }) => theme.palette.background.paper};
-  border: 1px solid ${({ theme }) => theme.palette.divider};
-  opacity: ${({ $completed }) => ($completed ? 0.6 : 1)};
-`
-
-export const TaskTitle = styled.span<{ $completed: boolean }>`
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: ${({ theme }) => theme.palette.text.primary};
-  text-decoration: ${({ $completed }) => ($completed ? 'line-through' : 'none')};
-`
-
-export const TaskMinutes = styled.span`
-  font-size: 0.8rem;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  white-space: nowrap;
+  justify-content: center;
 `
 
 export const EmptyState = styled.p`

@@ -186,16 +186,26 @@ describe('streamChatMessage', () => {
 })
 
 describe('requestPlan', () => {
-  it('returns the parsed steps on success', async () => {
+  it('returns the parsed taskTitle/taskDescription/steps on success', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => jsonResponse({ plan: { steps: [{ title: 'Step', minutes: 5 }] } })),
+      vi.fn(async () =>
+        jsonResponse({
+          plan: {
+            taskTitle: 'Clean kitchen',
+            taskDescription: 'A few quick steps.',
+            steps: [{ title: 'Step', minutes: 5 }],
+          },
+        }),
+      ),
     )
 
     const result = await requestPlan(1, 'en', async () => 'token')
 
     expect(result.ok).toBe(true)
     if (result.ok) {
+      expect(result.taskTitle).toBe('Clean kitchen')
+      expect(result.taskDescription).toBe('A few quick steps.')
       expect(result.steps).toHaveLength(1)
       expect(result.steps[0]).toMatchObject({ title: 'Step', minutes: 5 })
       expect(typeof result.steps[0].id).toBe('string')
@@ -251,21 +261,24 @@ describe('deleteConversationRequest', () => {
 })
 
 describe('createTasksFromPlan', () => {
+  const input = {
+    taskTitle: 'Clean kitchen',
+    taskDescription: 'A few quick steps.',
+    conversationId: 1,
+    steps: [{ id: 'a', title: 'Step', minutes: 5 }],
+  }
+
   it('returns true on success, false on failure', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => jsonResponse({ tasks: [] })),
+      vi.fn(async () => jsonResponse({ task: {} })),
     )
-    expect(
-      await createTasksFromPlan([{ id: 'a', title: 'Step', minutes: 5 }], async () => 'token'),
-    ).toBe(true)
+    expect(await createTasksFromPlan(input, async () => 'token')).toBe(true)
 
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => jsonResponse({}, false)),
     )
-    expect(
-      await createTasksFromPlan([{ id: 'a', title: 'Step', minutes: 5 }], async () => 'token'),
-    ).toBe(false)
+    expect(await createTasksFromPlan(input, async () => 'token')).toBe(false)
   })
 })
