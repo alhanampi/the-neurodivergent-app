@@ -21,6 +21,9 @@ const sampleSession: CreateTimerSession = {
   completed: true,
   startedAt: '2026-08-18T10:00:00.000Z',
   endedAt: '2026-08-18T10:25:00.000Z',
+  taskId: null,
+  subtaskId: null,
+  taskLabel: null,
 }
 
 describe('fetchTimerHistory', () => {

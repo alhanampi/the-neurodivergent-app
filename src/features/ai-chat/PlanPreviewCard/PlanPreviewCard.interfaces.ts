@@ -11,5 +11,10 @@ export interface PlanPreviewCardProps {
   onRemoveStep: (id: string) => void
   onDiscard: () => void
   onConfirm: () => void
+  /** "Start a Pomodoro now" (see ROADMAP.md's "Timers tab rethink" note) —
+   * navigates straight to the Timers tab with a Pomodoro pre-filled from
+   * the first step, creating no Task/Subtask rows at all. A second, distinct
+   * action from onConfirm ("Send to Tasks"), not a replacement for it. */
+  onStartPomodoro: () => void
   isSending: boolean
 }

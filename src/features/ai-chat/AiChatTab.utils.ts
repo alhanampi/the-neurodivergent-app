@@ -4,6 +4,10 @@ import type {
   ConversationDateGroup,
   ConversationSummary,
 } from './AiChatTab.interfaces'
+import {
+  DEFAULT_POMODORO_BREAK_MINUTES,
+  DEFAULT_POMODORO_FOCUS_MINUTES,
+} from '@/features/timers/TimersTab.constants'
 
 export function isChatSseFrame(value: unknown): value is ChatSseFrame {
   if (typeof value !== 'object' || value === null) return false
@@ -126,5 +130,24 @@ export function setStoredConversationId(conversationId: number | null): void {
     localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY)
   } else {
     localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, String(conversationId))
+  }
+}
+
+/** Expresses a plan step's estimated minutes as a rough Pomodoro-shaped
+ * breakdown (block count + the app's standard focus/break split, reused
+ * from the Timers tab's own defaults) instead of a bare minute count — see
+ * ROADMAP.md's "Timers tab rethink" note. A pure *display* helper: the
+ * step's stored `minutes` stays the source of truth, this is recomputed
+ * fresh every render, nothing about the breakdown itself is persisted. */
+export function estimatePomodoroBreakdown(minutes: number): {
+  blocks: number
+  focusMinutes: number
+  breakMinutes: number
+} {
+  const blocks = Math.max(1, Math.round(minutes / DEFAULT_POMODORO_FOCUS_MINUTES))
+  return {
+    blocks,
+    focusMinutes: DEFAULT_POMODORO_FOCUS_MINUTES,
+    breakMinutes: DEFAULT_POMODORO_BREAK_MINUTES,
   }
 }

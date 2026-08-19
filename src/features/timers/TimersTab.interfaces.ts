@@ -6,6 +6,20 @@ export type TimerPresetId = (typeof TIMER_PRESET_IDS)[number]
 
 export type TimerStatus = 'idle' | 'running' | 'paused'
 
+/** The optional, lightweight link a timer can carry to a real Task/Subtask
+ * — set via the "what are you working on?" picker when starting a timer
+ * directly from the Timers tab (never the other way around: no control on
+ * a Task/Subtask starts a Timers session). `label` snapshots the picked
+ * title so it stays readable in history/Dashboard even after the source
+ * Task is renamed or deleted. `subtaskId` is null when linked to a whole
+ * Task rather than one of its Subtasks. See ROADMAP.md's "Timers tab
+ * rethink" note and db/schema.ts's doc comment on `timerSessions`. */
+export interface TimerTaskLink {
+  taskId: number
+  subtaskId: number | null
+  label: string
+}
+
 /** The two stages a Pomodoro timer steps through on its own. */
 export type TimerPhaseKind = 'focus' | 'break'
 
@@ -48,6 +62,10 @@ export interface TimerInstance {
    * (along with `phaseIndex`) for a plain single-duration timer. */
   phases?: TimerPhase[]
   phaseIndex?: number
+  /** null when this timer isn't linked to any Task/Subtask — the common
+   * case. Set once, when the timer is created, via the Add timer/Pomodoro
+   * dialog's optional picker; not editable afterward. */
+  taskLink: TimerTaskLink | null
 }
 
 /** A finished timer run, either fetched from history or just persisted. */
@@ -60,6 +78,9 @@ export interface TimerSession {
   completed: boolean
   startedAt: string
   endedAt: string
+  taskId: number | null
+  subtaskId: number | null
+  taskLabel: string | null
 }
 
 export type CreateTimerSession = Omit<TimerSession, 'id'>

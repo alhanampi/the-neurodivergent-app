@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import { useTimersTab } from './useTimersTab'
 
 const mockGetToken = vi.fn(async () => 'token')
@@ -36,6 +37,18 @@ vi.mock('./useTimersTab.utils', () => ({
   playChimeSound: () => mockPlayChimeSound(),
 }))
 
+const mockFetchTasks = vi.fn(async (_getToken: unknown) => [] as unknown[])
+vi.mock('@/features/tasks/useTasksTab.utils', () => ({
+  fetchTasks: (getToken: unknown) => mockFetchTasks(getToken),
+}))
+
+// useTimersTab reads router state (for the "Start a Pomodoro now" deep link
+// from AI Chat) via useLocation, which throws outside a Router — same
+// wrapper pattern as useTasksTab.test.ts's own renderTasksHook.
+function renderTimersHook() {
+  return renderHook(() => useTimersTab(), { wrapper: MemoryRouter })
+}
+
 describe('useTimersTab', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -48,22 +61,41 @@ describe('useTimersTab', () => {
     mockPlayTickSound.mockClear()
     mockPlayChimeSound.mockClear()
     mockGetStoredSoundPreference.mockReturnValue(false)
+    mockFetchTasks.mockClear()
+    mockFetchTasks.mockResolvedValue([])
   })
 
   afterEach(() => {
     vi.useRealTimers()
   })
 
-  it('starts with no timers, the first preset selected, and the Add dialog closed', () => {
-    const { result } = renderHook(() => useTimersTab())
+  it('starts with no timers, the first secondary preset selected, and both dialogs closed', () => {
+    const { result } = renderTimersHook()
 
     expect(result.current.timers).toEqual([])
-    expect(result.current.selectedPresetId).toBe('pomodoro-focus')
+    // Pomodoro isn't among the secondary presets — it has its own primary
+    // CTA (openPomodoroDialog) instead. See secondaryPresets' doc comment.
+    expect(result.current.selectedPresetId).toBe('short-break')
     expect(result.current.isAddDialogOpen).toBe(false)
+    expect(result.current.isPomodoroDialogOpen).toBe(false)
+  })
+
+  it('the primary CTA opens the Pomodoro dialog directly, defaulting to 20/10, regardless of the secondary selection', () => {
+    const { result } = renderTimersHook()
+
+    act(() => result.current.selectPreset('long-break'))
+    act(() => result.current.setPomodoroFocusMinutes(90))
+    act(() => result.current.setPomodoroBreakMinutes(90))
+    act(() => result.current.openPomodoroDialog())
+
+    expect(result.current.isPomodoroDialogOpen).toBe(true)
+    expect(result.current.isAddDialogOpen).toBe(false)
+    expect(result.current.pomodoroFocusMinutes).toBe(20)
+    expect(result.current.pomodoroBreakMinutes).toBe(10)
   })
 
   it("opening the Add dialog resets the draft duration to the selected preset's suggested default", () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('long-break'))
     act(() => result.current.setDraftMinutes(90))
@@ -74,7 +106,7 @@ describe('useTimersTab', () => {
   })
 
   it("the Custom preset's Add dialog still defaults to 10 minutes", () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('custom'))
     act(() => result.current.openAddDialog())
@@ -83,7 +115,7 @@ describe('useTimersTab', () => {
   })
 
   it('opening the Add dialog resets the name draft, same as the duration', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('custom'))
     act(() => result.current.openAddDialog())
@@ -94,10 +126,10 @@ describe('useTimersTab', () => {
     expect(result.current.nameDraft).toBe('')
   })
 
-  it('opening the Add dialog while Focus is selected opens the Pomodoro dialog instead, defaulting to 20/10', () => {
-    const { result } = renderHook(() => useTimersTab())
+  it('opening the Add dialog while Focus is selected in the secondary row still opens the Pomodoro dialog (defense in depth)', () => {
+    const { result } = renderTimersHook()
 
-    // 'pomodoro-focus' (Focus) is the default selected preset.
+    act(() => result.current.selectPreset('pomodoro-focus'))
     act(() => result.current.setPomodoroFocusMinutes(90))
     act(() => result.current.setPomodoroBreakMinutes(90))
     act(() => result.current.openAddDialog())
@@ -109,7 +141,7 @@ describe('useTimersTab', () => {
   })
 
   it('closing the Add dialog without confirming adds nothing', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('custom'))
     act(() => result.current.openAddDialog())
@@ -121,10 +153,9 @@ describe('useTimersTab', () => {
   })
 
   it('closing the Pomodoro dialog without confirming adds nothing', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
-    // 'pomodoro-focus' (Focus) is the default selected preset.
-    act(() => result.current.openAddDialog())
+    act(() => result.current.openPomodoroDialog())
     expect(result.current.isPomodoroDialogOpen).toBe(true)
     act(() => result.current.closePomodoroDialog())
 
@@ -133,7 +164,7 @@ describe('useTimersTab', () => {
   })
 
   it('adds an idle timer, clears the name draft, and closes the dialog', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('custom'))
     act(() => result.current.openAddDialog())
@@ -154,7 +185,7 @@ describe('useTimersTab', () => {
   })
 
   it('supports multiple concurrent timers ticking independently', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('short-break'))
     act(() => result.current.setDraftMinutes(5))
@@ -178,7 +209,7 @@ describe('useTimersTab', () => {
   })
 
   it('toggling pauses a running timer and resumes a paused one', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
@@ -199,7 +230,7 @@ describe('useTimersTab', () => {
   })
 
   it('removes an untouched idle timer immediately, without a confirmation prompt', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
@@ -212,7 +243,7 @@ describe('useTimersTab', () => {
   })
 
   it('asks for confirmation before stopping a running timer, and only removes it on confirm', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
@@ -241,7 +272,7 @@ describe('useTimersTab', () => {
   })
 
   it('does not log stopping a timer with negligible elapsed time', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
@@ -255,7 +286,7 @@ describe('useTimersTab', () => {
   })
 
   it('edits an idle timer duration, but leaves a running one alone', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     act(() => result.current.addTimer())
@@ -273,7 +304,7 @@ describe('useTimersTab', () => {
   })
 
   it('adds minutes to a running timer, extending both its planned and remaining time', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
@@ -292,7 +323,7 @@ describe('useTimersTab', () => {
   })
 
   it('adds minutes to a paused timer too, but leaves an idle one alone', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     const id = result.current.timers[0].id
@@ -310,7 +341,7 @@ describe('useTimersTab', () => {
   })
 
   it('auto-completes, logs completed:true, and notifies once a timer runs out', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.selectPreset('custom'))
     act(() => result.current.setDraftMinutes(1))
@@ -328,7 +359,7 @@ describe('useTimersTab', () => {
 
   it('plays a tick sound each second while sound is enabled and a timer is running', () => {
     mockGetStoredSoundPreference.mockReturnValue(true)
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     expect(result.current.isSoundEnabled).toBe(true)
 
@@ -340,7 +371,7 @@ describe('useTimersTab', () => {
   })
 
   it('does not play a tick sound when sound is disabled', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.addTimer())
     act(() => result.current.toggleTimer(result.current.timers[0].id))
@@ -350,7 +381,7 @@ describe('useTimersTab', () => {
   })
 
   it('toggleSound flips state, persists it, and unlocks audio when turning on', () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     act(() => result.current.toggleSound())
 
@@ -360,7 +391,7 @@ describe('useTimersTab', () => {
   })
 
   it('requests notification permission on demand', async () => {
-    const { result } = renderHook(() => useTimersTab())
+    const { result } = renderTimersHook()
 
     await act(async () => {
       result.current.requestNotifications()
@@ -373,10 +404,9 @@ describe('useTimersTab', () => {
 
   describe('Pomodoro timers', () => {
     it('confirmPomodoro creates a two-phase timer, clears the name draft, and closes the dialog', () => {
-      const { result } = renderHook(() => useTimersTab())
+      const { result } = renderTimersHook()
 
-      // 'pomodoro-focus' (Focus) is the default selected preset.
-      act(() => result.current.openAddDialog())
+      act(() => result.current.openPomodoroDialog())
       act(() => result.current.setNameDraft('Deep work'))
       act(() => result.current.setPomodoroFocusMinutes(1))
       act(() => result.current.setPomodoroBreakMinutes(1))
@@ -401,9 +431,9 @@ describe('useTimersTab', () => {
     })
 
     it('auto-advances from focus to break when the focus phase runs out, keeping the card and logging a focus session', () => {
-      const { result } = renderHook(() => useTimersTab())
+      const { result } = renderTimersHook()
 
-      act(() => result.current.openAddDialog())
+      act(() => result.current.openPomodoroDialog())
       act(() => result.current.setPomodoroFocusMinutes(1))
       act(() => result.current.setPomodoroBreakMinutes(1))
       act(() => result.current.confirmPomodoro())
@@ -430,9 +460,9 @@ describe('useTimersTab', () => {
     })
 
     it('finishes the Pomodoro once the break phase runs out too, logging a break session and notifying again', () => {
-      const { result } = renderHook(() => useTimersTab())
+      const { result } = renderTimersHook()
 
-      act(() => result.current.openAddDialog())
+      act(() => result.current.openPomodoroDialog())
       act(() => result.current.setPomodoroFocusMinutes(1))
       act(() => result.current.setPomodoroBreakMinutes(1))
       act(() => result.current.confirmPomodoro())
@@ -455,9 +485,9 @@ describe('useTimersTab', () => {
 
     it('never plays the ambient tick sound for a Pomodoro timer, even with sound enabled', () => {
       mockGetStoredSoundPreference.mockReturnValue(true)
-      const { result } = renderHook(() => useTimersTab())
+      const { result } = renderTimersHook()
 
-      act(() => result.current.openAddDialog())
+      act(() => result.current.openPomodoroDialog())
       act(() => result.current.confirmPomodoro())
       act(() => result.current.toggleTimer(result.current.timers[0].id))
       act(() => vi.advanceTimersByTime(2500))
@@ -466,9 +496,9 @@ describe('useTimersTab', () => {
     })
 
     it('editing an idle Pomodoro only changes its focus phase, leaving break untouched', () => {
-      const { result } = renderHook(() => useTimersTab())
+      const { result } = renderTimersHook()
 
-      act(() => result.current.openAddDialog())
+      act(() => result.current.openPomodoroDialog())
       act(() => result.current.setPomodoroFocusMinutes(20))
       act(() => result.current.setPomodoroBreakMinutes(10))
       act(() => result.current.confirmPomodoro())
@@ -485,9 +515,9 @@ describe('useTimersTab', () => {
     })
 
     it('a manual stop mid-focus logs only the focus phase, with a pomodoro-focus presetId', () => {
-      const { result } = renderHook(() => useTimersTab())
+      const { result } = renderTimersHook()
 
-      act(() => result.current.openAddDialog())
+      act(() => result.current.openPomodoroDialog())
       act(() => result.current.setPomodoroFocusMinutes(1))
       act(() => result.current.setPomodoroBreakMinutes(1))
       act(() => result.current.confirmPomodoro())
@@ -505,6 +535,79 @@ describe('useTimersTab', () => {
       ]
       expect(session.presetId).toBe('pomodoro-focus')
       expect(session.completed).toBe(false)
+    })
+  })
+
+  describe('Task link', () => {
+    const sampleTask = {
+      id: 1,
+      conversationId: null,
+      title: 'Clean the kitchen',
+      description: null,
+      priority: 'medium',
+      dueDate: null,
+      createdAt: '2026-08-18T10:00:00.000Z',
+      subtasks: [],
+    }
+
+    it('fetches and exposes linkable Task/Subtask options', async () => {
+      mockFetchTasks.mockResolvedValue([sampleTask])
+      const { result } = renderTimersHook()
+
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(result.current.taskLinkOptions).toEqual([
+        { key: 'task-1', taskId: 1, subtaskId: null, label: 'Clean the kitchen' },
+      ])
+    })
+
+    it('attaches the picked link to a created timer, and clears the draft afterward', async () => {
+      mockFetchTasks.mockResolvedValue([sampleTask])
+      const { result } = renderTimersHook()
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      act(() => result.current.selectPreset('custom'))
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setTaskLink(result.current.taskLinkOptions[0]))
+      act(() => result.current.addTimer())
+
+      expect(result.current.timers[0].taskLink).toEqual({
+        taskId: 1,
+        subtaskId: null,
+        label: 'Clean the kitchen',
+      })
+      expect(result.current.taskLink).toBeNull()
+    })
+
+    it('posts the link on the logged session for a linked timer', async () => {
+      mockFetchTasks.mockResolvedValue([sampleTask])
+      const { result } = renderTimersHook()
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      act(() => result.current.selectPreset('custom'))
+      act(() => result.current.openAddDialog())
+      act(() => result.current.setTaskLink(result.current.taskLinkOptions[0]))
+      act(() => result.current.addTimer())
+      const id = result.current.timers[0].id
+
+      act(() => result.current.toggleTimer(id))
+      act(() => vi.advanceTimersByTime(10_000))
+      act(() => result.current.requestStop(id))
+      act(() => result.current.confirmStop())
+
+      expect(mockPostTimerSession).toHaveBeenCalledTimes(1)
+      const [session] = mockPostTimerSession.mock.calls[0] as unknown as [
+        { taskId: number | null; subtaskId: number | null; taskLabel: string | null },
+      ]
+      expect(session.taskId).toBe(1)
+      expect(session.subtaskId).toBeNull()
+      expect(session.taskLabel).toBe('Clean the kitchen')
     })
   })
 })

@@ -41,6 +41,16 @@ export const preferences = pgTable('preferences', {
  * is UI config, not a domain invariant the DB needs to enforce) or 'custom'
  * for a user-defined duration; `label` only holds a value for custom timers,
  * since presets are translated client-side from `presetId`.
+ *
+ * `taskId`/`subtaskId` (iteration 8b — Timers rethink) are an optional,
+ * lightweight link to what the session was actually spent on, set when the
+ * user picks a Task/Subtask from the Timers tab's own "what are you working
+ * on?" picker when starting a timer — never the other way around (no button
+ * on a Task/Subtask starts a Timers session; see ROADMAP.md). Both
+ * `onDelete: 'set null'`, and `taskLabel` snapshots the picked title at link
+ * time, so history/Dashboard stay readable even after the source Task is
+ * renamed or deleted. All three are null for a timer with no link, or one
+ * started from free text instead of picking a real Task/Subtask.
  */
 export const timerSessions = pgTable('timer_sessions', {
   id: serial('id').primaryKey(),
@@ -54,6 +64,9 @@ export const timerSessions = pgTable('timer_sessions', {
   completed: boolean('completed').notNull(),
   startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
   endedAt: timestamp('ended_at', { withTimezone: true }).notNull(),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
+  subtaskId: integer('subtask_id').references(() => subtasks.id, { onDelete: 'set null' }),
+  taskLabel: text('task_label'),
 })
 
 /**

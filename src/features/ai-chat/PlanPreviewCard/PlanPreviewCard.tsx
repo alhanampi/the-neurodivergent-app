@@ -8,9 +8,11 @@ import { FiTrash2 } from 'react-icons/fi'
 import { MinutesInput } from '@/features/timers/MinutesInput/MinutesInput'
 import { MAX_CUSTOM_MINUTES, MIN_CUSTOM_MINUTES } from '@/features/timers/TimersTab.constants'
 import { getPriorityChipColor } from '@/features/tasks/TasksTab.utils'
+import { estimatePomodoroBreakdown } from '../AiChatTab.utils'
 import {
   ActionsRow,
   Card,
+  PomodoroEstimate,
   StepRow,
   StepTitleField,
   StepUtilityRow,
@@ -40,6 +42,7 @@ export function PlanPreviewCard({
   onRemoveStep,
   onDiscard,
   onConfirm,
+  onStartPomodoro,
   isSending,
 }: PlanPreviewCardProps) {
   const { t } = useTranslation()
@@ -68,44 +71,57 @@ export function PlanPreviewCard({
         />
       </TaskFieldsColumn>
 
-      {steps.map((step) => (
-        <StepRow key={step.id}>
-          <StepTitleField>
-            <TextField
-              size="small"
-              fullWidth
-              multiline
-              value={step.title}
-              onChange={(event) => onTitleChange(step.id, event.target.value)}
-            />
-          </StepTitleField>
-          <StepUtilityRow>
-            <Chip
-              size="small"
-              label={t(`tasks.priority.${step.priority}`)}
-              color={getPriorityChipColor(step.priority)}
-            />
-            <MinutesInput
-              value={step.minutes}
-              onChange={(minutes) => onMinutesChange(step.id, minutes)}
-              min={MIN_CUSTOM_MINUTES}
-              max={MAX_CUSTOM_MINUTES}
-              ariaLabel={t('chat.plan.stepMinutesLabel')}
-            />
-            <IconButton
-              size="small"
-              aria-label={t('chat.plan.removeStepLabel')}
-              onClick={() => onRemoveStep(step.id)}
-            >
-              <FiTrash2 size={16} />
-            </IconButton>
-          </StepUtilityRow>
-        </StepRow>
-      ))}
+      {steps.map((step) => {
+        const pomodoro = estimatePomodoroBreakdown(step.minutes)
+        return (
+          <StepRow key={step.id}>
+            <StepTitleField>
+              <TextField
+                size="small"
+                fullWidth
+                multiline
+                value={step.title}
+                onChange={(event) => onTitleChange(step.id, event.target.value)}
+              />
+            </StepTitleField>
+            <StepUtilityRow>
+              <Chip
+                size="small"
+                label={t(`tasks.priority.${step.priority}`)}
+                color={getPriorityChipColor(step.priority)}
+              />
+              <MinutesInput
+                value={step.minutes}
+                onChange={(minutes) => onMinutesChange(step.id, minutes)}
+                min={MIN_CUSTOM_MINUTES}
+                max={MAX_CUSTOM_MINUTES}
+                ariaLabel={t('chat.plan.stepMinutesLabel')}
+              />
+              <IconButton
+                size="small"
+                aria-label={t('chat.plan.removeStepLabel')}
+                onClick={() => onRemoveStep(step.id)}
+              >
+                <FiTrash2 size={16} />
+              </IconButton>
+            </StepUtilityRow>
+            <PomodoroEstimate>
+              {t('chat.plan.pomodoroEstimate', {
+                count: pomodoro.blocks,
+                focusMinutes: pomodoro.focusMinutes,
+                breakMinutes: pomodoro.breakMinutes,
+              })}
+            </PomodoroEstimate>
+          </StepRow>
+        )
+      })}
 
       <ActionsRow>
         <Button onClick={onDiscard} disabled={isSending}>
           {t('chat.plan.discard')}
+        </Button>
+        <Button variant="outlined" onClick={onStartPomodoro} disabled={steps.length === 0}>
+          {t('chat.plan.startPomodoro')}
         </Button>
         <Button variant="contained" onClick={onConfirm} disabled={isSending || steps.length === 0}>
           {t('chat.plan.sendToTasks')}

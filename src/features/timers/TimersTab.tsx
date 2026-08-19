@@ -7,6 +7,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
 import {
   FiBell,
+  FiChevronDown,
+  FiChevronUp,
   FiClock,
   FiPause,
   FiPlay,
@@ -63,14 +65,17 @@ export function TimersTab() {
   const { t, i18n } = useTranslation()
   const {
     timers,
-    presets,
+    secondaryPresets,
     selectedPresetId,
     draftMinutes,
     nameDraft,
     isAddDialogOpen,
+    isOtherTimersOpen,
     pomodoroFocusMinutes,
     pomodoroBreakMinutes,
     isPomodoroDialogOpen,
+    taskLinkOptions,
+    taskLink,
     history,
     isHistoryLoading,
     notificationPermission,
@@ -79,6 +84,9 @@ export function TimersTab() {
     selectPreset,
     setDraftMinutes,
     setNameDraft,
+    setTaskLink,
+    toggleOtherTimers,
+    openPomodoroDialog,
     openAddDialog,
     closeAddDialog,
     addTimer,
@@ -134,29 +142,52 @@ export function TimersTab() {
       )}
 
       <ComposerSection>
-        <PresetRow>
-          <ToggleButtonGroup
-            value={selectedPresetId}
-            exclusive
-            size="small"
-            onChange={(_event, next: TimerPresetId | null) => {
-              if (next) selectPreset(next)
-            }}
-          >
-            {presets.map((preset) => (
-              <ToggleButton key={preset.id} value={preset.id}>
-                {t(getPresetTranslationKey(preset.id))}
-              </ToggleButton>
-            ))}
-            <ToggleButton value={CUSTOM_PRESET_ID}>
-              {t(getPresetTranslationKey(CUSTOM_PRESET_ID))}
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </PresetRow>
-
-        <Button variant="contained" startIcon={<FiPlus />} onClick={openAddDialog}>
-          {t('timers.addTimer')}
+        <Button
+          variant="contained"
+          size="large"
+          fullWidth
+          startIcon={<FiPlay />}
+          onClick={openPomodoroDialog}
+        >
+          {t('timers.startPomodoro')}
         </Button>
+
+        <Button
+          variant="text"
+          size="small"
+          startIcon={isOtherTimersOpen ? <FiChevronUp /> : <FiChevronDown />}
+          onClick={toggleOtherTimers}
+        >
+          {t('timers.otherTimers.toggle')}
+        </Button>
+
+        {isOtherTimersOpen && (
+          <>
+            <PresetRow>
+              <ToggleButtonGroup
+                value={selectedPresetId}
+                exclusive
+                size="small"
+                onChange={(_event, next: TimerPresetId | null) => {
+                  if (next) selectPreset(next)
+                }}
+              >
+                {secondaryPresets.map((preset) => (
+                  <ToggleButton key={preset.id} value={preset.id}>
+                    {t(getPresetTranslationKey(preset.id))}
+                  </ToggleButton>
+                ))}
+                <ToggleButton value={CUSTOM_PRESET_ID}>
+                  {t(getPresetTranslationKey(CUSTOM_PRESET_ID))}
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </PresetRow>
+
+            <Button variant="outlined" startIcon={<FiPlus />} onClick={openAddDialog}>
+              {t('timers.addTimer')}
+            </Button>
+          </>
+        )}
       </ComposerSection>
 
       {timers.length === 0 ? (
@@ -183,6 +214,7 @@ export function TimersTab() {
                       {t(getPhaseTranslationKey(activePhase.kind))}
                     </TimerCardPhaseTag>
                   )}
+                  {timer.taskLink && <TimerCardPhaseTag>{timer.taskLink.label}</TimerCardPhaseTag>}
                   <LinearProgress
                     variant="determinate"
                     value={getProgressFraction(timer.plannedSeconds, timer.remainingSeconds) * 100}
@@ -237,6 +269,7 @@ export function TimersTab() {
                   <Typography variant="body2">
                     {session.label || t(getPresetTranslationKey(session.presetId))}
                   </Typography>
+                  {session.taskLabel && <HistoryItemMeta>{session.taskLabel}</HistoryItemMeta>}
                   <HistoryItemMeta>
                     {formatSessionTimestamp(session.startedAt, i18n.language)}
                   </HistoryItemMeta>
@@ -260,6 +293,9 @@ export function TimersTab() {
         onMinutesChange={setDraftMinutes}
         min={MIN_CUSTOM_MINUTES}
         max={MAX_CUSTOM_MINUTES}
+        taskLinkOptions={taskLinkOptions}
+        taskLink={taskLink}
+        onTaskLinkChange={setTaskLink}
         onCancel={closeAddDialog}
         onConfirm={addTimer}
       />
@@ -274,6 +310,9 @@ export function TimersTab() {
         onBreakMinutesChange={setPomodoroBreakMinutes}
         min={MIN_CUSTOM_MINUTES}
         max={MAX_CUSTOM_MINUTES}
+        taskLinkOptions={taskLinkOptions}
+        taskLink={taskLink}
+        onTaskLinkChange={setTaskLink}
         onCancel={closePomodoroDialog}
         onConfirm={confirmPomodoro}
       />

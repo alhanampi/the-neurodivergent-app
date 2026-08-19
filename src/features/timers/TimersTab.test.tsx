@@ -1,36 +1,52 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import i18n from '@/i18n/i18n'
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider/ThemeModeProvider'
 import { TimersTab } from './TimersTab'
 
-// Not signed in: keeps the history-fetch effect from making a real network
-// call — same convention as AppLayout.test.tsx.
+// Not signed in: keeps the history-fetch/task-link-options effects from
+// making a real network call — same convention as AppLayout.test.tsx. With
+// isSignedIn false, taskLinkOptions stays empty, so TaskLinkPicker never
+// renders in these tests (guarded by taskLinkOptions.length > 0) — its own
+// coverage lives in useTimersTab.test.ts instead.
 vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => ({ isSignedIn: false, getToken: async () => null }),
 }))
 
 function renderTimersTab() {
   return render(
-    <ThemeModeProvider>
-      <TimersTab />
-    </ThemeModeProvider>,
+    <MemoryRouter>
+      <ThemeModeProvider>
+        <TimersTab />
+      </ThemeModeProvider>
+    </MemoryRouter>,
   )
 }
 
-// Selects the "Custom time" preset (no suggested duration of its own, so its
-// popup always defaults to 10 min) and runs it through the "Add timer"
-// popup, optionally overriding the name and/or duration by typing into the
-// popup's own fields, then confirms — mirrors the real flow (select preset →
-// trigger button → popup → confirm) end to end. Focus is deliberately
-// excluded here: it opens a different popup entirely (see
+// Reveals the secondary preset row (collapsed by default — see
+// ROADMAP.md's "Timers tab rethink" note) by clicking its toggle — a no-op
+// if it's already open (idempotent, since the toggle button would otherwise
+// close it again on a second call, e.g. adding two timers in one test).
+async function openOtherTimers(user: ReturnType<typeof userEvent.setup>) {
+  if (screen.queryByRole('button', { name: 'Custom time' })) return
+  await user.click(screen.getByRole('button', { name: 'Other timer options' }))
+}
+
+// Opens the secondary row, selects the "Custom time" preset (no suggested
+// duration of its own, so its popup always defaults to 10 min) and runs it
+// through the "Add timer" popup, optionally overriding the name and/or
+// duration by typing into the popup's own fields, then confirms — mirrors
+// the real flow end to end. Pomodoro is deliberately excluded here — it's
+// the tab's primary CTA now, not reachable through this secondary row (see
 // addPomodoroViaDialog below).
 async function addTimerViaDialog(
   user: ReturnType<typeof userEvent.setup>,
   minutes?: number,
   name?: string,
 ) {
+  await openOtherTimers(user)
   await user.click(screen.getByRole('button', { name: 'Custom time' }))
   await user.click(screen.getByRole('button', { name: 'Add timer' }))
   const dialog = screen.getByRole('dialog')
@@ -49,13 +65,13 @@ async function addTimerViaDialog(
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 }
 
-// Focus is the default selected preset, so "Add timer" opens the Pomodoro
-// popup (20/10 defaults) without needing to select anything first.
+// The primary "Start a Pomodoro" button opens the Pomodoro popup (20/10
+// defaults) directly — no preset selection needed first.
 async function addPomodoroViaDialog(
   user: ReturnType<typeof userEvent.setup>,
   overrides: { focusMinutes?: number; breakMinutes?: number; name?: string } = {},
 ) {
-  await user.click(screen.getByRole('button', { name: 'Add timer' }))
+  await user.click(screen.getByRole('button', { name: 'Start a Pomodoro' }))
   const dialog = screen.getByRole('dialog')
 
   if (overrides.name !== undefined) {
@@ -84,21 +100,35 @@ afterEach(() => {
 })
 
 describe('TimersTab', () => {
-  it('shows the preset options and no active timers initially', () => {
+  it('shows the primary Pomodoro CTA and no active timers initially, with the secondary presets collapsed', () => {
     renderTimersTab()
 
     expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Focus' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start a Pomodoro' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Other timer options' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Short break' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add timer' })).not.toBeInTheDocument()
+    expect(screen.getByText(/No active timers/)).toBeInTheDocument()
+  })
+
+  it('"Other timer options" reveals the secondary presets — Focus/Pomodoro is not among them', async () => {
+    const user = userEvent.setup()
+    renderTimersTab()
+
+    await openOtherTimers(user)
+
     expect(screen.getByRole('button', { name: 'Short break' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Long break' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Custom time' })).toBeInTheDocument()
-    expect(screen.getByText(/No active timers/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add timer' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Focus' })).not.toBeInTheDocument()
   })
 
   it('clicking Add timer with Short break selected opens a popup suggesting its predefined 5 minutes', async () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await openOtherTimers(user)
     await user.click(screen.getByRole('button', { name: 'Short break' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
 
@@ -112,6 +142,7 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await openOtherTimers(user)
     await user.click(screen.getByRole('button', { name: 'Long break' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
 
@@ -122,6 +153,7 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await openOtherTimers(user)
     await user.click(screen.getByRole('button', { name: 'Custom time' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
 
@@ -132,6 +164,7 @@ describe('TimersTab', () => {
     const user = userEvent.setup()
     renderTimersTab()
 
+    await openOtherTimers(user)
     await user.click(screen.getByRole('button', { name: 'Custom time' }))
     await user.click(screen.getByRole('button', { name: 'Add timer' }))
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
@@ -297,11 +330,11 @@ describe('TimersTab', () => {
   })
 
   describe('Pomodoro flow', () => {
-    it('Add timer with Focus selected (the default) opens the Pomodoro popup, explaining the 20/10 split', async () => {
+    it('the primary "Start a Pomodoro" button opens the Pomodoro popup directly, explaining the 20/10 split', async () => {
       const user = userEvent.setup()
       renderTimersTab()
 
-      await user.click(screen.getByRole('button', { name: 'Add timer' }))
+      await user.click(screen.getByRole('button', { name: 'Start a Pomodoro' }))
 
       const dialog = screen.getByRole('dialog')
       expect(
@@ -317,7 +350,7 @@ describe('TimersTab', () => {
       const user = userEvent.setup()
       renderTimersTab()
 
-      await user.click(screen.getByRole('button', { name: 'Add timer' }))
+      await user.click(screen.getByRole('button', { name: 'Start a Pomodoro' }))
       await user.click(screen.getByRole('button', { name: 'Cancel' }))
 
       await waitFor(() => {
@@ -350,6 +383,17 @@ describe('TimersTab', () => {
       const card = screen.getByRole('listitem')
       expect(within(card).getByText('20:00')).toBeInTheDocument()
       expect(within(card).getByText('Focus')).toBeInTheDocument()
+    })
+
+    it('selecting Focus in the (secondary) other-timers row still opens the Pomodoro popup (defense in depth)', async () => {
+      const user = userEvent.setup()
+      renderTimersTab()
+
+      // Focus/Pomodoro is normally not offered as a secondary preset — this
+      // exercises useTimersTab's kept-as-defense-in-depth branch by opening
+      // the row and confirming there's genuinely nothing there to select.
+      await openOtherTimers(user)
+      expect(screen.queryByRole('button', { name: 'Focus' })).not.toBeInTheDocument()
     })
   })
 })

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import {
+  estimatePomodoroBreakdown,
   formatConversationTimestamp,
   getStoredConversationId,
   groupConversationsByDate,
@@ -162,5 +163,16 @@ describe('getStoredConversationId / setStoredConversationId', () => {
 
     localStorage.setItem(LAST_CONVERSATION_STORAGE_KEY, '-1')
     expect(getStoredConversationId()).toBeNull()
+  })
+})
+
+describe('estimatePomodoroBreakdown', () => {
+  it('rounds to the nearest whole block, using the app-wide 20/10 defaults', () => {
+    expect(estimatePomodoroBreakdown(20)).toEqual({ blocks: 1, focusMinutes: 20, breakMinutes: 10 })
+    expect(estimatePomodoroBreakdown(45)).toEqual({ blocks: 2, focusMinutes: 20, breakMinutes: 10 })
+  })
+
+  it('never rounds down to zero blocks, even for a very short step', () => {
+    expect(estimatePomodoroBreakdown(1)).toEqual({ blocks: 1, focusMinutes: 20, breakMinutes: 10 })
   })
 })

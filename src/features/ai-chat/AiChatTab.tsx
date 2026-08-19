@@ -56,6 +56,7 @@ export function AiChatTab() {
     updatePlanTaskDescription,
     discardPlan,
     sendPlanToTasks,
+    startPomodoroFromPlan,
     renameConversation,
     requestDeleteConversation,
     cancelDeleteConversation,
@@ -129,6 +130,7 @@ export function AiChatTab() {
           onRemoveStep={removePlanStep}
           onDiscard={discardPlan}
           onConfirm={sendPlanToTasks}
+          onStartPomodoro={startPomodoroFromPlan}
           isSending={isCreatingTasks}
         />
       )}

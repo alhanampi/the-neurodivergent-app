@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 import {
   DEFAULT_CUSTOM_MINUTES,
   DEFAULT_POMODORO_BREAK_MINUTES,
@@ -14,6 +15,7 @@ import {
 } from './TimersTab.constants'
 import {
   addMinutesToTimerInstance,
+  buildTaskLinkOptions,
   clampMinutes,
   computeRemainingSeconds,
   createTimerId,
@@ -35,19 +37,56 @@ import {
   setStoredSoundPreference,
   unlockAudio,
 } from './useTimersTab.utils'
-import type { TimerInstance, TimerPresetId, TimerSession } from './TimersTab.interfaces'
+import type { TaskLinkOption } from './TaskLinkPicker/TaskLinkPicker.interfaces'
+import type {
+  TimerInstance,
+  TimerPresetId,
+  TimerSession,
+  TimerTaskLink,
+} from './TimersTab.interfaces'
+import { fetchTasks } from '@/features/tasks/useTasksTab.utils'
+
+/** Narrows a picked TaskLinkPicker option (which also carries a `key` for
+ * React/Autocomplete identity) down to the plain {taskId, subtaskId, label}
+ * shape a TimerInstance/session actually stores. */
+function toTaskLink(option: TaskLinkOption | null): TimerTaskLink | null {
+  if (!option) return null
+  return { taskId: option.taskId, subtaskId: option.subtaskId, label: option.label }
+}
+
+/** Prefill carried by a "Start a Pomodoro now" navigation from the AI Chat
+ * plan preview (see PlanPreviewCard/useAiChatTab.ts's startPomodoroFromPlan)
+ * — read once from router state on mount, the same one-shot-deep-link
+ * pattern as useAiChatTab.ts's own conversationId consumption. */
+interface PomodoroPrefillState {
+  startPomodoro?: {
+    label: string
+    focusMinutes: number
+    breakMinutes: number
+  }
+}
 
 const HISTORY_LIMIT = 50
 
 export function useTimersTab() {
   const { t } = useTranslation()
   const { isSignedIn, getToken } = useAuth()
+  const location = useLocation()
 
   const [timers, setTimers] = useState<TimerInstance[]>([])
-  const [selectedPresetId, setSelectedPresetId] = useState<TimerPresetId>(TIMER_PRESETS[0].id)
+  // The 4-preset toggle row is now the tab's *secondary* path — Pomodoro
+  // has its own dedicated primary CTA (openPomodoroDialog below) and is
+  // deliberately not one of these anymore, so this starts on the first of
+  // the remaining ones instead of TIMER_PRESETS[0] (still pomodoro-focus,
+  // kept as-is for history/Dashboard categorization).
+  const [selectedPresetId, setSelectedPresetId] = useState<TimerPresetId>('short-break')
   const [draftMinutes, setDraftMinutesState] = useState(DEFAULT_CUSTOM_MINUTES)
   const [nameDraft, setNameDraftState] = useState('')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  // Collapsed by default — "fewer decisions before starting" is the whole
+  // point of making Pomodoro the obvious first move; the other preset
+  // options are still one tap away, just not competing for attention.
+  const [isOtherTimersOpen, setIsOtherTimersOpen] = useState(false)
   const [pomodoroFocusMinutes, setPomodoroFocusMinutesState] = useState(
     DEFAULT_POMODORO_FOCUS_MINUTES,
   )
@@ -55,6 +94,8 @@ export function useTimersTab() {
     DEFAULT_POMODORO_BREAK_MINUTES,
   )
   const [isPomodoroDialogOpen, setIsPomodoroDialogOpen] = useState(false)
+  const [taskLinkOptions, setTaskLinkOptions] = useState<TaskLinkOption[]>([])
+  const [taskLink, setTaskLinkState] = useState<TaskLinkOption | null>(null)
   const [history, setHistory] = useState<TimerSession[]>([])
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [notificationPermission, setNotificationPermission] = useState(getNotificationPermission)
@@ -102,6 +143,23 @@ export function useTimersTab() {
     }
   }, [isSignedIn, getToken])
 
+  // Feeds the optional "what are you working on?" picker in the Add
+  // timer/Pomodoro dialogs — a plain best-effort fetch (see fetchTasks),
+  // not re-run on every dialog open, so the list is whatever it was as of
+  // this tab's mount rather than always perfectly fresh; acceptable for an
+  // optional, low-stakes picker.
+  useEffect(() => {
+    if (!isSignedIn) return
+    let cancelled = false
+    void fetchTasks(getToken).then((tasks) => {
+      if (cancelled) return
+      setTaskLinkOptions(buildTaskLinkOptions(tasks))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [isSignedIn, getToken])
+
   // Builds and posts the session payload for whichever phase is currently
   // active (or the whole timer, for a plain one) — shared by both a manual
   // stop and a natural phase completion. `completed=true` always means "ran
@@ -124,6 +182,9 @@ export function useTimersTab() {
         completed,
         startedAt: timer.startedAt ?? new Date().toISOString(),
         endedAt: new Date().toISOString(),
+        taskId: timer.taskLink?.taskId ?? null,
+        subtaskId: timer.taskLink?.subtaskId ?? null,
+        taskLabel: timer.taskLink?.label ?? null,
       }
 
       void postTimerSession(session, getToken).then((saved) => {
@@ -266,19 +327,37 @@ export function useTimersTab() {
   }, [])
 
   const setNameDraft = useCallback((name: string) => setNameDraftState(name), [])
+  const setTaskLink = useCallback((option: TaskLinkOption | null) => setTaskLinkState(option), [])
+  const toggleOtherTimers = useCallback(() => setIsOtherTimersOpen((current) => !current), [])
 
-  // The "Add timer" button's single entry point — which popup it opens
-  // depends on the selected preset. Focus is no longer a single-duration
-  // preset at all: it opens the Pomodoro dialog, defaulting to the classic
-  // 20/10 split. Short break/long break/custom open the plain duration
-  // popup, prefilled with that preset's suggested minutes (custom has none
-  // of its own, so it falls back to DEFAULT_CUSTOM_MINUTES) — always reset
-  // on open, regardless of whatever was left over from last time, so the
-  // user actively confirms a duration rather than silently inheriting one.
-  // The name draft resets to empty here too, now that it's set inside
-  // whichever popup opens rather than in the always-visible composer.
+  // The tab's primary CTA — always opens the Pomodoro dialog directly,
+  // defaulting to the classic 20/10 split, regardless of whichever preset
+  // is selected in the (now secondary, collapsed-by-default) preset row
+  // below. Decoupled from openAddDialog/selectedPresetId entirely so
+  // reaching Pomodoro never depends on first picking it from a row of
+  // options — see ROADMAP.md's "Timers tab rethink" note.
+  const openPomodoroDialog = useCallback(() => {
+    setNameDraftState('')
+    setTaskLinkState(null)
+    setPomodoroFocusMinutesState(DEFAULT_POMODORO_FOCUS_MINUTES)
+    setPomodoroBreakMinutesState(DEFAULT_POMODORO_BREAK_MINUTES)
+    setIsPomodoroDialogOpen(true)
+  }, [])
+
+  // The secondary "other timer options" row's "Add timer" button — short
+  // break/long break/custom open the plain duration popup, prefilled with
+  // that preset's suggested minutes (custom has none of its own, so it
+  // falls back to DEFAULT_CUSTOM_MINUTES) — always reset on open, regardless
+  // of whatever was left over from last time, so the user actively confirms
+  // a duration rather than silently inheriting one. The name/task-link
+  // drafts reset to empty here too, now that they're set inside whichever
+  // popup opens rather than in the always-visible composer. Focus/Pomodoro
+  // is no longer reachable through this path at all (selectedPresetId can
+  // no longer be POMODORO_PRESET_ID — see its initial state above), but the
+  // branch is kept as defense in depth rather than assumed unreachable.
   const openAddDialog = useCallback(() => {
     setNameDraftState('')
+    setTaskLinkState(null)
     if (selectedPresetId === POMODORO_PRESET_ID) {
       setPomodoroFocusMinutesState(DEFAULT_POMODORO_FOCUS_MINUTES)
       setPomodoroBreakMinutesState(DEFAULT_POMODORO_BREAK_MINUTES)
@@ -292,6 +371,29 @@ export function useTimersTab() {
   const closeAddDialog = useCallback(() => setIsAddDialogOpen(false), [])
   const closePomodoroDialog = useCallback(() => setIsPomodoroDialogOpen(false), [])
 
+  // Consumes a "Start a Pomodoro now" navigation from the AI Chat plan
+  // preview (see PomodoroPrefillState above) — one-shot per mount via a ref
+  // guard, same pattern as useAiChatTab.ts's own conversationId deep link,
+  // so navigating away and back doesn't reopen the dialog on every render.
+  const consumedPomodoroPrefillRef = useRef(false)
+  useEffect(() => {
+    if (consumedPomodoroPrefillRef.current) return
+    const state = location.state as PomodoroPrefillState | null
+    const prefill = state?.startPomodoro
+    if (!prefill) return
+    consumedPomodoroPrefillRef.current = true
+
+    setNameDraftState(prefill.label)
+    setTaskLinkState(null)
+    setPomodoroFocusMinutesState(
+      clampMinutes(prefill.focusMinutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES),
+    )
+    setPomodoroBreakMinutesState(
+      clampMinutes(prefill.breakMinutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES),
+    )
+    setIsPomodoroDialogOpen(true)
+  }, [location.state])
+
   const addTimer = useCallback(() => {
     const plannedSeconds = clampMinutes(draftMinutes, MIN_CUSTOM_MINUTES, MAX_CUSTOM_MINUTES) * 60
     const timer: TimerInstance = {
@@ -303,11 +405,13 @@ export function useTimersTab() {
       remainingSeconds: plannedSeconds,
       startedAt: null,
       endTimestampMs: null,
+      taskLink: toTaskLink(taskLink),
     }
     applyTimers((current) => [...current, timer])
     setNameDraftState('')
+    setTaskLinkState(null)
     setIsAddDialogOpen(false)
-  }, [draftMinutes, nameDraft, selectedPresetId, applyTimers])
+  }, [draftMinutes, nameDraft, selectedPresetId, taskLink, applyTimers])
 
   const confirmPomodoro = useCallback(() => {
     const focusSeconds =
@@ -328,11 +432,13 @@ export function useTimersTab() {
         { kind: 'break', seconds: breakSeconds },
       ],
       phaseIndex: 0,
+      taskLink: toTaskLink(taskLink),
     }
     applyTimers((current) => [...current, timer])
     setNameDraftState('')
+    setTaskLinkState(null)
     setIsPomodoroDialogOpen(false)
-  }, [pomodoroFocusMinutes, pomodoroBreakMinutes, nameDraft, applyTimers])
+  }, [pomodoroFocusMinutes, pomodoroBreakMinutes, nameDraft, taskLink, applyTimers])
 
   // Only meaningful for an idle timer — its remainingSeconds always equals
   // plannedSeconds at that point, so both move together. Once a timer has
@@ -444,14 +550,19 @@ export function useTimersTab() {
 
   return {
     timers,
-    presets: TIMER_PRESETS,
+    // Secondary preset row — Pomodoro has its own primary CTA (below) and is
+    // deliberately excluded here, see selectedPresetId's initial state.
+    secondaryPresets: TIMER_PRESETS.filter((preset) => preset.id !== POMODORO_PRESET_ID),
     selectedPresetId,
     draftMinutes,
     nameDraft,
     isAddDialogOpen,
+    isOtherTimersOpen,
     pomodoroFocusMinutes,
     pomodoroBreakMinutes,
     isPomodoroDialogOpen,
+    taskLinkOptions,
+    taskLink,
     history,
     isHistoryLoading,
     notificationPermission,
@@ -460,6 +571,9 @@ export function useTimersTab() {
     selectPreset,
     setDraftMinutes,
     setNameDraft,
+    setTaskLink,
+    toggleOtherTimers,
+    openPomodoroDialog,
     openAddDialog,
     closeAddDialog,
     addTimer,

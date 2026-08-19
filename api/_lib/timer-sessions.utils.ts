@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { db } from '../../db/client.js'
-import { timerSessions } from '../../db/schema.js'
+import { subtasks, tasks, timerSessions } from '../../db/schema.js'
+import { MAX_TASK_TITLE_LENGTH } from './tasks.constants.js'
 import { TIMER_PRESET_IDS } from './timer-sessions.interfaces.js'
 import type {
   CreateTimerSessionBody,
@@ -42,8 +43,15 @@ function isValidIsoDate(value: unknown): value is string {
   return typeof value === 'string' && !Number.isNaN(Date.parse(value))
 }
 
+function isPositiveIntegerOrNull(value: unknown): value is number | null {
+  return value === null || (typeof value === 'number' && Number.isInteger(value) && value > 0)
+}
+
 /** Validates an untrusted request body into a well-formed session, or
- * returns null if anything about it doesn't check out. */
+ * returns null if anything about it doesn't check out. Does NOT verify the
+ * optional taskId/subtaskId actually belong to the caller — that's an
+ * async DB check, done separately by verifyTaskLinkOwnership so this stays a
+ * pure parser like every other one in this codebase. */
 export function parseCreateTimerSessionBody(body: unknown): CreateTimerSessionBody | null {
   if (typeof body !== 'object' || body === null) return null
   const candidate = body as Record<string, unknown>
@@ -63,6 +71,27 @@ export function parseCreateTimerSessionBody(body: unknown): CreateTimerSessionBo
     return null
   }
 
+  const taskId = candidate.taskId ?? null
+  if (!isPositiveIntegerOrNull(taskId)) return null
+  const subtaskId = candidate.subtaskId ?? null
+  if (!isPositiveIntegerOrNull(subtaskId)) return null
+  // A linked subtask always carries its parent task's id too — a
+  // subtaskId with no taskId is malformed input, not a valid "linked to a
+  // subtask but not its task" state.
+  if (subtaskId !== null && taskId === null) return null
+
+  let taskLabel: string | null = null
+  if (candidate.taskLabel !== undefined && candidate.taskLabel !== null) {
+    if (typeof candidate.taskLabel !== 'string') return null
+    const trimmed = candidate.taskLabel.trim()
+    if (trimmed.length === 0 || trimmed.length > MAX_TASK_TITLE_LENGTH) return null
+    taskLabel = trimmed
+  }
+  // A link needs a label to render in history once the source Task/Subtask
+  // may no longer exist — reject taskId/subtaskId given without one rather
+  // than silently storing an unlabeled link.
+  if (taskId !== null && taskLabel === null) return null
+
   return {
     presetId: candidate.presetId,
     label: (candidate.label as string | null | undefined) ?? null,
@@ -71,7 +100,41 @@ export function parseCreateTimerSessionBody(body: unknown): CreateTimerSessionBo
     completed: candidate.completed,
     startedAt: candidate.startedAt,
     endedAt: candidate.endedAt,
+    taskId,
+    subtaskId,
+    taskLabel,
   }
+}
+
+/** Confirms a caller-supplied taskId/subtaskId link actually belongs to
+ * them before it's written — same IDOR-safe reasoning as
+ * tasks.utils.ts's conversationBelongsToUser (a raw FK insert would
+ * otherwise let user A silently link a session to user B's task, since
+ * Postgres only enforces the FK exists, not who owns it). No link at all
+ * (both null) is always valid and skips the query entirely. */
+export async function verifyTaskLinkOwnership(
+  userId: string,
+  taskId: number | null,
+  subtaskId: number | null,
+): Promise<boolean> {
+  if (taskId === null) return true
+
+  if (subtaskId !== null) {
+    const [row] = await db
+      .select({ taskId: subtasks.taskId, userId: tasks.userId })
+      .from(subtasks)
+      .innerJoin(tasks, eq(subtasks.taskId, tasks.id))
+      .where(eq(subtasks.id, subtaskId))
+      .limit(1)
+    return !!row && row.userId === userId && row.taskId === taskId
+  }
+
+  const [row] = await db
+    .select({ userId: tasks.userId })
+    .from(tasks)
+    .where(eq(tasks.id, taskId))
+    .limit(1)
+  return !!row && row.userId === userId
 }
 
 function firstQueryValue(value: string | string[] | undefined): string | undefined {
@@ -132,6 +195,9 @@ export async function listTimerSessions(
     completed: row.completed,
     startedAt: row.startedAt.toISOString(),
     endedAt: row.endedAt.toISOString(),
+    taskId: row.taskId,
+    subtaskId: row.subtaskId,
+    taskLabel: row.taskLabel,
   }))
 }
 
@@ -150,6 +216,9 @@ export async function createTimerSession(
       completed: body.completed,
       startedAt: new Date(body.startedAt),
       endedAt: new Date(body.endedAt),
+      taskId: body.taskId ?? null,
+      subtaskId: body.subtaskId ?? null,
+      taskLabel: body.taskLabel ?? null,
     })
     .returning()
 
@@ -162,5 +231,8 @@ export async function createTimerSession(
     completed: row.completed,
     startedAt: row.startedAt.toISOString(),
     endedAt: row.endedAt.toISOString(),
+    taskId: row.taskId,
+    subtaskId: row.subtaskId,
+    taskLabel: row.taskLabel,
   }
 }

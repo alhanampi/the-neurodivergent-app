@@ -35,6 +35,9 @@ function makeSession(overrides: Partial<TimerSession> = {}): TimerSession {
     completed: true,
     startedAt: localIso(2026, 7, 10, 10, 0), // Aug 10 2026
     endedAt: localIso(2026, 7, 10, 10, 25),
+    taskId: null,
+    subtaskId: null,
+    taskLabel: null,
     ...overrides,
   }
 }

@@ -6,7 +6,8 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
 import { MinutesInput } from '../MinutesInput/MinutesInput'
-import { DialogBody, NameFieldWrapper } from './AddTimerDialog.styles'
+import { TaskLinkPicker } from '../TaskLinkPicker/TaskLinkPicker'
+import { DialogBody, NameFieldWrapper, TaskLinkWrapper } from './AddTimerDialog.styles'
 import type { AddTimerDialogProps } from './AddTimerDialog.interfaces'
 
 // Opened by the composer's "Add timer" button (see useTimersTab's
@@ -22,6 +23,9 @@ export function AddTimerDialog({
   onMinutesChange,
   min,
   max,
+  taskLinkOptions,
+  taskLink,
+  onTaskLinkChange,
   onCancel,
   onConfirm,
 }: AddTimerDialogProps) {
@@ -49,6 +53,15 @@ export function AddTimerDialog({
             ariaLabel={t('timers.durationLabel')}
           />
         </DialogBody>
+        {taskLinkOptions.length > 0 && (
+          <TaskLinkWrapper>
+            <TaskLinkPicker
+              options={taskLinkOptions}
+              value={taskLink}
+              onChange={onTaskLinkChange}
+            />
+          </TaskLinkWrapper>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>{t('timers.addTimerDialog.cancel')}</Button>

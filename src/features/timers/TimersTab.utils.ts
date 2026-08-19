@@ -12,6 +12,8 @@ import type {
   TimerPhaseKind,
   TimerPresetId,
 } from './TimersTab.interfaces'
+import type { TaskLinkOption } from './TaskLinkPicker/TaskLinkPicker.interfaces'
+import type { TaskRecord } from '@/features/tasks/TasksTab.interfaces'
 
 /** Formats a duration as `M:SS`, or `H:MM:SS` past an hour. */
 export function formatSeconds(totalSeconds: number): string {
@@ -156,4 +158,32 @@ export function addMinutesToTimerInstance(
         : timer.endTimestampMs,
     ...(phases ? { phases } : {}),
   }
+}
+
+/** Flattens the signed-in user's Tasks into pickable options for
+ * TaskLinkPicker — one per Task (unless every one of its Subtasks is
+ * already completed, in which case there's nothing left on it to link a
+ * new timer to), plus one per each of its not-yet-completed Subtasks,
+ * labeled "Task title → Subtask title" so the two levels stay
+ * distinguishable in the picker. */
+export function buildTaskLinkOptions(tasks: TaskRecord[]): TaskLinkOption[] {
+  const options: TaskLinkOption[] = []
+
+  for (const task of tasks) {
+    const hasIncompleteSubtasks = task.subtasks.some((subtask) => !subtask.completed)
+    if (task.subtasks.length > 0 && !hasIncompleteSubtasks) continue
+
+    options.push({ key: `task-${task.id}`, taskId: task.id, subtaskId: null, label: task.title })
+    for (const subtask of task.subtasks) {
+      if (subtask.completed) continue
+      options.push({
+        key: `subtask-${subtask.id}`,
+        taskId: task.id,
+        subtaskId: subtask.id,
+        label: `${task.title} → ${subtask.title}`,
+      })
+    }
+  }
+
+  return options
 }

@@ -1,3 +1,5 @@
+import type { TaskLinkOption } from '../TaskLinkPicker/TaskLinkPicker.interfaces'
+
 export interface PomodoroDialogProps {
   open: boolean
   name: string
@@ -8,6 +10,9 @@ export interface PomodoroDialogProps {
   onBreakMinutesChange: (minutes: number) => void
   min: number
   max: number
+  taskLinkOptions: TaskLinkOption[]
+  taskLink: TaskLinkOption | null
+  onTaskLinkChange: (option: TaskLinkOption | null) => void
   onCancel: () => void
   onConfirm: () => void
 }
