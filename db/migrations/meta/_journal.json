@@ -15,6 +15,13 @@
       "when": 1787062861357,
       "tag": "0001_slimy_hardball",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787106357183,
+      "tag": "0002_easy_moira_mactaggert",
+      "breakpoints": true
     }
   ]
 }
