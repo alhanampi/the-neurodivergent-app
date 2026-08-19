@@ -11,21 +11,24 @@ export const Row = styled.li<{ $completed: boolean }>`
   opacity: ${({ $completed }) => ($completed ? 0.6 : 1)};
 `
 
-export const HeaderLine = styled.div`
+export const TitleLine = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 4px;
 `
 
+// Full title, always — no ellipsis/nowrap. Priority/minutes/delete moved to
+// their own UtilityLine below specifically so a long title has the whole
+// row width to wrap into instead of being squeezed by those controls.
 export const TitleButton = styled.button`
   flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
   text-align: left;
+  white-space: normal;
+  overflow-wrap: break-word;
   background: none;
   border: none;
-  padding: 0;
+  padding: 6px 0 0;
   cursor: pointer;
   font: inherit;
   color: ${({ theme }) => theme.palette.text.primary};
@@ -33,6 +36,13 @@ export const TitleButton = styled.button`
 
 export const CompletedTitle = styled.span<{ $completed: boolean }>`
   text-decoration: ${({ $completed }) => ($completed ? 'line-through' : 'none')};
+`
+
+export const UtilityLine = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 42px; /* aligns under the title, past the checkbox */
 `
 
 export const SubtaskMinutes = styled.span`

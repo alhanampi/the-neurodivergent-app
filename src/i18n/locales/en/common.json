@@ -4,7 +4,7 @@
   },
   "nav": {
     "timers": "Timers",
-    "chat": "AI Chat",
+    "chat": "Task planner Chat",
     "tasks": "Tasks",
     "dashboard": "Dashboard",
     "settings": "Settings"
@@ -79,7 +79,7 @@
     }
   },
   "chat": {
-    "title": "AI Chat",
+    "title": "Chat Planificador",
     "newChat": "New chat",
     "emptyState": {
       "title": "What are you working on?",

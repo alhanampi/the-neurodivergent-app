@@ -10,4 +10,9 @@ export const MIN_STEP_MINUTES = 1
 export const MAX_STEP_MINUTES = 180
 
 export const MAX_TASK_TITLE_LENGTH = 120
-export const MAX_TASK_DESCRIPTION_LENGTH = 500
+// Larger than a plain one-line summary — this is meant to hold a real
+// breakdown of what each step requires (ingredients/tools/prep), not just a
+// restated title.
+export const MAX_TASK_DESCRIPTION_LENGTH = 800
+
+export const PLAN_PRIORITIES = ['low', 'medium', 'high'] as const

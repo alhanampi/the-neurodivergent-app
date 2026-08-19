@@ -1,3 +1,5 @@
+import type { TaskPriority } from '@/features/tasks/TasksTab.interfaces'
+
 // Deliberately duplicated from api/chat.interfaces.ts /
 // api/conversations.interfaces.ts rather than importing across the
 // client/server boundary — same convention as TimersTab.interfaces.ts's own
@@ -35,12 +37,16 @@ export interface ConversationDateGroup {
 
 /** A locally-editable plan step, before it's confirmed and sent to Tasks.
  * `id` is a client-only crypto.randomUUID() for React keys/editing — never
- * persisted (a confirmed step becomes a plain {title, minutes} in the
- * POST /api/tasks body). */
+ * persisted (a confirmed step becomes a plain {title, minutes, priority} in
+ * the POST /api/tasks body). `priority` is AI-estimated (see
+ * chat-plan.utils.ts's buildPlanSystemPrompt) and shown read-only in
+ * PlanPreviewCard — not editable there, same as the Tasks tab's own
+ * priority stays editable only after creation. */
 export interface PlanStepDraft {
   id: string
   title: string
   minutes: number
+  priority: TaskPriority
 }
 
 /** PUT /api/conversations/[id]'s response — lighter than

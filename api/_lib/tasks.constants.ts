@@ -1,5 +1,8 @@
 export const MAX_TASK_TITLE_LENGTH = 120
-export const MAX_TASK_DESCRIPTION_LENGTH = 500
+// Matches chat-plan.constants.ts's MAX_TASK_DESCRIPTION_LENGTH — an
+// AI-generated description (a real breakdown of what each step requires,
+// not just a one-line summary) must fit within what POST /api/tasks accepts.
+export const MAX_TASK_DESCRIPTION_LENGTH = 800
 export const MIN_TASK_MINUTES = 1
 export const MAX_TASK_MINUTES = 180
 

@@ -87,4 +87,10 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('sanity-check')
     expect(prompt).toContain('REAL time')
   })
+
+  it('gives a concrete distance-based time-estimation example', () => {
+    const prompt = buildSystemPrompt('en')
+    expect(prompt).toContain('2 minutes per city block')
+    expect(prompt).toContain('round trip')
+  })
 })

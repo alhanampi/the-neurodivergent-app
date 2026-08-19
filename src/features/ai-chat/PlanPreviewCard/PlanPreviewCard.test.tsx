@@ -13,8 +13,8 @@ function renderCard(overrides: Partial<PlanPreviewCardProps> = {}) {
     taskDescription: 'A few quick steps to tidy up.',
     onTaskDescriptionChange: vi.fn(),
     steps: [
-      { id: '1', title: 'Wash dishes', minutes: 10 },
-      { id: '2', title: 'Wipe counters', minutes: 5 },
+      { id: '1', title: 'Wash dishes', minutes: 10, priority: 'medium' },
+      { id: '2', title: 'Wipe counters', minutes: 5, priority: 'low' },
     ],
     onTitleChange: vi.fn(),
     onMinutesChange: vi.fn(),

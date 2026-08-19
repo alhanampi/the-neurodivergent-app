@@ -265,7 +265,7 @@ describe('createTasksFromPlan', () => {
     taskTitle: 'Clean kitchen',
     taskDescription: 'A few quick steps.',
     conversationId: 1,
-    steps: [{ id: 'a', title: 'Step', minutes: 5 }],
+    steps: [{ id: 'a', title: 'Step', minutes: 5, priority: 'medium' as const }],
   }
 
   it('returns true on success, false on failure', async () => {

@@ -150,7 +150,7 @@ export async function requestPlan(
       plan?: {
         taskTitle: string
         taskDescription: string
-        steps: { title: string; minutes: number }[]
+        steps: { title: string; minutes: number; priority: PlanStepDraft['priority'] }[]
       }
     }
     if (!body.plan) return { ok: false, error: 'request-failed' }
@@ -159,6 +159,7 @@ export async function requestPlan(
       id: createDraftId(),
       title: step.title,
       minutes: step.minutes,
+      priority: step.priority,
     }))
     return {
       ok: true,
@@ -240,7 +241,11 @@ export async function createTasksFromPlan(
         title: input.taskTitle,
         description: input.taskDescription,
         conversationId: input.conversationId,
-        steps: input.steps.map((step) => ({ title: step.title, minutes: step.minutes })),
+        steps: input.steps.map((step) => ({
+          title: step.title,
+          minutes: step.minutes,
+          priority: step.priority,
+        })),
       }),
     })
     return response.ok

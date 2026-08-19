@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { FiTrash2 } from 'react-icons/fi'
 import { MinutesInput } from '@/features/timers/MinutesInput/MinutesInput'
 import { MAX_CUSTOM_MINUTES, MIN_CUSTOM_MINUTES } from '@/features/timers/TimersTab.constants'
+import { getPriorityChipColor } from '@/features/tasks/TasksTab.utils'
 import {
   ActionsRow,
   Card,
@@ -21,9 +23,11 @@ import type { PlanPreviewCardProps } from './PlanPreviewCard.interfaces'
 // secret/server boundary crossed). All-props, no local business logic —
 // edits are reported up to useAiChatTab immediately, not buffered here.
 // taskTitle/taskDescription are AI-suggested but editable — they become the
-// Task group's own title/description once confirmed; priority/due date are
-// deliberately not editable here (the model has no real basis for either)
-// and stay user-set afterward in the Tasks tab.
+// Task group's own title/description once confirmed. Priority IS
+// AI-estimated per step now (see chat-plan.utils.ts's buildPlanSystemPrompt)
+// and shown here read-only for visibility before confirming; due date still
+// isn't requested from the model (no real basis for a specific date) and
+// stays user-set afterward in the Tasks tab.
 export function PlanPreviewCard({
   taskTitle,
   onTaskTitleChange,
@@ -72,6 +76,11 @@ export function PlanPreviewCard({
               onChange={(event) => onTitleChange(step.id, event.target.value)}
             />
           </StepTitleField>
+          <Chip
+            size="small"
+            label={t(`tasks.priority.${step.priority}`)}
+            color={getPriorityChipColor(step.priority)}
+          />
           <MinutesInput
             value={step.minutes}
             onChange={(minutes) => onMinutesChange(step.id, minutes)}

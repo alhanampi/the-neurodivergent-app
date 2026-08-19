@@ -14,13 +14,14 @@ import {
 import {
   CompletedTitle,
   Countdown,
-  HeaderLine,
   MetaRow,
   Row,
   SubtaskMinutes,
   TimerControlsRow,
   TimerPanel,
   TitleButton,
+  TitleLine,
+  UtilityLine,
 } from './SubtaskRow.styles'
 import type { SubtaskRowProps } from './SubtaskRow.interfaces'
 
@@ -47,7 +48,7 @@ export function SubtaskRow({
 
   return (
     <Row $completed={subtask.completed}>
-      <HeaderLine>
+      <TitleLine>
         <Checkbox
           checked={subtask.completed}
           onChange={() => onToggleCompleted(subtask.id)}
@@ -62,6 +63,9 @@ export function SubtaskRow({
         <TitleButton onClick={() => onToggleExpand(subtask.id)} type="button">
           <CompletedTitle $completed={subtask.completed}>{subtask.title}</CompletedTitle>
         </TitleButton>
+      </TitleLine>
+
+      <UtilityLine>
         <Chip
           size="small"
           label={t(`tasks.priority.${subtask.priority}`)}
@@ -77,7 +81,7 @@ export function SubtaskRow({
         >
           <FiTrash2 size={16} />
         </IconButton>
-      </HeaderLine>
+      </UtilityLine>
 
       {isExpanded && (
         <TimerPanel>

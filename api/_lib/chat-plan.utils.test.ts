@@ -45,22 +45,54 @@ describe('buildPlanSystemPrompt', () => {
     expect(prompt).toContain('taskTitle')
     expect(prompt).toContain('taskDescription')
   })
+
+  it('asks for a per-step priority instead of a fixed default', () => {
+    const prompt = buildPlanSystemPrompt('en')
+    expect(prompt).toContain('"priority"')
+    expect(prompt).toContain("don't default every step to the same value")
+  })
+
+  it('gives a concrete distance-based time-estimation example', () => {
+    const prompt = buildPlanSystemPrompt('en')
+    expect(prompt).toContain('2 minutes per city block')
+    expect(prompt).toContain('round trip')
+  })
 })
 
 const baseFields = { taskTitle: 'Clean the kitchen', taskDescription: 'A few quick steps.' }
 
 describe('parsePlanResponse', () => {
   it('parses a well-formed response', () => {
-    const raw = JSON.stringify({ ...baseFields, steps: [{ title: 'Wash dishes', minutes: 10 }] })
+    const raw = JSON.stringify({
+      ...baseFields,
+      steps: [{ title: 'Wash dishes', minutes: 10, priority: 'high' }],
+    })
     expect(parsePlanResponse(raw)).toEqual({
       ...baseFields,
-      steps: [{ title: 'Wash dishes', minutes: 10 }],
+      steps: [{ title: 'Wash dishes', minutes: 10, priority: 'high' }],
     })
   })
 
   it('rounds a non-integer minutes value', () => {
-    const raw = JSON.stringify({ ...baseFields, steps: [{ title: 'Step', minutes: 10.6 }] })
+    const raw = JSON.stringify({
+      ...baseFields,
+      steps: [{ title: 'Step', minutes: 10.6, priority: 'medium' }],
+    })
     expect(parsePlanResponse(raw)?.steps[0].minutes).toBe(11)
+  })
+
+  it('rejects a missing or invalid step priority', () => {
+    expect(
+      parsePlanResponse(JSON.stringify({ ...baseFields, steps: [{ title: 'Step', minutes: 5 }] })),
+    ).toBeNull()
+    expect(
+      parsePlanResponse(
+        JSON.stringify({
+          ...baseFields,
+          steps: [{ title: 'Step', minutes: 5, priority: 'urgent' }],
+        }),
+      ),
+    ).toBeNull()
   })
 
   it('rejects malformed JSON', () => {
