@@ -134,7 +134,7 @@
   "tasks": {
     "title": "Tareas",
     "loading": "Cargando tus tareas…",
-    "empty": "Todavía no hay tareas — aprobá un plan desde el Chat IA para verlo acá.",
+    "empty": "Todavía no hay tareas — aprobá un plan desde el Chat para verlo acá.",
     "addTaskButton": "Agregar tarea",
     "dueDateLabel": "Fecha límite",
     "priority": {

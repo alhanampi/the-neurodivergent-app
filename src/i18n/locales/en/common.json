@@ -4,7 +4,7 @@
   },
   "nav": {
     "timers": "Timers",
-    "chat": "Task planner Chat",
+    "chat": "Chat",
     "tasks": "Tasks",
     "dashboard": "Dashboard",
     "settings": "Settings"
@@ -79,7 +79,7 @@
     }
   },
   "chat": {
-    "title": "Chat Planificador",
+    "title": "Chat",
     "newChat": "New chat",
     "emptyState": {
       "title": "What are you working on?",
@@ -134,7 +134,7 @@
   "tasks": {
     "title": "Tasks",
     "loading": "Loading your tasks…",
-    "empty": "No tasks yet — approve a plan from AI Chat to see it here.",
+    "empty": "No tasks yet — approve a plan from Chat to see it here.",
     "addTaskButton": "Add task",
     "dueDateLabel": "Due date",
     "priority": {
