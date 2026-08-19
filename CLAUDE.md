@@ -140,7 +140,16 @@ document plus review.
 
 ## Docs
 
-- [ROADMAP.md](./ROADMAP.md) — iterations, versions, status.
+- [ROADMAP.md](./ROADMAP.md) — iterations, versions, status, and currently-open
+  notes. Read every session, before touching any code — kept deliberately short;
+  don't add closed/historical narrative back into it (see below).
+- [docs/CHANGELOG.md](./docs/CHANGELOG.md) — iteration-by-iteration build
+  history: bugs found and fixed, mid-iteration design revisions, and the
+  reasoning behind them. Reference material, not part of the standard
+  per-session read — consult it when picking up work on a tab this history
+  touches, or when a bug smells like a past one. When an open item in
+  `ROADMAP.md`'s notes section gets resolved, move its write-up here instead of
+  deleting it.
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — folder structure, navigation
   shell, data flow.
 - [docs/SECURITY.md](./docs/SECURITY.md) — security checklist applied every

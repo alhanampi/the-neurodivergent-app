@@ -177,3 +177,52 @@ client.
 `vite-plugin-pwa` provides the manifest and service worker (added in iteration 1).
 Notifications for timers use the Web Notifications API through the service worker
 so alerts can fire even if the tab isn't focused.
+
+## Key technical decisions
+
+- **Linter: [oxlint](https://oxc.rs/), not ESLint** (iteration 1) —
+  `npm create vite@latest` now defaults to it, it's a Rust-based linter that's
+  meaningfully faster, and its `react`/`typescript`/`jsx-a11y`/`import` plugins
+  cover what this project needs. Prettier still handles formatting; Husky +
+  lint-staged still run both on pre-commit. Deviates from the
+  originally-planned ESLint/Prettier/Husky combo — revisit if a future
+  iteration wants ESLint's larger plugin ecosystem.
+- **ORM: Drizzle, not Prisma** (iteration 4) — lighter, pairs well with Neon's
+  serverless/edge driver. Revisitable if it becomes a poor fit.
+- **AI model: `openai/gpt-oss-120b` on Groq** (iteration 8) — for task
+  breakdown, quality of instruction-following matters more than multilingual
+  certification, and gpt-oss-120b benchmarks meaningfully stronger on
+  reasoning/instruction-following than the alternative considered
+  (`llama-3.3-70b-versatile`, Meta-certified for 8 languages incl. Spanish but
+  weaker on reasoning). Its Spanish conversational quality isn't formally
+  benchmarked but is expected to be adequate; swap for the fallback model if
+  tone/quality disappoints in real use — a one-line config change. No
+  sustained free tier exists for the Claude API, so Groq stays the practical
+  "free" choice for this feature. Reference implementation the chat feature's
+  base was patterned from: https://github.com/alhanampi/AI-chat-app.
+  - **System prompt requirement:** the assistant's persona must be spelled out
+    explicitly in the system prompt, not left to model defaults — warm,
+    encouraging, non-judgmental tone; explicitly a task-breakdown helper;
+    asks clarifying questions before proposing a plan; never scolds or
+    implies the user should already know how to do this. Applies regardless
+    of which model backs the chat.
+  - **Future: model selection (v1.1.0, `iteration/14-model-selection`).** Once
+    the app is stable post-v1.0, let the user pick from a small, curated set
+    of models for different needs (e.g. quick/cheap vs. stronger reasoning) —
+    not the whole Groq catalog.
+
+## Local dev gotchas
+
+- **`npm run dev` doesn't run `/api`** — Vite's dev server only serves the
+  frontend. Use `vercel dev` (needs `vercel link` first) to exercise
+  `/api` routes locally. See [README.md](../README.md#getting-started) for
+  the full command.
+- **A brand-new Clerk account made only through `vercel dev` never syncs to
+  Neon.** The Clerk→Neon webhook (`api/webhooks/clerk.ts`) can only be reached
+  by Clerk at a public HTTPS URL, never at `localhost`, so its `users` row is
+  never created and any insert referencing it (a conversation, a task) fails
+  its foreign key. Not a bug — forward the webhook via the Clerk CLI/ngrok, or
+  insert the `users`/`preferences` rows by hand from Clerk's Backend API data
+  to unblock local testing. See
+  [docs/CHANGELOG.md](./CHANGELOG.md#new-local-users-never-sync-to-neon-under-vercel-dev)
+  for the full incident this was first found in.
