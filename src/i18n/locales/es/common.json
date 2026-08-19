@@ -5,14 +5,9 @@
   "nav": {
     "timers": "Timers",
     "chat": "Chat IA",
+    "tasks": "Tareas",
     "dashboard": "Panel",
     "settings": "Ajustes"
-  },
-  "comingSoon": {
-    "chat": {
-      "title": "Chat IA",
-      "description": "Conversá sobre una tarea y dividila en pasos chicos y manejables. Próximamente."
-    }
   },
   "auth": {
     "brandTitle": "The Neurodivergent App",
@@ -81,6 +76,68 @@
       "empty": "Todavía no hay sesiones — iniciá un temporizador para ver tu historial acá.",
       "completed": "Completado",
       "stopped": "Detenido antes"
+    }
+  },
+  "chat": {
+    "title": "Chat IA",
+    "newChat": "Nuevo chat",
+    "emptyState": {
+      "title": "¿En qué estás trabajando?",
+      "description": "Contame sobre una tarea y te ayudo a dividirla en pasos chicos y manejables."
+    },
+    "composer": {
+      "placeholder": "Contame en qué estás trabajando…",
+      "send": "Enviar"
+    },
+    "assistantTyping": "El asistente está escribiendo…",
+    "loadingConversation": "Cargando esta conversación…",
+    "sidebar": {
+      "toggleLabel": "Abrir conversaciones",
+      "title": "Conversaciones",
+      "groups": {
+        "today": "Hoy",
+        "yesterday": "Ayer",
+        "thisWeek": "Esta semana",
+        "older": "Más antiguas"
+      },
+      "empty": "Todavía no hay conversaciones.",
+      "loading": "Cargando tus conversaciones…",
+      "renameLabel": "Renombrar conversación",
+      "renameSave": "Guardar nombre",
+      "renameCancel": "Cancelar renombrado",
+      "deleteLabel": "Eliminar conversación",
+      "deleteDialog": {
+        "title": "¿Eliminar esta conversación?",
+        "body": "Esto borra \"{{title}}\" para siempre, junto con todo lo que tiene. No se puede deshacer.",
+        "cancel": "Cancelar",
+        "confirm": "Eliminar para siempre"
+      }
+    },
+    "plan": {
+      "convertButton": "Convertir en plan",
+      "generating": "Armando tu plan…",
+      "title": "Plan sugerido",
+      "stepMinutesLabel": "Duración del paso en minutos",
+      "removeStepLabel": "Quitar paso",
+      "discard": "Descartar",
+      "sendToTasks": "Enviar a Tareas",
+      "error": "Todavía no pude armar un plan con esta conversación. Probá de nuevo en un momento."
+    },
+    "error": {
+      "sendFailed": "El asistente tuvo un problema para responder. Probá de nuevo.",
+      "dismiss": "Descartar",
+      "notConfigured": "El chat no está disponible por ahora. Probá de nuevo más tarde."
+    }
+  },
+  "tasks": {
+    "title": "Tareas",
+    "loading": "Cargando tus tareas…",
+    "empty": "Todavía no hay tareas — aprobá un plan desde el Chat IA para verlo acá.",
+    "item": {
+      "minutesLabel": "{{minutes}} min",
+      "markDone": "Marcar como hecha",
+      "markNotDone": "Marcar como no hecha",
+      "deleteLabel": "Eliminar tarea"
     }
   },
   "dashboard": {
