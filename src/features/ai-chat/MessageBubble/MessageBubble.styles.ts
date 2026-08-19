@@ -27,4 +27,22 @@ export const Bubble = styled.div<{ $isUser: boolean }>`
     margin: 0 0 8px;
     padding-left: 20px;
   }
+
+  /* A GFM table can be wider than the bubble/viewport (long cell content,
+   * many columns) — scrolls horizontally inside its own wrapper instead of
+   * overflowing the bubble and breaking the page layout, per this app's
+   * "wide content scrolls in its own container" rule. */
+  & table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 8px;
+  }
+  & th,
+  & td {
+    border: 1px solid ${({ theme }) => theme.palette.divider};
+    padding: 4px 8px;
+    text-align: left;
+  }
 `
