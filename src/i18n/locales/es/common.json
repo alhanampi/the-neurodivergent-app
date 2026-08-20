@@ -1,6 +1,8 @@
 {
   "app": {
-    "shortName": "ND App"
+    "shortName": "ND App",
+    "loadingTab": "Cargando…",
+    "skipToContent": "Saltar al contenido"
   },
   "nav": {
     "timers": "Timers",

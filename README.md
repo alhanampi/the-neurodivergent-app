@@ -85,7 +85,7 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 | v0.8.0  | Dashboard tab                                                                                                            | ✅ done    |
 | v0.9.0  | Chat tab (Groq) + Tasks tab (task/subtask hierarchy, priorities, timers)                                                 | ✅ done    |
 | v0.9.5  | Timers tab redesign: Pomodoro as default, optional task link, "start Pomodoro" from chat; unified header account control | ✅ done    |
-| v0.10.0 | Security & accessibility hardening                                                                                       | ⏳ pending |
+| v0.10.0 | Security & accessibility hardening                                                                                       | ✅ done    |
 | v0.11.0 | Badges and social sharing                                                                                                | ⏳ pending |
 | v0.12.0 | Google Calendar integration                                                                                              | ⏳ pending |
 | v0.13.0 | Spotify/SoundCloud integration                                                                                           | ⏳ pending |

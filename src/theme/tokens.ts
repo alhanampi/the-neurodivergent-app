@@ -11,7 +11,12 @@
 export const colors = {
   light: {
     primary: '#3E7C8C',
-    primaryContrast: '#F5F7F8',
+    // Pure white, not the near-white F5F7F8 used for backgrounds — used only
+    // as contrastText on top of `primary` (e.g. filled button labels).
+    // F5F7F8-on-#3E7C8C measured 4.38:1, just under WCAG AA's 4.5:1 minimum
+    // for normal text (found during the v0.10.0 accessibility pass); white
+    // clears it at 4.70:1 with a barely perceptible visual change.
+    primaryContrast: '#FFFFFF',
     background: '#F5F7F8',
     surface: '#FFFFFF',
     textPrimary: '#1F2A2E',

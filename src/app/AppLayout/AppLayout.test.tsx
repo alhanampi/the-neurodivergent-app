@@ -48,22 +48,37 @@ describe('AppLayout', () => {
     expect(screen.queryByRole('button', { name: 'Settings' })).not.toBeInTheDocument()
   })
 
-  it('shows the Timers tab content by default at the root path', () => {
+  // findByRole (not getByRole) below — every tab is a lazy-loaded chunk now
+  // (see AppLayout.tsx), so its content resolves after Suspense's fallback,
+  // not synchronously with the render. A longer-than-default timeout (the
+  // RTL default is 1000ms) avoids flakiness specifically under the full
+  // suite's load, where many test files' own dynamic imports compete for the
+  // same transform pipeline and can push real resolution past 1s even though
+  // it's near-instant in isolation.
+  const LAZY_TAB_TIMEOUT = 5000
+
+  it('shows the Timers tab content by default at the root path', async () => {
     renderAppLayout()
 
-    expect(screen.getByRole('heading', { name: 'Timers' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Timers' }, { timeout: LAZY_TAB_TIMEOUT }),
+    ).toBeInTheDocument()
   })
 
-  it('reaches the Tasks tab at /tasks', () => {
+  it('reaches the Tasks tab at /tasks', async () => {
     renderAppLayout(['/tasks'])
 
-    expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Tasks' }, { timeout: LAZY_TAB_TIMEOUT }),
+    ).toBeInTheDocument()
   })
 
-  it('reaches Settings by URL (as the header does) with no bottom tab highlighted', () => {
+  it('reaches Settings by URL (as the header does) with no bottom tab highlighted', async () => {
     renderAppLayout(['/settings'])
 
-    expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Settings' }, { timeout: LAZY_TAB_TIMEOUT }),
+    ).toBeInTheDocument()
     // MUI's BottomNavigation marks the selected action with aria-selected="true" —
     // none of the four tabs should have it, since Settings isn't one of them.
     for (const name of ['Timers', 'Chat', 'Tasks', 'Dashboard']) {
@@ -75,7 +90,9 @@ describe('AppLayout', () => {
     const user = userEvent.setup()
     renderAppLayout(['/settings'])
 
-    expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Settings' }, { timeout: LAZY_TAB_TIMEOUT }),
+    ).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Español' }))
 

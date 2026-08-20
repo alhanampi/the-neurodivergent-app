@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # npm packages (src/, api/, db/ all share the one package.json)
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    groups:
+      # Patch/minor bumps land as one grouped PR instead of one-per-package —
+      # keeps the PR list reviewable. Major bumps (real breaking-change risk,
+      # e.g. MUI/Clerk/React majors) stay ungrouped so each gets its own
+      # dedicated look.
+      dev-dependencies:
+        dependency-type: 'development'
+        update-types: ['minor', 'patch']
+      production-dependencies:
+        dependency-type: 'production'
+        update-types: ['minor', 'patch']
+
+  # GitHub Actions used by .github/workflows/ci.yml
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'

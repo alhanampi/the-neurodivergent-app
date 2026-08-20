@@ -19,7 +19,13 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
       <DialogTitle>{t('settings.account.deleteDialog.title')}</DialogTitle>
       <DialogContent>
         <DialogContentText>{t('settings.account.deleteDialog.body')}</DialogContentText>
-        {hasError && <ErrorText>{t('settings.account.deleteDialog.error')}</ErrorText>}
+        {hasError && (
+          // role="alert" — same reason as AiChatTab's <Alert>: a screen
+          // reader user focused elsewhere in the dialog (e.g. still on the
+          // "Delete" button after the failed attempt) needs this announced
+          // proactively, not just discoverable if they happen to tab past it.
+          <ErrorText role="alert">{t('settings.account.deleteDialog.error')}</ErrorText>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={isDeleting}>

@@ -21,7 +21,7 @@ Status legend: `pending` (not started) · `in progress` · `done`.
 | v0.8.0  | `iteration/07-dashboard-tab`       | Dashboard: charts/stats from timer history (MUI X Charts or Recharts), date-range filters                                                                                                                                                                                                                                                                                                                                                                                                                               | done    |
 | v0.9.0  | `iteration/08-ai-chat-tab`         | AI chat tab via Groq (`/api/chat` proxy keeps the key server-side); system prompt is a task-breakdown assistant; streaming back-and-forth; "send plan to Tasks" handoff creates a Task + Subtasks with realistic estimated durations, priorities, and due dates (destination changed from the originally-scoped Timers tab to a new Tasks tab, then reshaped mid-iteration into a task/subtask hierarchy with persisted per-subtask timers — see notes below)                                                           | done    |
 | v0.9.5  | `iteration/08b-timers-rethink`     | Timers tab redesign: Pomodoro becomes the tab's default/primary flow instead of one of four equal presets; timers gain an optional link/label to a real Task or Subtask; AI Chat's plan preview gains a "Start a Pomodoro now" option alongside "Send to Tasks" that launches a Timers session directly (no Task rows created) using Pomodoro-shaped step estimates instead of raw minutes — Tasks and its subtask mini-timer are unchanged; also folded the header's avatar+gear pair into one unified account control | done    |
-| v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                                                                                 | pending |
+| v0.10.0 | `iteration/09-security-hardening`  | Full `security-review` pass; dependency audit / Dependabot; rate limiting on `/api`; CSP and security headers; accessibility pass (WCAG, reduced motion, ND-friendly UX); bundle code-splitting (MUI/Clerk push the main chunk past 500kB as of v0.4.0)                                                                                                                                                                                                                                                                 | done    |
 | v0.11.0 | `iteration/10-gamification`        | Badges/medals (streaks, task completions, daily login); achievements storage; social sharing (Web Share API + share-card image)                                                                                                                                                                                                                                                                                                                                                                                         | pending |
 | v0.12.0 | `iteration/11-google-calendar`     | Google Calendar OAuth; two-way sync between tasks and events                                                                                                                                                                                                                                                                                                                                                                                                                                                            | pending |
 | v0.13.0 | `iteration/12-music-integration`   | Spotify/SoundCloud OAuth; attach playlists to tasks/timers; auto-play for the timer's duration                                                                                                                                                                                                                                                                                                                                                                                                                          | pending |
@@ -46,8 +46,20 @@ section keeps only what's still open, unresolved, or decided-but-not-yet-built.
   `GROQ_API_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`, `CLERK_WEBHOOK_SECRET` are
   registered for the Development environment only (found iteration 8, see
   [docs/CHANGELOG.md](./docs/CHANGELOG.md#local-only-clerkgroq-keys-never-reached-vercel)).
-  Must be added for Production/Preview before anything depending on them works
-  in a real deploy — check this before iteration 9 wraps up.
+  Must be added for Production/Preview before anything depending on them
+  works in a real deploy.
+- **Open: Upstash Redis not provisioned yet — deliberately deferred by the
+  user past iteration 9's close (2026-08-19).** Iteration 9 added rate
+  limiting on `/api/chat`, `/api/chat-plan`, and the Clerk webhook, backed by
+  Upstash Redis — but the account/database doesn't exist yet, so
+  `UPSTASH_REDIS_REST_URL`/`_TOKEN` aren't set anywhere. The code fails open
+  without them (see
+  [docs/SECURITY.md](./docs/SECURITY.md#rate-limiting-fails-open-not-closed)),
+  so the app works fine either way — there's just no real rate limiting
+  until this is done. **User to set up** (Vercel dashboard →
+  Storage/Marketplace → Upstash integration is the fastest path) whenever —
+  not blocking any later iteration, just tracked here until confirmed live
+  in Development/Preview/Production.
 - **Open: sign-up bounces to Clerk's hosted Account Portal** instead of an
   in-app screen (only `<SignIn>` was built, not `<SignUp>`, iteration 3
   scope). Doesn't block new users, just unstyled. Worth an in-app `<SignUp>`

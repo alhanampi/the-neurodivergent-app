@@ -1,4 +1,5 @@
 import { getUserIdFromRequest } from './_lib/auth.utils.js'
+import { checkRateLimit } from './_lib/rate-limit.utils.js'
 import { createGroqClient } from './_lib/groq.client.js'
 import { GROQ_MODEL } from './_lib/groq.constants.js'
 import { getOwnedConversation } from './_lib/conversations.utils.js'
@@ -31,6 +32,12 @@ export default async function handler(req: VercelApiRequest, res: VercelApiRespo
 
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
+  const { limited } = await checkRateLimit('chat', userId)
+  if (limited) {
+    res.status(429).json({ error: 'Too many messages — please slow down and try again shortly.' })
     return
   }
 
