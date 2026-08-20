@@ -73,27 +73,27 @@ this repo follows, and [docs/](./docs) for architecture and security notes.
 
 ## Roadmap
 
-| Version | What it adds                                                                                                             | Status         |
-| ------- | ------------------------------------------------------------------------------------------------------------------------ | -------------- |
-| v0.1.0  | Project docs and repo setup                                                                                              | ✅ done        |
-| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                                                             | ✅ done        |
-| v0.3.0  | Language switching + visual theme                                                                                        | ✅ done        |
-| v0.4.0  | Login with Clerk                                                                                                         | ✅ done        |
-| v0.5.0  | Database (Neon) wired up                                                                                                 | ✅ done        |
-| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                                                          | ✅ done        |
-| v0.7.0  | Timers tab                                                                                                               | ✅ done        |
-| v0.8.0  | Dashboard tab                                                                                                            | ✅ done        |
-| v0.9.0  | Chat tab (Groq) + Tasks tab (task/subtask hierarchy, priorities, timers)                                                 | ✅ done        |
-| v0.9.5  | Timers tab redesign: Pomodoro as default, optional task link, "start Pomodoro" from chat; unified header account control | ✅ done        |
-| v0.10.0 | Security & accessibility hardening                                                                                       | 🚧 in progress |
-| v0.11.0 | Badges and social sharing                                                                                                | ⏳ pending     |
-| v0.12.0 | Google Calendar integration                                                                                              | ⏳ pending     |
-| v0.13.0 | Spotify/SoundCloud integration                                                                                           | ⏳ pending     |
-| v1.0.0  | App store packaging                                                                                                      | ⏳ pending     |
-| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                                                      | ⏳ pending     |
-| v1.2.0  | More themes, more languages, dyslexia-friendly font option                                                               | ⏳ pending     |
-| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music                                      | ⏳ pending     |
-| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges                                   | ⏳ pending     |
+| Version | What it adds                                                                                                             | Status     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| v0.1.0  | Project docs and repo setup                                                                                              | ✅ done    |
+| v0.2.0  | App scaffold: navigation shell, PWA basics, CI, first deploy                                                             | ✅ done    |
+| v0.3.0  | Language switching + visual theme                                                                                        | ✅ done    |
+| v0.4.0  | Login with Clerk                                                                                                         | ✅ done    |
+| v0.5.0  | Database (Neon) wired up                                                                                                 | ✅ done    |
+| v0.6.0  | Settings tab + fixed header (avatar/Settings), 3-tab bottom nav                                                          | ✅ done    |
+| v0.7.0  | Timers tab                                                                                                               | ✅ done    |
+| v0.8.0  | Dashboard tab                                                                                                            | ✅ done    |
+| v0.9.0  | Chat tab (Groq) + Tasks tab (task/subtask hierarchy, priorities, timers)                                                 | ✅ done    |
+| v0.9.5  | Timers tab redesign: Pomodoro as default, optional task link, "start Pomodoro" from chat; unified header account control | ✅ done    |
+| v0.10.0 | Security & accessibility hardening                                                                                       | ✅ done    |
+| v0.11.0 | Badges and social sharing                                                                                                | ⏳ pending |
+| v0.12.0 | Google Calendar integration                                                                                              | ⏳ pending |
+| v0.13.0 | Spotify/SoundCloud integration                                                                                           | ⏳ pending |
+| v1.0.0  | App store packaging                                                                                                      | ⏳ pending |
+| v1.1.0  | Choice of AI model for different needs (quick vs. deeper reasoning)                                                      | ⏳ pending |
+| v1.2.0  | More themes, more languages, dyslexia-friendly font option                                                               | ⏳ pending |
+| v1.3.0  | Relaxation tab: animated breathing exercises (box breathing, waves) + calming music                                      | ⏳ pending |
+| v1.4.0  | Task roulette: spin for a random pending task, earn points by difficulty, share badges                                   | ⏳ pending |
 
 ## Getting started
 
