@@ -44,7 +44,7 @@
     "react-router-dom": "^7.18.2",
     "remark-gfm": "^4.0.1",
     "styled-components": "^6.5.3",
-    "svix": "^1.99.1"
+    "svix": "^2.0.0"
   },
   "devDependencies": {
     "@clerk/testing": "^2.2.26",
